@@ -38,7 +38,7 @@ class WebLibrary extends SchemeLibrary with _$WebLibraryMixin {
   
   @primitive @SchemeSymbol("js-set!")
   static Expression jsSet(JsExpression obj, Expression property, Expression value) {
-    if (property is! SchemeSymbol || property is! SchemeString) {
+    if (property is! SchemeSymbol && property is! SchemeString) {
       throw new SchemeException("JS property name must be a string or symbol");
     }
     obj.obj[property.display] = value.toJS();
@@ -47,7 +47,7 @@ class WebLibrary extends SchemeLibrary with _$WebLibraryMixin {
   
   @primitive @SchemeSymbol("js-ref")
   static Expression jsRef(JsExpression obj, Expression property) {
-    if (property is! SchemeSymbol || property is! SchemeString) {
+    if (property is! SchemeSymbol && property is! SchemeString) {
       throw new SchemeException("JS property name must be a string or symbol");
     }
     return jsToScheme(obj.obj[property.display]); 
@@ -58,7 +58,7 @@ class WebLibrary extends SchemeLibrary with _$WebLibraryMixin {
     Expression obj = expressions.removeAt(0);
     Expression method = expressions.removeAt(0);
     if (obj is! JsExpression) throw new Exception("$obj is not a JS object");
-    if (method is! SchemeSymbol || method is! SchemeString) {
+    if (method is! SchemeSymbol && method is! SchemeString) {
       throw new SchemeException("JS method name must be a string or symbol");
     }
     JsObject jsObj = (obj as JsExpression).obj;
