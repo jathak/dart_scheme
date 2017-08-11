@@ -1,0 +1,20 @@
+name: cs61a_scheme
+description: Dart implementation of 61A Scheme.
+version: 2.0.0-alpha001
+homepage: https://scheme.cs61a.org
+author: CS 61A Staff <cs61a@berkeley.edu>
+
+environment:
+  sdk: '>=1.20.1 <2.0.0'
+
+dependencies:
+  analyzer: ^0.30.0+2
+  barback: ^0.15.2+11
+  code_builder: ^1.0.4
+  dart_style: ^1.0.7
+  grinder: ^0.8.0+3
+  quiver_hashcode: ^1.0.0
+  rational: ^0.1.11
+
+dev_dependencies:
+  test: ^0.12.0
