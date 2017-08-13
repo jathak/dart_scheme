@@ -55,8 +55,8 @@ class Diagram extends DiagramInterface {
   
   _finish() {
     for (int row in _rowHowMany.keys.toList()..sort()) {
-      int missing = rows[row - 1].elements.length - _rowHowMany[row];
-      rows[row - 1].elements.take(missing).forEach((e) {
+      int missing = rows[_rowParent[row]].elements.length - _rowHowMany[row];
+      rows[_rowParent[row]].elements.take(missing).forEach((e) {
         if (e is BlockGrid) {
           rows[row].elements.insert(0, e.spacer ? e : e.toSpacer());
         }
@@ -75,7 +75,9 @@ class Diagram extends DiagramInterface {
     _finish();
   }
   
+  int get currentRow => rows.length - 1;
   Map<int, int> _rowHowMany = {};
+  Map<int, int> _rowParent = {};
   
   UIElement bindingTo(Expression expression) {
     if (expression.inlineUI) return expression.draw(this);
@@ -94,23 +96,24 @@ class Diagram extends DiagramInterface {
     return anchor;
   }
   
-  UIElement pointTo(Expression expression, [bool newRow = false]) {
+  UIElement pointTo(Expression expression, [int parentRow = null]) {
     if (expression.inlineUI) return expression.draw(this);
     if (_known.containsKey(expression)) {
       Anchor anchor = new Anchor();
       arrows.add(new Arrow(anchor, _known[expression].anchor(Direction.left)));
       return anchor;
     }
-    if (newRow) rows.add(new Row([]));
+    if (parentRow != null) rows.add(new Row([]));
     int myRow = rows.length - 1;
     UIElement element = expression.draw(this);
     _known[expression] = element;
     rows[myRow].elements.insert(0, element);
-    if (newRow) {
-      _rowHowMany[myRow] = rows[myRow - 1].elements.length + 1;
+    if (parentRow != null) {
+      _rowParent[myRow] = parentRow;
+      _rowHowMany[myRow] = rows[parentRow].elements.length + 1;
     }
     Anchor anchor = new Anchor();
-    Direction dir = newRow ? Direction.top : Direction.left;
+    Direction dir = parentRow != null ? Direction.top : Direction.left;
     UIElement anchoring = element;
     if (element is BlockGrid) anchoring = element.rowAt(0).first;
     arrows.add(new Arrow(anchor, anchoring.anchor(dir)));

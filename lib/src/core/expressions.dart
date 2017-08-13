@@ -262,8 +262,9 @@ class Pair<A extends Expression, B extends Expression> extends Expression
   
   @override
   UIElement draw(DiagramInterface diagram) {
+    int parentRow = diagram.currentRow;
     UIElement right = diagram.pointTo(second);
-    UIElement left = diagram.pointTo(first, true);
+    UIElement left = diagram.pointTo(first, parentRow);
     return new BlockGrid.pair(new Block.a1(left), new Block.a1(right));
   }
  

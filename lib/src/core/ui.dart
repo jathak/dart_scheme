@@ -108,9 +108,12 @@ class BlockGrid extends UIElement {
 }
 
 abstract class DiagramInterface extends UIElement {
+  int get currentRow;
   /// If expression.inlineUI is true, returns expression.draw(this).
   /// If not, returns an anchor that is linked to expression.draw(this).
-  UIElement pointTo(Expression expression, [bool newRow]);
+  /// If parentRow is set, the new object will be on a new line, with spacing
+  /// based on the parentRow.
+  UIElement pointTo(Expression expression, [int parentRow]);
 }
 
 typedef void Renderer(UIElement);
