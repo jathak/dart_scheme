@@ -50,6 +50,7 @@ class Diagram extends DiagramInterface {
     } else {
       rows[0].elements.insert(0, expression.draw(this));
     }
+    _finish();
   }
   
   _finish() {
