@@ -21,29 +21,38 @@ String generateImportMixin(String sourceCode) {
 }
 
 String _buildMixin(ClassDeclaration decl) {
-  String className = decl.name.toSource();
   List<String> primitives = [];
+  List<String> abstractMethods = [];
   for (ClassMember member in decl.members) {
     if (member is MethodDeclaration) {
       for (Annotation annotation in member.metadata) {
         if (annotation.name.toSource() == "primitive") {
-          primitives.add(_buildPrimitive(className, member));
+          abstractMethods.add(_buildAbstract(member));
+          primitives.add(_buildPrimitive(member));
         }
       }
     }
   }
   String mixinName = decl.withClause.mixinTypes[0].name.toSource();
   return """abstract class $mixinName {
+  ${abstractMethods.join("\n  ")}
   void importAll(Frame __env) {
-    ${primitives.join("\n  ")}
+    ${primitives.join("\n    ")}
   }
 }""";
 }
 
-String _buildPrimitive(String className, MethodDeclaration method) {
+String _buildAbstract(MethodDeclaration method) {
+  return "${method.returnType} ${method.name}${method.parameters};";
+}
+
+String _buildPrimitive(MethodDeclaration method) {
   String name = JSON.encode(method.name.toSource().toLowerCase());
   bool variable = false;
   String minArgs = "0", maxArgs = "-1";
+  String returning = 'return';
+  String after = "";
+  String op = "";
   for (Annotation ant in method.metadata) {
     if (ant.name.toSource() == "MinArgs") {
       minArgs = ant.arguments.arguments[0].toSource();
@@ -53,6 +62,13 @@ String _buildPrimitive(String className, MethodDeclaration method) {
       variable = true;
     } else if (ant.name.toSource() == "SchemeSymbol") {
       name = ant.arguments.arguments[0].toSource().toLowerCase();
+    } else if (ant.name.toSource() == "TriggerEventAfter") {
+      String symbol = ant.arguments.arguments[0].toSource();
+      returning = 'var __value = ';
+      var val = 'new Pair(__value, __env)';
+      after = "__env.interpreter.triggerEvent($symbol, $val); return __value;";
+    } else if (ant.name.toSource() == "noeval") {
+      op = "Operand";
     }
   }
   if (method.parameters.parameters.length > 0) {
@@ -65,13 +81,18 @@ String _buildPrimitive(String className, MethodDeclaration method) {
   }
   String symb = "const SchemeSymbol($name)";
   if (variable) {
-    String fn = className + "." + method.name.toSource();
-    if (method.parameters.parameters.length == 1) {
-      fn = "(__exprs, __env) => $fn(__exprs)";
-    } else if (method.parameters.parameters.length != 2) {
+    String fn = "this." + method.name.toSource();
+    int paramCount = method.parameters.parameters.length;
+    if (paramCount != 1 && paramCount != 2) {
       throw new Exception("$fn has an invalid number of parameters!");
     }
-    return "addVariablePrimitive(__env, $symb, $fn, $minArgs, $maxArgs);";
+    if (after != "") {
+      String args = paramCount == 1 ? '__exprs' : '__exprs, __env';
+      fn = "(__exprs, __env) {$returning $fn($args); $after}";
+    } else if (paramCount == 1) {
+      fn = "(__exprs, __env) => $fn(__exprs)";
+    }
+    return "addVariable${op}Primitive(__env, $symb, $fn, $minArgs, $maxArgs);";
   } else {
     List<String> types = [];
     for (FormalParameter param in method.parameters.parameters) {
@@ -92,13 +113,14 @@ String _buildPrimitive(String className, MethodDeclaration method) {
       passes.add("__exprs[$i]");
     }
     if (types.any((type) => type != "Expression")) {
-      var error = "Argument of invalid type passed to $name.";
+      var decodeName = name.substring(1, name.length - 1);
+      var error = "Argument of invalid type passed to ${decodeName}.";
       checks = "if(${pieces.join('||')}) throw new SchemeException('$error');";
     }
     if (takesFrame) passes.add("__env");
     var passStr = passes.join(",");
-    String m = className + "." + method.name.toSource();
-    String fn = "(__exprs, __env) { $checks return $m($passStr); }";
-    return "addPrimitive(__env, $symb, $fn, ${types.length});";
+    String m = "this." + method.name.toSource();
+    String fn = "(__exprs, __env) { $checks $returning $m($passStr); $after }";
+    return "add${op}Primitive(__env, $symb, $fn, ${types.length});";
   }
 }

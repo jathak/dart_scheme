@@ -13,4 +13,5 @@ export 'src/core/logging.dart';
 export 'src/core/project_interface.dart';
 export 'src/core/reader.dart';
 export 'src/core/scheme_library.dart';
+export 'src/core/ui.dart';
 export 'src/core/utils.dart' hide b, n, i, d;

@@ -37,16 +37,34 @@ Expression schemeEval(Expression expr, Frame env) {
   return completeEval(expr.evaluate(env));
 }
 
+Expression schemeApply(Procedure procedure, PairOrEmpty args, Frame env) {
+  return completeEval(procedure.apply(args, env));
+}
+
+Expression evalCallExpression(Pair expr, Frame env) {
+  if (!expr.isWellFormedList()) {
+    throw new SchemeException("Malformed list: $expr");
+  }
+  Expression first = expr.first;
+  Expression rest = expr.second;
+  if (first is SchemeSymbol && env.interpreter.specialForms.containsKey(first)) {
+    var result = env.interpreter.specialForms[first](rest, env);
+    env.interpreter.triggerEvent(first, new Pair(rest, env));
+    return result;
+  }
+  return env.interpreter.implementation.evalProcedureCall(first, rest, env);
+}
+
 Expression completeEval(val) => val is Thunk ? val.evaluate(null) : val;
 
 addPrimitive(Frame env, SchemeSymbol name, SchemePrimitive fn, int args) {
-  env.define(name, new PrimitiveProcedure.fixed(name, fn, args));
+  env.define(name, new PrimitiveProcedure.fixed(name, fn, args), true);
 }
 
 addVariablePrimitive(Frame env, SchemeSymbol name, SchemePrimitive fn,
     int minArgs, [int maxArgs = -1]) {
   var p = new PrimitiveProcedure.variable(name, fn, minArgs, maxArgs);
-  env.define(name, p);
+  env.define(name, p, true);
 }
 
 Boolean b(bool val) => val ? schemeTrue : schemeFalse;

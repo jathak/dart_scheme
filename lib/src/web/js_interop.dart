@@ -6,7 +6,7 @@ import 'dart:js';
 import 'package:cs61a_scheme/cs61a_scheme_extra.dart';
 
 class JsProcedure extends Procedure {
-  JsFunction fn;
+  final JsFunction fn;
   JsProcedure(this.fn);
   Expression apply(PairOrEmpty args, Frame env) {
     var result = fn.apply(args.map((arg) => arg.toJS()).toList());
@@ -24,7 +24,6 @@ class JsExpression extends SelfEvaluating {
     if (objString.length > 20) objString.substring(0, 17) + "...";
     return "#[js:$objString]";
   }
-  
   toJS() => obj;
 }
 
@@ -43,6 +42,7 @@ Expression jsToScheme(obj) {
   if (obj is Expression) return obj;
   if (obj is double) return new Number.fromDouble(obj);
   if (obj is int) return new Number.fromInteger(obj);
+  if (obj is bool) return obj ? schemeTrue : schemeFalse;
   if (obj is String) return new SchemeString(obj);
   if (obj is SchemeFunction) return obj.procedure;
   if (obj is JsFunction) return new JsProcedure(obj);
@@ -78,11 +78,11 @@ class SchemeFunction implements Function {
   Procedure procedure;
   Frame env;
   SchemeFunction(this.procedure, this.env);
-  call() => procedure.apply(nil, env);
+  call() => schemeApply(procedure, nil, null).toJS();
   noSuchMethod(Invocation invocation) {
-    if (invocation.memberName.toString() == "call") {
+    if (invocation.memberName == new Symbol("call")) {
       var args = invocation.positionalArguments.map((arg) => jsToScheme(arg));
-      return procedure.apply(new PairOrEmpty.fromIterable(args), env);
+      return schemeApply(procedure, new PairOrEmpty.fromIterable(args), env).toJS();
     }
     throw new SchemeException("Something has gone horrible wrong with wrapped procedures");
   }

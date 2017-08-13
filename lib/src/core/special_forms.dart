@@ -46,7 +46,12 @@ Expression doLetForm(PairOrEmpty expressions, Frame env) {
   Expression bindings = expressions.pair.first;
   Expression body = expressions.pair.second;
   Frame letEnv = env.interpreter.implementation.makeLetFrame(bindings, env);
-  return env.interpreter.implementation.evalAll(body, letEnv);
+  env.interpreter.triggerEvent(const SchemeSymbol('new-frame'),
+                               new Pair(nil, letEnv));
+  Expression result = env.interpreter.implementation.evalAll(body, letEnv);
+  env.interpreter.triggerEvent(const SchemeSymbol('return'),
+                               new Pair(result, letEnv));
+  return result;
 }
 
 Expression doBeginForm(PairOrEmpty expressions, Frame env) {

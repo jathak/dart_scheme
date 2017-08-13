@@ -8,17 +8,23 @@ import 'package:quiver_hashcode/hashcode.dart';
 
 import 'interpreter.dart';
 import 'logging.dart';
-import 'utils.dart' show schemeEval;
+import 'ui.dart';
+import 'utils.dart';
 
 abstract class Expression {
   const Expression();
   Expression evaluate(Frame env);
-  
   bool get isTruthy => true;
+  /// If true, this expression should be inlined in diagrams.
+  /// If false, it should be added to the objects with an arrow to it.
+  bool get inlineUI => false;
+  /// Constructs a UIElement for this expression, adding elements to the diagram
+  /// as necessary.
+  UIElement draw(DiagramInterface diagram) => new TextElement(toString());
   bool get isNil => false;
   String get display => toString();
+  /// Should return the version of this object that can be passed to JS
   dynamic toJS();
-  
   /// Convenience function since casting as a Pair is very common.
   Pair get pair => this as Pair;
 }
@@ -29,6 +35,7 @@ abstract class SelfEvaluating extends Expression {
 }
 
 class Number extends SelfEvaluating {
+  final inlineUI = true;
   final bool isInteger;
   final double doubleValue;
   final BigInt bigInt;
@@ -117,6 +124,7 @@ class Number extends SelfEvaluating {
 }
 
 class Boolean extends SelfEvaluating {
+  final inlineUI = true;
   final bool value;
   const Boolean._internal(this.value);
   bool get isTruthy => value;
@@ -130,6 +138,7 @@ const schemeTrue = const Boolean._internal(true);
 const schemeFalse = const Boolean._internal(false);
 
 class SchemeSymbol extends Expression {
+  final inlineUI = true;
   final String value;
   // Constant constructor must already use a lowercase String.
   const SchemeSymbol(this.value);
@@ -138,14 +147,11 @@ class SchemeSymbol extends Expression {
   toString() => value;
   operator ==(other) => other is SchemeSymbol && value == other.value;
   int get hashCode => hash2("SchemeSymbol", value);
-  toJS() => SchemeSymbol.jsSymbol(this);
-  
-  static dynamic Function(SchemeSymbol) jsSymbol = (SchemeSymbol symb) {
-    throw new UnimplementedError("JS interop must be loaded for SchemeSymbol.toJS() to work.");
-  };
+  toJS() => value;
 }
 
 class SchemeString extends SelfEvaluating {
+  final inlineUI = true;
   final String value;
   const SchemeString(this.value);
   toString() => JSON.encode(value);
@@ -190,11 +196,14 @@ abstract class PairOrEmpty extends Expression with IterableMixin<Expression> {
 }
 
 class EmptyList extends SelfEvaluating implements PairOrEmpty {
+  final inlineUI = true;
   const EmptyList._internal();
   bool isWellFormedList() => true;
   bool get isNil => true;
   toString() => "()";
   toJS() => nil;
+  @override
+  UIElement draw(diagram) => new TextElement("nil");
   // Dummy properties to ensure this works as an iterator
   get first => throw new StateError("empty list");
   final isEmpty = true;
@@ -250,7 +259,14 @@ class Pair<A extends Expression, B extends Expression> extends Expression
   Expression evaluate(Frame env) => evalCallExpression(this, env);
   
   toJS() => this;
-
+  
+  @override
+  UIElement draw(DiagramInterface diagram) {
+    UIElement right = diagram.pointTo(second);
+    UIElement left = diagram.pointTo(first, true);
+    return new BlockGrid.pair(new Block.a1(left), new Block.a1(right));
+  }
+ 
   toString() {
     String result = "($first";
     Expression current = second;
@@ -290,6 +306,7 @@ class Thunk extends Expression {
     return result;
   }
   toJS() => throw new StateError("Thunks should not be passed to JS");
+  toString() => 'Thunk($expr in f${env.id})';
 }
 
 class Promise extends SelfEvaluating {
@@ -305,15 +322,25 @@ class Promise extends SelfEvaluating {
     return expr;
   }
   toJS() => this;
+  toString() => "#[promise (${_evaluated ? 'not ' : ''}forced)]";
+  @override
+  UIElement draw(DiagramInterface diagram) {
+    var inside = _evaluated ? diagram.pointTo(expr) : new TextElement("⋯");
+    return new Block.b1(inside);
+  }
 }
 
 class Frame extends SelfEvaluating {
   Frame parent;
   Interpreter interpreter;
+  String tag;
+  int id;
   Map<SchemeSymbol, Expression> bindings = {};
-  Frame(this.parent, this.interpreter);
-  void define(SchemeSymbol symbol, Expression value) {
+  Map<SchemeSymbol, bool> hidden = {};
+  Frame(this.parent, this.interpreter) : id = interpreter.frameCounter++;
+  void define(SchemeSymbol symbol, Expression value, [bool hide = false]) {
     interpreter.implementation.defineInFrame(symbol, value, this);
+    hidden[symbol] = hide;
   }
   Expression lookup(SchemeSymbol symbol) {
     return interpreter.implementation.lookupInFrame(symbol, this);

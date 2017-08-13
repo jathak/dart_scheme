@@ -44,6 +44,12 @@ class _Register { const _Register(); }
 const _Primitive primitive = const _Primitive();
 class _Primitive { const _Primitive(); }
 
+/// Annotation to make a SpecialFormPrimitiveProcedure
+/// This procedure is defined in the extra library, so don't use this inside
+/// the core library.
+const _NoEval noeval = const _NoEval();
+class _NoEval { const _NoEval(); }
+
 /// Annotation to specify a name other than the function name for the
 /// Scheme binding.
 
@@ -59,4 +65,11 @@ class MinArgs {
 class MaxArgs {
   final int value;
   const MaxArgs(this.value);
+}
+
+/// Annotation to trigger event after evaluation, passing a pair of the
+/// return value and the current environment.
+class TriggerEventAfter {
+  final SchemeSymbol id;
+  const TriggerEventAfter(this.id);
 }

@@ -1,5 +1,7 @@
 library cs61a_scheme.core.interpreter;
 
+import 'dart:async';
+
 import 'expressions.dart';
 import 'logging.dart';
 import 'reader.dart';
@@ -7,19 +9,47 @@ import 'project_interface.dart';
 import 'scheme_library.dart';
 import 'special_forms.dart';
 import 'standard_library.dart';
+import 'ui.dart';
 import 'utils.dart' show schemeEval;
 
 class Interpreter {
   final ProjectInterface implementation;
   Frame globalEnv;
   bool tailCallOptimized = true;
+  Renderer renderer = (UIElement) => null;
   Logger _logger = (Expression e, bool newline) => null;
   Logger get logger => _logger;
   void set logger(Logger logger) => _logger = logger;
   void Function() onExit = () => null;
+  int frameCounter = 0;
+  StreamController<Pair<SchemeSymbol, Expression>> _controller;
+  Map<SchemeSymbol, List<void Function(Expression)>> _blocking = {};
+  
+  void triggerEvent(SchemeSymbol id, Expression data) {
+    if (_blocking.containsKey(id)) {
+      for (var blocker in _blocking[id]) blocker(data);
+    }
+    _controller.add(new Pair(id, data));
+  }
+  
+  Stream<Expression> events(SchemeSymbol id) {
+    return _controller.stream.where((pair) => pair.first == id)
+                             .map((pair) => pair.second);
+  }
+  
+  void blockOnEvent(SchemeSymbol id, void Function(Expression) callback) {
+    _blocking.putIfAbsent(id, () => []).add(callback);
+  }
+  bool stopBlockingOnEvent(SchemeSymbol id, void Function(Expression) callback) {
+    if (_blocking.containsKey(id)) {
+      return _blocking[id].remove(callback);
+    }
+    return false;
+  }
   
   Interpreter(this.implementation) {
     globalEnv = new Frame(null, this);
+    _controller = new StreamController<Pair<SchemeSymbol, Expression>>();
     new StandardLibrary().importAll(globalEnv);
   }
   
@@ -64,16 +94,4 @@ class Interpreter {
     const SchemeSymbol('unquote') : doUnquoteForm,
     const SchemeSymbol('unquote-splicing') : doUnquoteSplicingForm
   };
-}
-
-Expression evalCallExpression(Pair expr, Frame env) {
-  if (!expr.isWellFormedList()) {
-    throw new SchemeException("Malformed list: $expr");
-  }
-  Expression first = expr.first;
-  Expression rest = expr.second;
-  if (first is SchemeSymbol && env.interpreter.specialForms.containsKey(first)) {
-    return env.interpreter.specialForms[first](rest, env);
-  }
-  return env.interpreter.implementation.evalProcedureCall(first, rest, env);
 }

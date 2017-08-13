@@ -1,6 +1,8 @@
 library cs61a_scheme.core.procedures;
 
 import 'expressions.dart';
+import 'logging.dart';
+import 'ui.dart';
 
 abstract class Procedure extends SelfEvaluating {
   SchemeSymbol get name => null;
@@ -12,7 +14,7 @@ abstract class Procedure extends SelfEvaluating {
   toString() => '#[$name]';
   toJS() => Procedure.jsProcedure(this);
   static dynamic Function(Procedure) jsProcedure = (p) {
-    throw new UnimplementedError("JS interop must be enabled for Procedure.toJS() to work");
+    throw new SchemeException("JS interop must be enabled for Procedure.toJS() to work");
   };
 }
 
@@ -34,24 +36,34 @@ class PrimitiveProcedure extends Procedure {
 }
 
 abstract class UserDefinedProcedure extends Procedure {
+  PairOrEmpty get formals;
   PairOrEmpty get body;
   
   Frame makeCallFrame(PairOrEmpty arguments, Frame env);
   
   Expression apply(PairOrEmpty arguments, Frame env) {
     Frame frame = makeCallFrame(arguments, env);
-    return env.interpreter.implementation.evalAll(body, frame);
+    if (name != null) frame.tag = name.toString();
+    env.interpreter.triggerEvent(const SchemeSymbol('new-frame'),
+                                 new Pair(undefined, frame));
+    var result = env.interpreter.implementation.evalAll(body, frame);
+    env.interpreter.triggerEvent(const SchemeSymbol('return'),
+                                 new Pair(result, frame));
+    return result;
   }
+  
+  @override
+  UIElement draw(diag) => new TextElement(new Pair(name, formals).toString());
 }
 
 class LambdaProcedure extends UserDefinedProcedure {
   SchemeSymbol name = const SchemeSymbol('λ');
-  PairOrEmpty formals, body;
-  Frame env;
+  final PairOrEmpty formals, body;
+  final Frame env;
   
   LambdaProcedure(this.formals, this.body, this.env);
   
-  Frame makeCallFrame(PairOrEmpty arguments, Frame env) {
+  Frame makeCallFrame(PairOrEmpty arguments, Frame _) {
     return env.interpreter.implementation.makeLambdaFrame(this, arguments, env);
   }
   
@@ -71,7 +83,7 @@ class MacroProcedure extends LambdaProcedure {
 
 class MuProcedure extends UserDefinedProcedure {
   SchemeSymbol name = const SchemeSymbol('μ');
-  PairOrEmpty formals, body;
+  final PairOrEmpty formals, body;
   
   MuProcedure(this.formals, this.body);
   
@@ -84,11 +96,9 @@ class MuProcedure extends UserDefinedProcedure {
 
 class Continuation extends Procedure {
   static int counter = 0;
-  int id;
+  final int id;
   Expression result;
-  Continuation() {
-    id = counter++;
-  }
+  Continuation() : id = counter++;
   
   Expression apply(PairOrEmpty args, Frame env) {
     return env.interpreter.implementation.continuationApply(this, args, env);

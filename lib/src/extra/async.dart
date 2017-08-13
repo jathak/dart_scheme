@@ -36,6 +36,12 @@ class AsyncExpression extends Expression {
   static dynamic Function(AsyncExpression) makePromise = (expr) {
     throw new UnimplementedError("JS interop must be loaded for AsyncExpression.toJS() to work.");
   };
+  
+  @override
+  UIElement draw(DiagramInterface diagram) {
+    UIElement inside = complete ? diagram.pointTo(result) : new TextElement("async");
+    return new Block.b2(inside);
+  }
 }
 
 class AsyncLambdaProcedure extends LambdaProcedure {

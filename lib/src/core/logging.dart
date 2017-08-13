@@ -32,6 +32,10 @@ class SchemeException extends SelfEvaluating {
   toJS() => this;
 }
 
+logMessage(String msg, Frame env) {
+  return env.interpreter.logger(new TextMessage(msg), true);
+}
+
 class ExitException {
   const ExitException();
 }
