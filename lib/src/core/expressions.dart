@@ -203,7 +203,7 @@ class EmptyList extends SelfEvaluating implements PairOrEmpty {
   toString() => "()";
   toJS() => nil;
   @override
-  UIElement draw(diagram) => new TextElement("nil");
+  UIElement draw(diagram) => new Strike();
   // Dummy properties to ensure this works as an iterator
   get first => throw new StateError("empty list");
   final isEmpty = true;

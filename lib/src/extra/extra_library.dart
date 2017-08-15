@@ -55,12 +55,17 @@ class ExtraLibrary extends SchemeLibrary with _$ExtraLibraryMixin {
   }
   
   @primitive
-  Undefined draw(Expression expression, Frame env) {
+  Undefined render(Expression expression, Frame env) {
     if (expression is! UIElement) expression = new Diagram(expression);
     env.interpreter.renderer(expression);
     return undefined;
   }
   
+  @primitive @SchemeSymbol('make-diagram')
+  Diagram makeDiagram(Expression expression, Frame env) {
+    return new Diagram(expression);
+  }
+    
   @primitive @noeval
   Expression visualize(Expression code, Frame env) {
     return visualization.visualize(code, env);

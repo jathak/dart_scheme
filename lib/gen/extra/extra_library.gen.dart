@@ -4,7 +4,8 @@ abstract class _$ExtraLibraryMixin {
   AsyncExpression runAsync(Procedure proc, Frame env);
   AsyncExpression runAfter(Number millis, Procedure proc, Frame env);
   Undefined diagram(Frame env);
-  Undefined draw(Expression expression, Frame env);
+  Undefined render(Expression expression, Frame env);
+  Diagram makeDiagram(Expression expression, Frame env);
   Expression visualize(Expression code, Frame env);
   Undefined visGoto(Number number);
   Undefined visExit();
@@ -29,8 +30,11 @@ abstract class _$ExtraLibraryMixin {
     addPrimitive(__env, const SchemeSymbol("diagram"), (__exprs, __env) {
       return this.diagram(__env);
     }, 0);
-    addPrimitive(__env, const SchemeSymbol("draw"), (__exprs, __env) {
-      return this.draw(__exprs[0], __env);
+    addPrimitive(__env, const SchemeSymbol("render"), (__exprs, __env) {
+      return this.render(__exprs[0], __env);
+    }, 1);
+    addPrimitive(__env, const SchemeSymbol('make-diagram'), (__exprs, __env) {
+      return this.makeDiagram(__exprs[0], __env);
     }, 1);
     addOperandPrimitive(__env, const SchemeSymbol("visualize"),
         (__exprs, __env) {

@@ -11,7 +11,11 @@ class HtmlRenderer {
   JsObject jsPlumb;
   Iterable connections;
   
-  HtmlRenderer(this.container, this.jsPlumb);
+  static int anchorCount = 0;
+  
+  HtmlRenderer(this.container, JsObject masterJsPlumb) {
+    jsPlumb = masterJsPlumb.callMethod('getInstance');
+  }
   
   void render(UIElement element) {
     connections = null;
@@ -36,7 +40,7 @@ class HtmlRenderer {
       ]
     });
     jsPlumb?.callMethod('reset');
-    jsPlumb?.callMethod('setContainer', ['diagramTable']);
+    jsPlumb?.callMethod('setContainer', [container]);
     jsPlumb?.callMethod('setDraggable', [false]);
     for (var c in connections) {
       jsPlumb?.callMethod('connect', [new JsObject.jsify(c), base]);
@@ -50,52 +54,54 @@ class HtmlRenderer {
   Map<int, String> trueAnchorIds = {};
   Map<int, Direction> anchorDirections = {};
   
-  Element convert(UIElement element) {
-    Element node = _convertRaw(element);
-    if (element.spacer) node.style.visibility = 'hidden';
+  Element convert(UIElement element, [bool spaced = false]) {
+    Element node = _convertRaw(element, spaced);
+    if (element.spacer || spaced) {
+      node.style.visibility = 'hidden';
+      return node;
+    }
     for (Direction dir in element.anchoredDirections) {
       int id = element.anchor(dir).id;
       anchorDirections[id] = dir;
-      node.id = 'anchoredElement$id';
+      node.id = 'anchoredElement${anchorCount++}';
       trueAnchorIds[id] = node.id;
     }
     return node;
   }
 
-  Element _convertRaw(UIElement element) {
-    if (element is Diagram) return convertDiagram(element);
-    if (element is FrameElement) return convertFrameElement(element);
-    if (element is Row) return convertRow(element);
-    if (element is TextElement) return convertTextElement(element);
-    if (element is Block) return convertBlock(element);
-    if (element is BlockGrid) return convertBlockGrid(element);
-    if (element is Anchor) return convertAnchor(element);
-    if (element is Binding) return convertBinding(element);
+  Element _convertRaw(UIElement element, [bool spaced = false]) {
+    if (element is Diagram) return convertDiagram(element, spaced);
+    if (element is FrameElement) return convertFrameElement(element, spaced);
+    if (element is Row) return convertRow(element, spaced);
+    if (element is TextElement) return convertTextElement(element, spaced);
+    if (element is Block) return convertBlock(element, spaced);
+    if (element is BlockGrid) return convertBlockGrid(element, spaced);
+    if (element is Anchor) return convertAnchor(element, spaced);
+    if (element is Binding) return convertBinding(element, spaced);
+    if (element is Strike) return convertStrike(element, spaced);
     throw new SchemeException("Cannot render $element");
   }
 
-  Element convertDiagram(Diagram diagram) {
-    DivElement wrapper = new DivElement();
-    wrapper.appendHtml("""
-      <table id='diagramTable' class='diagramTable'>
-        <tr class='diagramInnerWrapper'>
-          <td class='diagramFrames'></td>
-          <td class='diagramObjects'></td>
-        </tr>
-      </table>""");
-    Element frames = wrapper.querySelector(".diagramFrames");
-    Element objects = wrapper.querySelector(".diagramObjects");
+  Element convertDiagram(Diagram diagram, [bool spaced = false]) {
+    TableElement table = new TableElement()..id='#diagramTable'..classes = ['diagramTable'];
+    table.appendHtml("""
+      <tr class='diagramInnerWrapper'>
+        <td class='diagramFrames'></td>
+        <td class='diagramObjects'></td>
+      </tr>""");
+    Element frames = table.querySelector(".diagramFrames");
+    Element objects = table.querySelector(".diagramObjects");
     for (FrameElement frame in diagram.frames) {
-      frames.append(convert(frame));
+      frames.append(convert(frame, spaced || diagram.spacer));
     }
     for (UIElement row in diagram.rows) {
-      objects.append(convert(row));
+      objects.append(convert(row, spaced || diagram.spacer));
     }
     connections = diagram.arrows.map(makeConnection);
-    return wrapper;
+    return table;
   }
 
-  Element convertFrameElement(FrameElement frame) {
+  Element convertFrameElement(FrameElement frame, [bool spaced = false]) {
     DivElement div = new DivElement()..className = 'frame';
     div.id = 'frame${frame.id}';
     if (frame.active) div.classes.add('current');
@@ -104,53 +110,63 @@ class HtmlRenderer {
     header.innerHtml = '<b>$name</b>&nbsp;${frame.tag ?? ''}';
     div.append(header);
     for (Binding binding in frame.bindings) {
-      div.append(convert(binding));
+      div.append(convert(binding, spaced || frame.spacer));
     }
     return div;
   }
   
-  Element convertBinding(Binding binding) {
+  Element convertBinding(Binding binding, [bool spaced = false]) {
     DivElement div = new DivElement()..className = 'binding';
     div.innerHtml = '${binding.symbol}&nbsp;';
     SpanElement span = new SpanElement()..className = 'alignRight';
     div.append(span);
-    span.append(convert(binding.value));
+    span.append(convert(binding.value, spaced || binding.spacer));
     return div;
   }
   
-  Element convertRow(Row row) {
+  Element convertRow(Row row, [bool spaced = false]) {
     DivElement div = new DivElement()..className = 'diagramRow';
     for (UIElement element in row.elements) {
-      div.append(convert(element));
+      div.append(convert(element, spaced || row.spacer));
     }
     return div;
   }
   
-  Element convertTextElement(TextElement text) {
+  Element convertTextElement(TextElement text, [bool spaced = false]) {
     return new SpanElement()..text = text.text;
   }
   
-  Element convertBlock(Block block) {
+  Element convertBlock(Block block, [bool spaced = false]) {
     DivElement div = new DivElement();
     div.className = 'block block_' + block.type.id;
-    div.append(convert(block.inside));
+    div.append(convert(block.inside, spaced || block.spacer));
     return div;
   }
   
-  Element convertBlockGrid(BlockGrid blockGrid) {
+  Element convertBlockGrid(BlockGrid blockGrid, [bool spaced = false]) {
     if (blockGrid.rowCount != 1) {
       throw new SchemeException("Multiple BlockGrid rows not yet implemented");
     }
     DivElement div = new DivElement();
     div.className = 'blockGrid';
     for (Block block in blockGrid.rowAt(0)) {
-      div.append(convert(block));
+      div.append(convert(block, spaced || blockGrid.spacer));
     }
     return div;
   }
   
-  Element convertAnchor(Anchor anchor) {
-    return new SpanElement()..id = 'anchor${anchor.id}'..innerHtml = '&nbsp;';
+  Element convertAnchor(Anchor anchor, [bool spaced = false]) {
+    if (spaced) {
+      return new SpanElement()..innerHtml = '&nbsp';
+    }
+    String htmlAnchorId = 'trueAnchor${anchorCount++}';
+    trueAnchorIds[anchor.id] = htmlAnchorId;
+    anchorDirections[anchor.id] = null;
+    return new SpanElement()..id = htmlAnchorId..innerHtml = '&nbsp;';
+  }
+  
+  Element convertStrike(Strike strike, [bool spaced = false]) {
+    return new SpanElement()..innerHtml = '-'..classes = ['strike'];
   }
   
   List<num> _anchorForDirection(Direction dir) {
@@ -162,7 +178,7 @@ class HtmlRenderer {
     if (dir == Direction.right) return [1, 0.5, 1, 0, 0, 0];
     if (dir == Direction.topRight) return [1, 0, 1, 0, 0, 0];
     if (dir == Direction.bottomRight) return [1, 1, 1, 0, 0, 0];
-    return null;
+    return [0.5, 0.5, 1, 0, 0, 0];
   }
   
   makeConnection(Arrow arrow) {

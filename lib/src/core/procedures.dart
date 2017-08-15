@@ -5,8 +5,8 @@ import 'logging.dart';
 import 'ui.dart';
 
 abstract class Procedure extends SelfEvaluating {
-  SchemeSymbol get name => null;
-  const Procedure();
+  SchemeSymbol name;
+  Procedure();
   Expression call(PairOrEmpty operands, Frame env) {
     return env.interpreter.implementation.procedureCall(this, operands, env);
   }
@@ -57,11 +57,12 @@ abstract class UserDefinedProcedure extends Procedure {
 }
 
 class LambdaProcedure extends UserDefinedProcedure {
-  SchemeSymbol name = const SchemeSymbol('λ');
+  final SchemeSymbol name;
   final PairOrEmpty formals, body;
   final Frame env;
   
-  LambdaProcedure(this.formals, this.body, this.env);
+  LambdaProcedure(this.formals, this.body, this.env,
+                  [this.name = const SchemeSymbol('λ')]);
   
   Frame makeCallFrame(PairOrEmpty arguments, Frame _) {
     return env.interpreter.implementation.makeLambdaFrame(this, arguments, env);
@@ -82,10 +83,10 @@ class MacroProcedure extends LambdaProcedure {
 }
 
 class MuProcedure extends UserDefinedProcedure {
-  SchemeSymbol name = const SchemeSymbol('μ');
+  SchemeSymbol name;
   final PairOrEmpty formals, body;
   
-  MuProcedure(this.formals, this.body);
+  MuProcedure(this.formals, this.body, [this.name = const SchemeSymbol('μ')]);
   
   Frame makeCallFrame(PairOrEmpty arguments, Frame env) {
     return env.interpreter.implementation.makeMuFrame(this, arguments, env);

@@ -44,6 +44,11 @@ class TextElement extends UIElement {
   toString() => "#[TextElement:$text]";
 }
 
+class Strike extends UIElement {
+  Strike();
+  toString() => "#[Strike]";
+}
+
 class BlockType {
   final String id;
   const BlockType._(this.id);
