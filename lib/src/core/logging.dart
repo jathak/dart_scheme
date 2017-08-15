@@ -26,10 +26,25 @@ class SchemeException extends SelfEvaluating {
   final String message;
   final bool showTrace;
   final Expression context;
-  const SchemeException([this.message = null, this.showTrace = true, this.context]);
+  final List<Expression> callStack = [];
+  SchemeException([this.message = null, this.showTrace = true, this.context]);
   
-  toString() => "SchemeException: $message";
+  toString() {
+    if (!showTrace || callStack.isEmpty) return 'Error: $message';
+    var str = 'Traceback (most recent call last)\n';
+    for (int i = 0; i < callStack.length; i++) {
+      str += '$i\t${callStack[i]}\n';
+    }
+    return str + 'Error: $message';  
+  }
+  
+  addCall(Expression expr) {
+    callStack.insert(0, expr);
+  }
+  
   toJS() => this;
+  
+  
 }
 
 logMessage(String msg, Frame env) {

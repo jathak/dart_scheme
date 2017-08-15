@@ -34,7 +34,12 @@ void checkFormals(Expression formals) {
 }
 
 Expression schemeEval(Expression expr, Frame env) {
-  return completeEval(expr.evaluate(env));
+  try {
+    return completeEval(expr.evaluate(env));
+  } on SchemeException catch(e) {
+    e.addCall(expr);
+    rethrow;
+  }
 }
 
 Expression schemeApply(Procedure procedure, PairOrEmpty args, Frame env) {

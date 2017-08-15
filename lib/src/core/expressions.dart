@@ -95,6 +95,7 @@ class Number extends SelfEvaluating {
       ? new Number.fromBigInt(-bigInt)
       : new Number.fromDouble(-doubleValue);
   operator /(Number other) {
+    if (other == Number.ZERO) throw new SchemeException("cannot divide by zero");
     if (!this.isInteger && !other.isInteger) {
       return new Number.fromDouble(this / other);
     } else if (this.isInteger && other.isInteger) {
@@ -105,7 +106,10 @@ class Number extends SelfEvaluating {
     return new Number.fromDouble(a / b);
   }
 
-  operator ~/(Number other) => _operation(this, other, (a, b) => a ~/ b);
+  operator ~/(Number other) {
+    if (other == Number.ZERO) throw new SchemeException("cannot divide by zero");
+    return _operation(this, other, (a, b) => a ~/ b);
+  }
   operator *(Number other) => _operation(this, other, (a, b) => a * b);
   operator %(Number other) => _operation(this, other, (a, b) => a % b);
   operator <(Number other) => compareTo(other) < 0;
@@ -299,12 +303,21 @@ class Thunk extends Expression {
   final Frame env;
   const Thunk(this.expr, this.env);
   Expression evaluate(Frame _) {
-    Expression result = this;
-    while (result is Thunk) {
-      Thunk thunk = result as Thunk;
-      result = thunk.expr.evaluate(thunk.env);
+    List<Expression> expressions = [];
+    try {
+      Expression result = this;
+      while (result is Thunk) {
+        Thunk thunk = result as Thunk;
+        expressions.insert(0, thunk.expr);
+        result = thunk.expr.evaluate(thunk.env);
+      }
+      return result;
+    } on SchemeException catch (e) {
+      for (Expression expr in expressions) {
+        e.addCall(expr);
+      }
+      rethrow;
     }
-    return result;
   }
   toJS() => throw new StateError("Thunks should not be passed to JS");
   toString() => 'Thunk($expr in f${env.id})';
