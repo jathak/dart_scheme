@@ -105,7 +105,7 @@ Iterable<Expression> tokenizeLine(String line) sync* {
       }
       if (!number) {
         if (validSymbol(text)) {
-          yield new SchemeSymbol(text);
+          yield new SchemeSymbol.runtime(text);
         } else {
           throw new FormatException("invalid numeral or symbol: $text");
         }
