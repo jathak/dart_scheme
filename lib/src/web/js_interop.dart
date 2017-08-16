@@ -60,7 +60,8 @@ Expression jsObjectToScheme(JsObject obj) {
       completer.complete,
       completer.completeError
     ]);
-    return new AsyncExpression(completer.future);
+    var future = completer.future.then((result)=>jsToScheme(result));
+    return new AsyncExpression(future)..jsPromise = obj;
   }
   return new JsExpression(obj);
 }
@@ -82,6 +83,7 @@ class SchemeFunction implements Function {
   noSuchMethod(Invocation invocation) {
     if (invocation.memberName == new Symbol("call")) {
       var args = invocation.positionalArguments.map((arg) => jsToScheme(arg));
+      print(invocation.positionalArguments);
       return schemeApply(procedure, new PairOrEmpty.fromIterable(args), env).toJS();
     }
     throw new SchemeException("Something has gone horrible wrong with wrapped procedures");

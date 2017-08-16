@@ -4,16 +4,20 @@ import 'dart:async';
 
 import 'package:cs61a_scheme/cs61a_scheme.dart';
 
-class AsyncExpression extends Expression {
-  Future<Expression> _future;
-  Future<Expression> get future => _future;
+class AsyncExpression<T extends Expression> extends Expression {
+  Future<T> _future;
+  Future<T> get future => _future;
   bool _complete = false;
   bool get complete => _complete;
-  Expression _result;
-  Expression get result => _result;
+  T _result;
+  T get result => _result;
+  Object jsPromise = null;
   
-  AsyncExpression(Future<Expression> future) {
-    _future = future.then((e) {
+  AsyncExpression(Future<T> future) {
+    _future = future.then((e) async {
+      while (e is AsyncExpression) {
+        e = await (e as AsyncExpression).future;
+      }
       _result = e;
       _complete = true;
       return e;
@@ -26,13 +30,13 @@ class AsyncExpression extends Expression {
   }
   
   AsyncExpression chain(Procedure proc, Frame env) {
-    return new AsyncExpression(_future.then((Expression e) {
+    return new AsyncExpression(_future.then((T e) {
       return completeEval(proc.apply(new Pair(e, nil), env));
     }));
   }
   
   toString() => complete ? "#[async:$result]" : "#[async]";
-  toJS() => AsyncExpression.makePromise(this);
+  toJS() => jsPromise ?? AsyncExpression.makePromise(this);
   static dynamic Function(AsyncExpression) makePromise = (expr) {
     throw new UnimplementedError("JS interop must be loaded for AsyncExpression.toJS() to work.");
   };
@@ -53,6 +57,16 @@ class AsyncLambdaProcedure extends LambdaProcedure {
     if (expr is Expression) return expr;
     return new AsyncExpression(expr);
   }
+}
+
+class EventListener extends SelfEvaluating {
+  final SchemeSymbol id;
+  final StreamSubscription subscription;
+  EventListener(this.id, this.subscription);
+
+  toString() => '#[event-listener:$id]';
+
+  toJS() => this;
 }
 
 /// define-async special form

@@ -149,4 +149,8 @@ class StandardLibrary extends SchemeLibrary with _$StandardLibraryMixin {
     p.second = val;
     return undefined;
   }
+  @primitive @SchemeSymbol("runtime-type")
+  SchemeString getRuntimeType(Expression expression) {
+    return new SchemeString(expression.runtimeType.toString());
+  }
 }

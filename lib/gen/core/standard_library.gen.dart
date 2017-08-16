@@ -49,6 +49,7 @@ abstract class _$StandardLibraryMixin {
   Expression cdrStream(Pair p);
   Undefined setCar(Pair p, Expression val);
   Undefined setCdr(Pair p, Expression val);
+  SchemeString getRuntimeType(Expression expression);
   void importAll(Frame __env) {
     addPrimitive(__env, const SchemeSymbol("apply"), (__exprs, __env) {
       if (__exprs[0] is! Procedure || __exprs[1] is! PairOrEmpty)
@@ -241,5 +242,8 @@ abstract class _$StandardLibraryMixin {
           const SchemeSymbol("pair-mutation"), new Pair(__value, __env));
       return __value;
     }, 2);
+    addPrimitive(__env, const SchemeSymbol("runtime-type"), (__exprs, __env) {
+      return this.getRuntimeType(__exprs[0]);
+    }, 1);
   }
 }

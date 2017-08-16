@@ -7,6 +7,9 @@ abstract class _$WebLibraryMixin {
   Expression jsSet(JsExpression obj, Expression property, Expression value);
   Expression jsRef(JsExpression obj, Expression property);
   Expression jsCall(List<Expression> expressions);
+  Expression jsObject(List<Expression> expressions);
+  Boolean isJsObject(Expression expression);
+  Boolean isJsProcedure(Expression expression);
   void importAll(Frame __env) {
     addPrimitive(__env, const SchemeSymbol("close-diagram"), (__exprs, __env) {
       return this.closeDiagram(__env);
@@ -31,5 +34,13 @@ abstract class _$WebLibraryMixin {
     }, 2);
     addVariablePrimitive(__env, const SchemeSymbol("js-call"),
         (__exprs, __env) => this.jsCall(__exprs), 2, -1);
+    addVariablePrimitive(__env, const SchemeSymbol("js-object"),
+        (__exprs, __env) => this.jsObject(__exprs), 0, -1);
+    addPrimitive(__env, const SchemeSymbol("js-object?"), (__exprs, __env) {
+      return this.isJsObject(__exprs[0]);
+    }, 1);
+    addPrimitive(__env, const SchemeSymbol("js-procedure?"), (__exprs, __env) {
+      return this.isJsProcedure(__exprs[0]);
+    }, 1);
   }
 }

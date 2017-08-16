@@ -36,7 +36,7 @@ class PrimitiveProcedure extends Procedure {
 }
 
 abstract class UserDefinedProcedure extends Procedure {
-  PairOrEmpty get formals;
+  Expression get formals;
   PairOrEmpty get body;
   
   Frame makeCallFrame(PairOrEmpty arguments, Frame env);
@@ -58,7 +58,8 @@ abstract class UserDefinedProcedure extends Procedure {
 
 class LambdaProcedure extends UserDefinedProcedure {
   final SchemeSymbol name;
-  final PairOrEmpty formals, body;
+  final Expression formals;
+  final PairOrEmpty body;
   final Frame env;
   
   LambdaProcedure(this.formals, this.body, this.env,

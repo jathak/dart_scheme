@@ -336,7 +336,7 @@ class Promise extends SelfEvaluating {
     return expr;
   }
   toJS() => this;
-  toString() => "#[promise (${_evaluated ? 'not ' : ''}forced)]";
+  toString() => "#[promise (${_evaluated ? '' : 'not '}forced)]";
   @override
   UIElement draw(DiagramInterface diagram) {
     var inside = _evaluated ? diagram.pointTo(expr) : new TextElement("⋯");

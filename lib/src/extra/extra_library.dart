@@ -48,6 +48,10 @@ class ExtraLibrary extends SchemeLibrary with _$ExtraLibraryMixin {
     return new AsyncExpression(future);
   }
   
+  @primitive @SchemeSymbol("completed?")
+  Boolean isCompleted(AsyncExpression expr) =>
+    expr.complete ? schemeTrue : schemeFalse;
+
   @primitive
   Undefined diagram(Frame env) {
     env.interpreter.renderer(new Diagram(env));
@@ -112,4 +116,24 @@ class ExtraLibrary extends SchemeLibrary with _$ExtraLibraryMixin {
     return new PairOrEmpty.fromIterable(env.bindings.keys);
   }
   
+  @primitive @SchemeSymbol('trigger-event')
+  Undefined triggerEvent(SchemeSymbol id, Expression data, Frame env) {
+    env.interpreter.triggerEvent(id, data);
+    return undefined;
+  }
+
+  @primitive @SchemeSymbol('listen-for')
+  EventListener listenFor(SchemeSymbol id, Procedure onEvent, Frame env) {
+    return new EventListener(id, env.interpreter.events(id).listen((value) {
+      onEvent.apply(new Pair(value, nil), env);
+    }));
+  }
+
+  @primitive @SchemeSymbol('cancel-listener')
+  AsyncExpression<Undefined> cancelListener(EventListener listener) {
+    return new AsyncExpression(listener.subscription.cancel().then((e) {
+      return undefined;
+    }));
+  }
+
 }
