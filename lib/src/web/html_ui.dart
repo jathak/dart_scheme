@@ -49,6 +49,13 @@ class HtmlRenderer {
     new Future.delayed(const Duration(milliseconds: 50), () {
       jsPlumb?.callMethod('repaintEverything');
     });
+    if (jsPlumb != null) {
+      window.onResize.listen((e) {
+        new Future.delayed(const Duration(milliseconds: 50), () {
+          jsPlumb.callMethod('repaintEverything');
+        });
+      });
+    }
   }
   
   Map<int, String> trueAnchorIds = {};
