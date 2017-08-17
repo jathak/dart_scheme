@@ -7,6 +7,7 @@ import 'package:cs61a_scheme/cs61a_scheme_extra.dart';
 
 import 'html_ui.dart';
 import 'js_interop.dart';
+import 'theming.dart';
 
 part '../../gen/web/web_library.gen.dart';
 
@@ -15,10 +16,12 @@ part '../../gen/web/web_library.gen.dart';
 /// the primitives and performs type checking on arguments).
 @register
 class WebLibrary extends SchemeLibrary with _$WebLibraryMixin {
-  html.Element renderContainer;
-  JsObject jsPlumb;
+  final html.Element renderContainer;
+  final JsObject jsPlumb;
+  final String css;
+  final html.Element styleElement;
   
-  WebLibrary(this.renderContainer, this.jsPlumb) {
+  WebLibrary(this.renderContainer, this.jsPlumb, this.css, this.styleElement) {
     Undefined.jsUndefined = context['undefined'];
     AsyncExpression.makePromise = (expr) {
       return new JsObject(context['Promise'], [
@@ -41,9 +44,8 @@ class WebLibrary extends SchemeLibrary with _$WebLibraryMixin {
   }
   
   @primitive @SchemeSymbol("close-diagram")
-  Undefined closeDiagram(Frame env) {
+  void closeDiagram(Frame env) {
     env.interpreter.renderer(new TextElement(""));
-    return undefined;
   }
   
   @primitive
@@ -95,12 +97,41 @@ class WebLibrary extends SchemeLibrary with _$WebLibraryMixin {
   }
 
   @primitive @SchemeSymbol("js-object?")
-  Boolean isJsObject(Expression expression) =>
-    expression is JsExpression ? schemeTrue : schemeFalse;
+  bool isJsObject(Expression expression) => expression is JsExpression;
 
   @primitive @SchemeSymbol("js-procedure?")
-  Boolean isJsProcedure(Expression expression) =>
-    expression is JsProcedure ? schemeTrue : schemeFalse;
-
+  bool isJsProcedure(Expression expression) => expression is JsProcedure;
+    
+  @primitive
+  Color rgb(int r, int g, int b) => new Color(r, g, b);
+  
+  @primitive
+  Color rgba(int r, int g, int b, num a) => new Color(r, g, b, a.toDouble());
+  
+  @primitive
+  Color hex(String hex) => new Color.fromHexString(hex);
+  
+  @primitive
+  Theme theme() => new Theme();
+  
+  @primitive @SchemeSymbol('theme-set-color!')
+  void themeSetColor(Theme theme, SchemeSymbol property, Color color) {
+    theme.compiledCss = null;
+    theme.colors[property] = color;
+  }
+  
+  @primitive @SchemeSymbol('theme-set-css!')
+  void themeSetCss(Theme theme, SchemeSymbol property, SchemeString code) {
+    theme.compiledCss = null;
+    theme.cssProps[property] = code;
+  }
+  
+  @primitive @SchemeSymbol('compile-theme')
+  Theme compileTheme(Theme theme) => theme.compile(css);
+  
+  @primitive @SchemeSymbol('apply-theme')
+  void applyTheme(Theme theme) {
+    styleElement.innerHtml = theme.compile(css).compiledCss;
+  }
   
 }

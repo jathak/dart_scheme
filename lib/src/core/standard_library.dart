@@ -20,9 +20,8 @@ class StandardLibrary extends SchemeLibrary with _$StandardLibraryMixin {
     return schemeApply(procedure, args, env);
   }
   
-  @primitive Undefined display(Expression message, Frame env) {
+  @primitive void display(Expression message, Frame env) {
     env.interpreter.logger(new DisplayOutput(message), false);
-    return undefined;
   }
   
   @primitive Expression error(Expression message) {
@@ -41,29 +40,27 @@ class StandardLibrary extends SchemeLibrary with _$StandardLibraryMixin {
     throw new UnimplementedError("load has not yet been implemented");
   }
   
-  @primitive Undefined newline(Frame env) {
+  @primitive void newline(Frame env) {
     env.interpreter.logger(new TextMessage(""), true);
-    return undefined;
   }
   
-  @primitive Undefined print(Expression message, Frame env) {
+  @primitive void print(Expression message, Frame env) {
     env.interpreter.logger(message, true);
-    return undefined;
   }
   
-  @primitive @SchemeSymbol("atom?") Boolean isAtom(Expression val) {
-    return b(val is Boolean || val is Number || val is SchemeSymbol || val.isNil);
+  @primitive @SchemeSymbol("atom?") bool isAtom(Expression val) {
+    return val is Boolean || val is Number || val is SchemeSymbol || val.isNil;
   }
   
-  @primitive @SchemeSymbol("integer?") Boolean isInteger(Expression val) => b(val is Number && val.isInteger);
-  @primitive @SchemeSymbol("list?") Boolean isList(Expression val) => b(val is PairOrEmpty && val.isWellFormedList());
-  @primitive @SchemeSymbol("number?") Boolean isNumber(Expression val) => b(val is Number);
-  @primitive @SchemeSymbol("null?") Boolean isNull(Expression val) => b(val.isNil);
-  @primitive @SchemeSymbol("pair?") Boolean isPair(Expression val) => b(val is Pair);
-  @primitive @SchemeSymbol("procedure?") Boolean isProcedure(Expression val) => b(val is Procedure);
-  @primitive @SchemeSymbol("promise?") Boolean isPromise(Expression val) => b(val is Promise);
-  @primitive @SchemeSymbol("string?") Boolean isString(Expression val) => b(val is SchemeString);
-  @primitive @SchemeSymbol("symbol?") Boolean isSymbol(Expression val) => b(val is SchemeSymbol);
+  @primitive @SchemeSymbol("integer?") bool isInteger(Expression val) => val is Number && val.isInteger;
+  @primitive @SchemeSymbol("list?") bool isList(Expression val) => val is PairOrEmpty && val.isWellFormedList();
+  @primitive @SchemeSymbol("number?") bool isNumber(Expression val) => val is Number;
+  @primitive @SchemeSymbol("null?") bool isNull(Expression val) => val.isNil;
+  @primitive @SchemeSymbol("pair?") bool isPair(Expression val) => val is Pair;
+  @primitive @SchemeSymbol("procedure?") bool isProcedure(Expression val) => val is Procedure;
+  @primitive @SchemeSymbol("promise?") bool isPromise(Expression val) => val is Promise;
+  @primitive @SchemeSymbol("string?") bool isString(Expression val) => val is SchemeString;
+  @primitive @SchemeSymbol("symbol?") bool isSymbol(Expression val) => val is SchemeSymbol;
   @primitive Expression append(List<Expression> args) {
     if (args.isEmpty) return nil;
     List<Expression> lst = [];
@@ -84,7 +81,7 @@ class StandardLibrary extends SchemeLibrary with _$StandardLibraryMixin {
   @primitive Expression car(Pair val) => val.first;
   @primitive Expression cdr(Pair val) => val.second;
   @primitive Pair cons(Expression car, Expression cdr) => new Pair(car, cdr);
-  @primitive Number length(PairOrEmpty lst) => i(lst.length);
+  @primitive Number length(PairOrEmpty lst) => new Number.fromInt(lst.length);
   @primitive PairOrEmpty list(List<Expression> args) => new PairOrEmpty.fromIterable(args);
   @primitive @SchemeSymbol("+") Number add(List<Expression> args) => allNumbers(args).fold(Number.ZERO, (a, b) => a + b);
   @primitive @SchemeSymbol("-") @MinArgs(1) Number sub(List<Expression> args) {
@@ -107,7 +104,7 @@ class StandardLibrary extends SchemeLibrary with _$StandardLibraryMixin {
       }
       return total;
     }
-    return n(pow(base.toJS(), power.toJS()));
+    return new Number.fromNum(pow(base.toJS(), power.toJS()));
   }
   @primitive Number modulo(Number a, Number b) => a % b;
   @primitive Number quotient(Number a, Number b) => a ~/ b;
@@ -119,38 +116,36 @@ class StandardLibrary extends SchemeLibrary with _$StandardLibraryMixin {
     }
     return mod;
   }
-  @primitive @SchemeSymbol("eq?") Boolean isEq(Expression x, Expression y) {
-    if (x is Number && y is Number) return b(x == y);
-    if (x is SchemeSymbol && y is SchemeSymbol) return b(x == y);
-    if (x is SchemeString && y is SchemeString) return b(x == y);
-    return b(identical(x, y));
+  @primitive @SchemeSymbol("eq?") bool isEq(Expression x, Expression y) {
+    if (x is Number && y is Number) return x == y;
+    if (x is SchemeSymbol && y is SchemeSymbol) return x == y;
+    if (x is SchemeString && y is SchemeString) return x == y;
+    return identical(x, y);
   }
-  @primitive @SchemeSymbol("equal?") Boolean isEqual(Expression x, Expression y) => b(x == y);
-  @primitive @SchemeSymbol("not") Boolean not(Expression arg) => b(!arg.isTruthy);
-  @primitive @SchemeSymbol("=") Boolean eqNumbers(Number x, Number y) => b(x == y);
-  @primitive @SchemeSymbol("<") Boolean lt(Number x, Number y) => b(x < y);
-  @primitive @SchemeSymbol(">") Boolean gt(Number x, Number y) => b(x > y);
-  @primitive @SchemeSymbol("<=") Boolean le(Number x, Number y) => b(x <= y);
-  @primitive @SchemeSymbol(">=") Boolean ge(Number x, Number y) => b(x >= y);
-  @primitive @SchemeSymbol("even?") Boolean isEven(Number x) => b(x % Number.TWO == Number.ZERO);
-  @primitive @SchemeSymbol("odd?") Boolean isOdd(Number x) => b(x % Number.TWO == Number.ONE);
-  @primitive @SchemeSymbol("zero?") Boolean isZero(Number x) => b(x == Number.ZERO);
+  @primitive @SchemeSymbol("equal?") bool isEqual(Expression x, Expression y) => x == y;
+  @primitive @SchemeSymbol("not") bool not(Expression arg) => !arg.isTruthy;
+  @primitive @SchemeSymbol("=") bool eqNumbers(Number x, Number y) => x == y;
+  @primitive @SchemeSymbol("<") bool lt(Number x, Number y) => x < y;
+  @primitive @SchemeSymbol(">") bool gt(Number x, Number y) => x > y;
+  @primitive @SchemeSymbol("<=") bool le(Number x, Number y) => x <= y;
+  @primitive @SchemeSymbol(">=") bool ge(Number x, Number y) => x >= y;
+  @primitive @SchemeSymbol("even?") bool isEven(Number x) => x % Number.TWO == Number.ZERO;
+  @primitive @SchemeSymbol("odd?") bool isOdd(Number x) => x % Number.TWO == Number.ONE;
+  @primitive @SchemeSymbol("zero?") bool isZero(Number x) => x == Number.ZERO;
   @primitive Expression force(Promise p) => p.force();
   @primitive @SchemeSymbol("cdr-stream") Expression cdrStream(Pair p) => force(cdr(p));
   @primitive @SchemeSymbol("set-car!")
   @TriggerEventAfter(const SchemeSymbol("pair-mutation"))
-  Undefined setCar(Pair p, Expression val) {
+  void setCar(Pair p, Expression val) {
     p.first = val;
-    return undefined;
   }
   @primitive @SchemeSymbol("set-cdr!")
   @TriggerEventAfter(const SchemeSymbol("pair-mutation"))
-  Undefined setCdr(Pair p, Expression val) {
+  void setCdr(Pair p, Expression val) {
     p.second = val;
-    return undefined;
   }
   @primitive @SchemeSymbol("runtime-type")
-  SchemeString getRuntimeType(Expression expression) {
-    return new SchemeString(expression.runtimeType.toString());
+  String getRuntimeType(Expression expression) {
+    return expression.runtimeType.toString();
   }
 }

@@ -23,10 +23,12 @@ class Row extends UIElement {
 class FrameElement extends UIElement {
   int id;
   String tag;
+  int parentId;
   bool active = false;
   List<Binding> bindings = [];
   FrameElement(Frame frame, Diagram diagram, [Expression returnValue]) {
     id = frame.id;
+    parentId = frame.parent?.id;
     tag = frame.tag;
     for (SchemeSymbol key in frame.bindings.keys) {
       if (frame.hidden[key]) continue;

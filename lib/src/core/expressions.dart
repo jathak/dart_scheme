@@ -46,13 +46,18 @@ class Number extends SelfEvaluating {
       : isInteger = true,
         doubleValue = null;
 
-  factory Number.fromInteger(int value) {
+  factory Number.fromInt(int value) {
     return new Number.fromBigInt(new BigInt.fromJsInt(value));
   }
   
-  static final ZERO = new Number.fromInteger(0);
-  static final ONE = new Number.fromInteger(1);
-  static final TWO = new Number.fromInteger(2);
+  factory Number.fromNum(num value) {
+    if (value is int) return new Number.fromInt(value);
+    return new Number.fromDouble(value);
+  }
+  
+  static final ZERO = new Number.fromInt(0);
+  static final ONE = new Number.fromInt(1);
+  static final TWO = new Number.fromInt(2);
 
   factory Number.fromString(String numString) {
     try {
@@ -75,7 +80,7 @@ class Number extends SelfEvaluating {
     num aNum = a.isInteger ? num.parse("$a") : a.doubleValue;
     num bNum = b.isInteger ? num.parse("$b") : b.doubleValue;
     num result = fn(aNum, bNum);
-    if (result is int) return new Number.fromInteger(result);
+    if (result is int) return new Number.fromInt(result);
     return new Number.fromDouble(result);
   }
 
@@ -117,7 +122,7 @@ class Number extends SelfEvaluating {
   operator >(Number other) => compareTo(other) > 0;
   operator >=(Number other) => compareTo(other) >= 0;
   operator ==(dynamic other) {
-    if (other is int) return this == new Number.fromInteger(other);
+    if (other is int) return this == new Number.fromInt(other);
     if (other is double) return this == new Number.fromDouble(other);
     if (other is Number) return compareTo(other) == 0;
     return false;
@@ -136,6 +141,7 @@ class Boolean extends SelfEvaluating {
   bool toJS() => value;
   operator ==(other) => other is Boolean && value == other.value;
   int get hashCode => value.hashCode;
+  factory Boolean(bool value) => value ? schemeTrue : schemeFalse;
 }
 
 const schemeTrue = const Boolean._internal(true);
@@ -269,7 +275,7 @@ class Pair<A extends Expression, B extends Expression> extends Expression
     int parentRow = diagram.currentRow;
     UIElement right = diagram.pointTo(second);
     UIElement left = diagram.pointTo(first, parentRow);
-    return new BlockGrid.pair(new Block.a1(left), new Block.a1(right));
+    return new BlockGrid.pair(new Block.pair(left), new Block.pair(right));
   }
  
   toString() {
@@ -340,7 +346,7 @@ class Promise extends SelfEvaluating {
   @override
   UIElement draw(DiagramInterface diagram) {
     var inside = _evaluated ? diagram.pointTo(expr) : new TextElement("⋯");
-    return new Block.b1(inside);
+    return new Block.promise(inside);
   }
 }
 

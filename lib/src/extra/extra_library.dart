@@ -7,7 +7,7 @@ import 'package:cs61a_scheme/cs61a_scheme.dart';
 import 'async.dart';
 import 'diagramming.dart';
 import 'operand_procedures.dart';
-import 'visualization.dart' as visualization;
+import 'visualization.dart';
 
 part '../../gen/extra/extra_library.gen.dart';
 
@@ -23,8 +23,8 @@ class ExtraLibrary extends SchemeLibrary with _$ExtraLibraryMixin {
   }
   
   @primitive @SchemeSymbol("run-async")
-  AsyncExpression runAsync(Procedure proc, Frame env) {
-    var completer = new Completer();
+  Future<Expression> runAsync(Procedure proc, Frame env) {
+    var completer = new Completer<Expression>();
     
     var resolver = (List<Expression> args, Frame env) {
       completer.complete(args[0]);
@@ -38,77 +38,37 @@ class ExtraLibrary extends SchemeLibrary with _$ExtraLibraryMixin {
     var reject = new PrimitiveProcedure.fixed(const SchemeSymbol("async:reject"), rejecter, 1);
     var operands = new PairOrEmpty.fromIterable([resolve, reject]);
     new Future.microtask(() => completeEval(proc.apply(operands, env)));
-    return new AsyncExpression(completer.future);
+    return completer.future;
   }
   
   @primitive @SchemeSymbol("run-after")
-  AsyncExpression runAfter(Number millis, Procedure proc, Frame env) {
+  Future<Expression> runAfter(Number millis, Procedure proc, Frame env) {
     var duration = new Duration(milliseconds: millis.toJS());
-    var future = new Future.delayed(duration, () => completeEval(proc.apply(nil, env)));
-    return new AsyncExpression(future);
+    return new Future.delayed(duration, () => completeEval(proc.apply(nil, env)));
   }
   
   @primitive @SchemeSymbol("completed?")
   Boolean isCompleted(AsyncExpression expr) =>
     expr.complete ? schemeTrue : schemeFalse;
-
+  
   @primitive
-  Undefined diagram(Frame env) {
-    env.interpreter.renderer(new Diagram(env));
-    return undefined;
+  void render(UIElement ui, Frame env) {
+    env.interpreter.renderer(ui);
   }
   
   @primitive
-  Undefined render(Expression expression, Frame env) {
-    if (expression is! UIElement) expression = new Diagram(expression);
-    env.interpreter.renderer(expression);
-    return undefined;
-  }
-  
-  @primitive @SchemeSymbol('make-diagram')
-  Diagram makeDiagram(Expression expression, Frame env) {
+  Diagram draw(Expression expression) {
     return new Diagram(expression);
+  }
+  
+  @primitive
+  Diagram diagram(Frame env) {
+    return new Diagram(env);
   }
     
   @primitive @noeval
-  Expression visualize(Expression code, Frame env) {
-    return visualization.visualize(code, env);
-  }
-  
-  @primitive @SchemeSymbol('vis-goto')
-  Undefined visGoto(Number number) {
-    visualization.visGoto(number.toJS());
-    return undefined;
-  }
-  
-  @primitive @SchemeSymbol('vis-exit')
-  Undefined visExit() {
-    visualization.visExit();
-    return undefined;
-  }
-  
-  @primitive @SchemeSymbol('vis-first')
-  Undefined visFirst() {
-    visualization.visFirst();
-    return undefined;
-  }
-  
-  @primitive @SchemeSymbol('vis-last')
-  Undefined visLast() {
-    visualization.visLast();
-    return undefined;
-  }
-  
-  @primitive @SchemeSymbol('vis-next')
-  Undefined visNext() {
-    visualization.visNext();
-    return undefined;
-  }
-  
-  @primitive @SchemeSymbol('vis-prev')
-  Undefined visPrev() {
-    visualization.visPrev();
-    return undefined;
+  Visualization visualize(Expression code, Frame env) {
+    return new Visualization(code, env);
   }
   
   @primitive
@@ -117,9 +77,8 @@ class ExtraLibrary extends SchemeLibrary with _$ExtraLibraryMixin {
   }
   
   @primitive @SchemeSymbol('trigger-event')
-  Undefined triggerEvent(SchemeSymbol id, Expression data, Frame env) {
+  void triggerEvent(SchemeSymbol id, Expression data, Frame env) {
     env.interpreter.triggerEvent(id, data);
-    return undefined;
   }
 
   @primitive @SchemeSymbol('listen-for')

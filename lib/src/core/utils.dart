@@ -72,10 +72,6 @@ addVariablePrimitive(Frame env, SchemeSymbol name, SchemePrimitive fn,
   env.define(name, p, true);
 }
 
-Boolean b(bool val) => val ? schemeTrue : schemeFalse;
-Number n(num dartNum) => dartNum is double ? d(dartNum) : i(dartNum as int);
-Number i(int dartInt) => new Number.fromInteger(dartInt);
-Number d(double dartDouble) => new Number.fromDouble(dartDouble);
 Iterable<Number> allNumbers(List<Expression> expr) {
   return expr.map((ex) => ex is Number ? ex : throw new SchemeException("$ex is not a number."));
 }

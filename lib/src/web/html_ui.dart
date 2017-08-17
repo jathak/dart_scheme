@@ -15,16 +15,27 @@ class HtmlRenderer {
   
   HtmlRenderer(this.container, JsObject masterJsPlumb) {
     jsPlumb = masterJsPlumb.callMethod('getInstance');
+    container.classes.add('render');
   }
   
+  List<StreamSubscription> subs = [];
+  
   void render(UIElement element) {
+    var oldSubscriptions = subs;
+    subs = [];
     connections = null;
     trueAnchorIds = {};
     anchorDirections = {};
     Element el = convert(element);
     container.text = "";
+    for (StreamSubscription sub in oldSubscriptions) {
+      sub.cancel();
+    }
     container.append(el);
     refreshConnections();
+    subs.add(element.onUpdate.listen(([_]) {
+      render(element);
+    }));
   }
   
   void refreshConnections() {
@@ -50,11 +61,11 @@ class HtmlRenderer {
       jsPlumb?.callMethod('repaintEverything');
     });
     if (jsPlumb != null) {
-      window.onResize.listen((e) {
+      subs.add(window.onResize.listen((e) {
         new Future.delayed(const Duration(milliseconds: 50), () {
           jsPlumb.callMethod('repaintEverything');
         });
-      });
+      }));
     }
   }
   
@@ -77,6 +88,8 @@ class HtmlRenderer {
   }
 
   Element _convertRaw(UIElement element, [bool spaced = false]) {
+    if (element is Visualization) return convertVisualization(element, spaced);
+    if (element is Button) return convertButton(element, spaced);
     if (element is Diagram) return convertDiagram(element, spaced);
     if (element is FrameElement) return convertFrameElement(element, spaced);
     if (element is Row) return convertRow(element, spaced);
@@ -88,16 +101,35 @@ class HtmlRenderer {
     if (element is Strike) return convertStrike(element, spaced);
     throw new SchemeException("Cannot render $element");
   }
+  
+  Element convertVisualization(Visualization viz, [bool spaced = false]) {
+    DivElement wrapper = new DivElement()..classes = ['visualization'];
+    DivElement header = new DivElement()..classes = ['header'];
+    for (UIElement headerItem in viz.headerRow) {
+      header.append(convert(headerItem));
+    }
+    wrapper.append(header);
+    wrapper.append(convert(viz.currentDiagram));
+    return wrapper;
+  }
+  
+  Element convertButton(Button button, [bool spaced = false]) {
+    DivElement element = new DivElement()..classes = ['button'];
+    element.append(convert(button.inside));
+    subs.add(element.onClick.listen((event) {
+      button.click();
+    }));
+    return element;
+  }
 
   Element convertDiagram(Diagram diagram, [bool spaced = false]) {
-    TableElement table = new TableElement()..id='#diagramTable'..classes = ['diagramTable'];
-    table.appendHtml("""
-      <tr class='diagramInnerWrapper'>
-        <td class='diagramFrames'></td>
-        <td class='diagramObjects'></td>
-      </tr>""");
-    Element frames = table.querySelector(".diagramFrames");
-    Element objects = table.querySelector(".diagramObjects");
+    TableElement table = new TableElement()..classes = ['diagram'];
+    TableRowElement tr = new TableRowElement();
+    TableCellElement frames = new TableCellElement()..classes = ['frames'];
+    TableCellElement objects = new TableCellElement()..classes = ['objects'];
+    tr.append(frames);
+    tr.append(objects);
+    table.append(tr);
     for (FrameElement frame in diagram.frames) {
       frames.append(convert(frame, spaced || diagram.spacer));
     }
@@ -109,12 +141,16 @@ class HtmlRenderer {
   }
 
   Element convertFrameElement(FrameElement frame, [bool spaced = false]) {
-    DivElement div = new DivElement()..className = 'frame';
+    DivElement div = new DivElement();
     div.id = 'frame${frame.id}';
-    if (frame.active) div.classes.add('current');
+    div.classes.add(frame.active ? 'current-frame': 'other-frame');
     DivElement header = new DivElement();
     String name = frame.id == 0 ? 'Global frame' : 'f${frame.id}';
-    header.innerHtml = '<b>$name</b>&nbsp;${frame.tag ?? ''}';
+    String parent = "";
+    if (frame.parentId != null && frame.parentId != 0) {
+      parent = '&nbsp;<span class="parent">[parent=f${frame.parentId}]</span>';
+    }
+    header.innerHtml = '<b>$name</b>&nbsp;${frame.tag ?? ''}$parent';
     div.append(header);
     for (Binding binding in frame.bindings) {
       div.append(convert(binding, spaced || frame.spacer));
@@ -125,14 +161,14 @@ class HtmlRenderer {
   Element convertBinding(Binding binding, [bool spaced = false]) {
     DivElement div = new DivElement()..className = 'binding';
     div.innerHtml = '${binding.symbol}&nbsp;';
-    SpanElement span = new SpanElement()..className = 'alignRight';
+    SpanElement span = new SpanElement()..className = 'align-right';
     div.append(span);
     span.append(convert(binding.value, spaced || binding.spacer));
     return div;
   }
   
   Element convertRow(Row row, [bool spaced = false]) {
-    DivElement div = new DivElement()..className = 'diagramRow';
+    DivElement div = new DivElement()..className = 'row';
     for (UIElement element in row.elements) {
       div.append(convert(element, spaced || row.spacer));
     }
@@ -145,7 +181,7 @@ class HtmlRenderer {
   
   Element convertBlock(Block block, [bool spaced = false]) {
     DivElement div = new DivElement();
-    div.className = 'block block_' + block.type.id;
+    div.classes = ['block', block.type.id];
     div.append(convert(block.inside, spaced || block.spacer));
     return div;
   }
@@ -155,7 +191,7 @@ class HtmlRenderer {
       throw new SchemeException("Multiple BlockGrid rows not yet implemented");
     }
     DivElement div = new DivElement();
-    div.className = 'blockGrid';
+    div.className = 'block-grid';
     for (Block block in blockGrid.rowAt(0)) {
       div.append(convert(block, spaced || blockGrid.spacer));
     }

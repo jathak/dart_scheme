@@ -11,6 +11,7 @@ abstract class Procedure extends SelfEvaluating {
     return env.interpreter.implementation.procedureCall(this, operands, env);
   }
   Expression apply(PairOrEmpty arguments, Frame env);
+  @override
   toString() => '#[$name]';
   toJS() => Procedure.jsProcedure(this);
   static dynamic Function(Procedure) jsProcedure = (p) {
@@ -69,7 +70,15 @@ class LambdaProcedure extends UserDefinedProcedure {
     return env.interpreter.implementation.makeLambdaFrame(this, arguments, env);
   }
   
+  @override
   toString() => new Pair(new SchemeSymbol('lambda'), new Pair(formals, body)).toString();
+  
+  @override
+  UIElement draw(diag) {
+    var parent = env.id == 0 ? '' : ' [parent=f${env.id}]';
+    var msg = "${new Pair(name, formals)}$parent";
+    return new TextElement(msg);
+  }
 }
 
 class MacroProcedure extends LambdaProcedure {

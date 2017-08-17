@@ -2,23 +2,23 @@ part of cs61a_scheme.core.standard_library;
 
 abstract class _$StandardLibraryMixin {
   Expression apply(Procedure procedure, PairOrEmpty args, Frame env);
-  Undefined display(Expression message, Frame env);
+  void display(Expression message, Frame env);
   Expression error(Expression message);
   Expression eval(Expression expr, Frame env);
   Expression exit();
   Expression load(Expression file, Frame env);
-  Undefined newline(Frame env);
-  Undefined print(Expression message, Frame env);
-  Boolean isAtom(Expression val);
-  Boolean isInteger(Expression val);
-  Boolean isList(Expression val);
-  Boolean isNumber(Expression val);
-  Boolean isNull(Expression val);
-  Boolean isPair(Expression val);
-  Boolean isProcedure(Expression val);
-  Boolean isPromise(Expression val);
-  Boolean isString(Expression val);
-  Boolean isSymbol(Expression val);
+  void newline(Frame env);
+  void print(Expression message, Frame env);
+  bool isAtom(Expression val);
+  bool isInteger(Expression val);
+  bool isList(Expression val);
+  bool isNumber(Expression val);
+  bool isNull(Expression val);
+  bool isPair(Expression val);
+  bool isProcedure(Expression val);
+  bool isPromise(Expression val);
+  bool isString(Expression val);
+  bool isSymbol(Expression val);
   Expression append(List<Expression> args);
   Expression car(Pair val);
   Expression cdr(Pair val);
@@ -34,22 +34,22 @@ abstract class _$StandardLibraryMixin {
   Number modulo(Number a, Number b);
   Number quotient(Number a, Number b);
   Number remainder(Number a, Number b);
-  Boolean isEq(Expression x, Expression y);
-  Boolean isEqual(Expression x, Expression y);
-  Boolean not(Expression arg);
-  Boolean eqNumbers(Number x, Number y);
-  Boolean lt(Number x, Number y);
-  Boolean gt(Number x, Number y);
-  Boolean le(Number x, Number y);
-  Boolean ge(Number x, Number y);
-  Boolean isEven(Number x);
-  Boolean isOdd(Number x);
-  Boolean isZero(Number x);
+  bool isEq(Expression x, Expression y);
+  bool isEqual(Expression x, Expression y);
+  bool not(Expression arg);
+  bool eqNumbers(Number x, Number y);
+  bool lt(Number x, Number y);
+  bool gt(Number x, Number y);
+  bool le(Number x, Number y);
+  bool ge(Number x, Number y);
+  bool isEven(Number x);
+  bool isOdd(Number x);
+  bool isZero(Number x);
   Expression force(Promise p);
   Expression cdrStream(Pair p);
-  Undefined setCar(Pair p, Expression val);
-  Undefined setCdr(Pair p, Expression val);
-  SchemeString getRuntimeType(Expression expression);
+  void setCar(Pair p, Expression val);
+  void setCdr(Pair p, Expression val);
+  String getRuntimeType(Expression expression);
   void importAll(Frame __env) {
     addPrimitive(__env, const SchemeSymbol("apply"), (__exprs, __env) {
       if (__exprs[0] is! Procedure || __exprs[1] is! PairOrEmpty)
@@ -57,7 +57,9 @@ abstract class _$StandardLibraryMixin {
       return this.apply(__exprs[0], __exprs[1], __env);
     }, 2);
     addPrimitive(__env, const SchemeSymbol("display"), (__exprs, __env) {
-      return this.display(__exprs[0], __env);
+      var __value = undefined;
+      this.display(__exprs[0], __env);
+      return __value;
     }, 1);
     addPrimitive(__env, const SchemeSymbol("error"), (__exprs, __env) {
       return this.error(__exprs[0]);
@@ -72,43 +74,48 @@ abstract class _$StandardLibraryMixin {
       return this.load(__exprs[0], __env);
     }, 1);
     addPrimitive(__env, const SchemeSymbol("newline"), (__exprs, __env) {
-      return this.newline(__env);
+      var __value = undefined;
+      this.newline(__env);
+      return __value;
     }, 0);
     addPrimitive(__env, const SchemeSymbol("print"), (__exprs, __env) {
-      return this.print(__exprs[0], __env);
+      var __value = undefined;
+      this.print(__exprs[0], __env);
+      return __value;
     }, 1);
     addPrimitive(__env, const SchemeSymbol("atom?"), (__exprs, __env) {
-      return this.isAtom(__exprs[0]);
+      return new Boolean(this.isAtom(__exprs[0]));
     }, 1);
     addPrimitive(__env, const SchemeSymbol("integer?"), (__exprs, __env) {
-      return this.isInteger(__exprs[0]);
+      return new Boolean(this.isInteger(__exprs[0]));
     }, 1);
     addPrimitive(__env, const SchemeSymbol("list?"), (__exprs, __env) {
-      return this.isList(__exprs[0]);
+      return new Boolean(this.isList(__exprs[0]));
     }, 1);
     addPrimitive(__env, const SchemeSymbol("number?"), (__exprs, __env) {
-      return this.isNumber(__exprs[0]);
+      return new Boolean(this.isNumber(__exprs[0]));
     }, 1);
     addPrimitive(__env, const SchemeSymbol("null?"), (__exprs, __env) {
-      return this.isNull(__exprs[0]);
+      return new Boolean(this.isNull(__exprs[0]));
     }, 1);
     addPrimitive(__env, const SchemeSymbol("pair?"), (__exprs, __env) {
-      return this.isPair(__exprs[0]);
+      return new Boolean(this.isPair(__exprs[0]));
     }, 1);
     addPrimitive(__env, const SchemeSymbol("procedure?"), (__exprs, __env) {
-      return this.isProcedure(__exprs[0]);
+      return new Boolean(this.isProcedure(__exprs[0]));
     }, 1);
     addPrimitive(__env, const SchemeSymbol("promise?"), (__exprs, __env) {
-      return this.isPromise(__exprs[0]);
+      return new Boolean(this.isPromise(__exprs[0]));
     }, 1);
     addPrimitive(__env, const SchemeSymbol("string?"), (__exprs, __env) {
-      return this.isString(__exprs[0]);
+      return new Boolean(this.isString(__exprs[0]));
     }, 1);
     addPrimitive(__env, const SchemeSymbol("symbol?"), (__exprs, __env) {
-      return this.isSymbol(__exprs[0]);
+      return new Boolean(this.isSymbol(__exprs[0]));
     }, 1);
-    addVariablePrimitive(__env, const SchemeSymbol("append"),
-        (__exprs, __env) => this.append(__exprs), 0, -1);
+    addVariablePrimitive(__env, const SchemeSymbol("append"), (__exprs, __env) {
+      return this.append(__exprs);
+    }, 0, -1);
     addPrimitive(__env, const SchemeSymbol("car"), (__exprs, __env) {
       if (__exprs[0] is! Pair)
         throw new SchemeException('Argument of invalid type passed to car.');
@@ -127,16 +134,21 @@ abstract class _$StandardLibraryMixin {
         throw new SchemeException('Argument of invalid type passed to length.');
       return this.length(__exprs[0]);
     }, 1);
-    addVariablePrimitive(__env, const SchemeSymbol("list"),
-        (__exprs, __env) => this.list(__exprs), 0, -1);
-    addVariablePrimitive(__env, const SchemeSymbol("+"),
-        (__exprs, __env) => this.add(__exprs), 0, -1);
-    addVariablePrimitive(__env, const SchemeSymbol("-"),
-        (__exprs, __env) => this.sub(__exprs), 1, -1);
-    addVariablePrimitive(__env, const SchemeSymbol("*"),
-        (__exprs, __env) => this.mul(__exprs), 0, -1);
-    addVariablePrimitive(__env, const SchemeSymbol("/"),
-        (__exprs, __env) => this.truediv(__exprs), 1, -1);
+    addVariablePrimitive(__env, const SchemeSymbol("list"), (__exprs, __env) {
+      return this.list(__exprs);
+    }, 0, -1);
+    addVariablePrimitive(__env, const SchemeSymbol("+"), (__exprs, __env) {
+      return this.add(__exprs);
+    }, 0, -1);
+    addVariablePrimitive(__env, const SchemeSymbol("-"), (__exprs, __env) {
+      return this.sub(__exprs);
+    }, 1, -1);
+    addVariablePrimitive(__env, const SchemeSymbol("*"), (__exprs, __env) {
+      return this.mul(__exprs);
+    }, 0, -1);
+    addVariablePrimitive(__env, const SchemeSymbol("/"), (__exprs, __env) {
+      return this.truediv(__exprs);
+    }, 1, -1);
     addPrimitive(__env, const SchemeSymbol("abs"), (__exprs, __env) {
       if (__exprs[0] is! Number)
         throw new SchemeException('Argument of invalid type passed to abs.');
@@ -165,53 +177,53 @@ abstract class _$StandardLibraryMixin {
       return this.remainder(__exprs[0], __exprs[1]);
     }, 2);
     addPrimitive(__env, const SchemeSymbol("eq?"), (__exprs, __env) {
-      return this.isEq(__exprs[0], __exprs[1]);
+      return new Boolean(this.isEq(__exprs[0], __exprs[1]));
     }, 2);
     addPrimitive(__env, const SchemeSymbol("equal?"), (__exprs, __env) {
-      return this.isEqual(__exprs[0], __exprs[1]);
+      return new Boolean(this.isEqual(__exprs[0], __exprs[1]));
     }, 2);
     addPrimitive(__env, const SchemeSymbol("not"), (__exprs, __env) {
-      return this.not(__exprs[0]);
+      return new Boolean(this.not(__exprs[0]));
     }, 1);
     addPrimitive(__env, const SchemeSymbol("="), (__exprs, __env) {
       if (__exprs[0] is! Number || __exprs[1] is! Number)
         throw new SchemeException('Argument of invalid type passed to =.');
-      return this.eqNumbers(__exprs[0], __exprs[1]);
+      return new Boolean(this.eqNumbers(__exprs[0], __exprs[1]));
     }, 2);
     addPrimitive(__env, const SchemeSymbol("<"), (__exprs, __env) {
       if (__exprs[0] is! Number || __exprs[1] is! Number)
         throw new SchemeException('Argument of invalid type passed to <.');
-      return this.lt(__exprs[0], __exprs[1]);
+      return new Boolean(this.lt(__exprs[0], __exprs[1]));
     }, 2);
     addPrimitive(__env, const SchemeSymbol(">"), (__exprs, __env) {
       if (__exprs[0] is! Number || __exprs[1] is! Number)
         throw new SchemeException('Argument of invalid type passed to >.');
-      return this.gt(__exprs[0], __exprs[1]);
+      return new Boolean(this.gt(__exprs[0], __exprs[1]));
     }, 2);
     addPrimitive(__env, const SchemeSymbol("<="), (__exprs, __env) {
       if (__exprs[0] is! Number || __exprs[1] is! Number)
         throw new SchemeException('Argument of invalid type passed to <=.');
-      return this.le(__exprs[0], __exprs[1]);
+      return new Boolean(this.le(__exprs[0], __exprs[1]));
     }, 2);
     addPrimitive(__env, const SchemeSymbol(">="), (__exprs, __env) {
       if (__exprs[0] is! Number || __exprs[1] is! Number)
         throw new SchemeException('Argument of invalid type passed to >=.');
-      return this.ge(__exprs[0], __exprs[1]);
+      return new Boolean(this.ge(__exprs[0], __exprs[1]));
     }, 2);
     addPrimitive(__env, const SchemeSymbol("even?"), (__exprs, __env) {
       if (__exprs[0] is! Number)
         throw new SchemeException('Argument of invalid type passed to even?.');
-      return this.isEven(__exprs[0]);
+      return new Boolean(this.isEven(__exprs[0]));
     }, 1);
     addPrimitive(__env, const SchemeSymbol("odd?"), (__exprs, __env) {
       if (__exprs[0] is! Number)
         throw new SchemeException('Argument of invalid type passed to odd?.');
-      return this.isOdd(__exprs[0]);
+      return new Boolean(this.isOdd(__exprs[0]));
     }, 1);
     addPrimitive(__env, const SchemeSymbol("zero?"), (__exprs, __env) {
       if (__exprs[0] is! Number)
         throw new SchemeException('Argument of invalid type passed to zero?.');
-      return this.isZero(__exprs[0]);
+      return new Boolean(this.isZero(__exprs[0]));
     }, 1);
     addPrimitive(__env, const SchemeSymbol("force"), (__exprs, __env) {
       if (__exprs[0] is! Promise)
@@ -228,7 +240,8 @@ abstract class _$StandardLibraryMixin {
       if (__exprs[0] is! Pair || __exprs[1] is! Expression)
         throw new SchemeException(
             'Argument of invalid type passed to set-car!.');
-      var __value = this.setCar(__exprs[0], __exprs[1]);
+      var __value = undefined;
+      this.setCar(__exprs[0], __exprs[1]);
       __env.interpreter.triggerEvent(
           const SchemeSymbol("pair-mutation"), new Pair(__value, __env));
       return __value;
@@ -237,13 +250,14 @@ abstract class _$StandardLibraryMixin {
       if (__exprs[0] is! Pair || __exprs[1] is! Expression)
         throw new SchemeException(
             'Argument of invalid type passed to set-cdr!.');
-      var __value = this.setCdr(__exprs[0], __exprs[1]);
+      var __value = undefined;
+      this.setCdr(__exprs[0], __exprs[1]);
       __env.interpreter.triggerEvent(
           const SchemeSymbol("pair-mutation"), new Pair(__value, __env));
       return __value;
     }, 2);
     addPrimitive(__env, const SchemeSymbol("runtime-type"), (__exprs, __env) {
-      return this.getRuntimeType(__exprs[0]);
+      return new SchemeString(this.getRuntimeType(__exprs[0]));
     }, 1);
   }
 }

@@ -4,27 +4,81 @@ import 'package:cs61a_scheme/cs61a_scheme.dart';
 
 import 'diagramming.dart';
 
-void Function() visExit = () => null;
-void Function(int) visGoto = (int x) => null;
-visFirst() => visGoto(1);
-void Function() visLast = () => null;
-void Function() visNext = () => null;
-void Function() visPrev = () => null;
-
-Expression visualize(Expression code, Frame env) {
-  Interpreter inter = env.interpreter;
-  List<Diagram> diagrams = [];
-
-  Map<Frame, Expression> frameReturnValues = {};
-  addFrames(Frame myEnv, [Expression returnValue = null]) {
-    if (!frameReturnValues.containsKey(myEnv)) {
-      frameReturnValues[myEnv] = returnValue;
-    } else if (frameReturnValues[myEnv] == null) {
-      frameReturnValues[myEnv] = returnValue;
-    }
-    if (myEnv.parent != null) addFrames(myEnv.parent);
+class Button extends UIElement {
+  void Function() click;
+  UIElement inside;
+  Button(this.inside, this.click);
+  Button.forEvent(this.inside, SchemeSymbol id, Expression data, Frame env) {
+    click = () {
+      env.interpreter.triggerEvent(id, data);
+    };
   }
-  addDiagram(Frame active) {
+}
+
+class Visualization extends UIElement {
+  Frame env;
+  Expression code;
+  List<Diagram> diagrams = [];
+  Map<Frame, Expression> frameReturnValues = new Map.identity();
+  int current = 0;
+  
+  Diagram get currentDiagram => diagrams[current];
+  List<UIElement> headerRow;
+  Expression result;
+  
+  Visualization(this.code, this.env) {
+    Interpreter inter = env.interpreter;
+    
+    inter.blockOnEvent(const SchemeSymbol('define'), _makeVisualizeStep);
+    inter.blockOnEvent(const SchemeSymbol('set!'), _makeVisualizeStep);
+    inter.blockOnEvent(const SchemeSymbol('pair-mutation'), _makeVisualizeStep);
+    inter.blockOnEvent(const SchemeSymbol('new-frame'), _makeVisualizeStep);
+    inter.blockOnEvent(const SchemeSymbol('return'), _makeVisualizeReturnStep);
+    
+    bool oldStatus = env.interpreter.tailCallOptimized;
+    env.interpreter.tailCallOptimized = false;
+    _makeVisualizeStep(new Pair(nil, env));
+    Expression result = schemeEval(code, env);
+    _makeVisualizeStep(new Pair(result, env));
+    env.interpreter.tailCallOptimized = oldStatus;
+    
+    inter.stopBlockingOnEvent(const SchemeSymbol('define'), _makeVisualizeStep);
+    inter.stopBlockingOnEvent(const SchemeSymbol('set!'), _makeVisualizeStep);
+    inter.stopBlockingOnEvent(const SchemeSymbol('pair-mutation'), _makeVisualizeStep);
+    inter.stopBlockingOnEvent(const SchemeSymbol('new-frame'), _makeVisualizeStep);
+    inter.stopBlockingOnEvent(const SchemeSymbol('return'), _makeVisualizeReturnStep);
+    
+    goto(int index) {
+      if (index < 0) index = diagrams.length - 1;
+      current = index;
+      headerRow[2] = new TextElement("${current+1}/${diagrams.length}");
+      update();
+    }
+    Button first = new Button(new TextElement("<<"), () => goto(0));
+    Button prev = new Button(new TextElement("<"), () => goto(current - 1));
+    TextElement status = new TextElement("${current+1}/${diagrams.length}");
+    Button next = new Button(new TextElement(">"), () => goto(current + 1));
+    Button last = new Button(new TextElement(">>"), () => goto(-1));
+    headerRow = [first, prev, status, next, last];
+  }
+  
+  
+  void _addFrames(Frame myEnv, [Expression returnValue = null]) {
+    if (frameReturnValues.containsKey(myEnv)) {
+      frameReturnValues[myEnv] = returnValue;
+      return;
+    }
+    frameReturnValues[myEnv] = returnValue;
+    for (SchemeSymbol binding in myEnv.bindings.keys) {
+      Expression value = myEnv.bindings[binding];
+      if (value is LambdaProcedure) {
+        _addFrames(value.env);
+      }
+    }
+    if (myEnv.parent != null) _addFrames(myEnv.parent);
+  }
+  
+  void _addDiagram(Frame active) {
     List<Frame> frames = frameReturnValues.keys.toList()..sort((a, b) {
       return a.id - b.id;
     });
@@ -33,58 +87,23 @@ Expression visualize(Expression code, Frame env) {
     }).toList();
     diagrams.add(new Diagram.allFrames(passing, active));
   }
-  void makeVisualizeStep(Expression expr) {
+  
+  void _makeVisualizeStep(Expression expr) {
     if (expr is! Pair || expr.pair.second is! Frame) {
       throw new SchemeException("Invalid event $expr trigged during visualization");
     }
     Frame myEnv = expr.pair.second as Frame;
-    addFrames(myEnv);
-    addDiagram(myEnv);
-  };
-  void makeVisualizeReturnStep(Expression expr) {
+    _addFrames(myEnv);
+    _addDiagram(myEnv);
+  }
+  
+  void _makeVisualizeReturnStep(Expression expr) {
     if (expr is! Pair || expr.pair.second is! Frame) {
       throw new SchemeException("Invalid event $expr trigged during visualization");
     }
     Expression returnValue = expr.pair.first;
     Frame myEnv = expr.pair.second as Frame;
-    addFrames(myEnv, returnValue);
-    addDiagram(myEnv);
+    _addFrames(myEnv, returnValue);
+    _addDiagram(myEnv);
   }
-  inter.blockOnEvent(const SchemeSymbol('define'), makeVisualizeStep);
-  inter.blockOnEvent(const SchemeSymbol('set!'), makeVisualizeStep);
-  inter.blockOnEvent(const SchemeSymbol('pair-mutation'), makeVisualizeStep);
-  inter.blockOnEvent(const SchemeSymbol('new-frame'), makeVisualizeStep);
-  inter.blockOnEvent(const SchemeSymbol('return'), makeVisualizeReturnStep);
-  
-  bool oldStatus = env.interpreter.tailCallOptimized;
-  env.interpreter.tailCallOptimized = false;
-  makeVisualizeStep(new Pair(nil, env));
-  Expression result = schemeEval(code, env);
-  makeVisualizeStep(new Pair(result, env));
-  env.interpreter.tailCallOptimized = oldStatus;
-  
-  int current = 0;
-  drawCurrent() {
-    env.interpreter.renderer(diagrams[current]);
-    logMessage("Step ${current+1}/${diagrams.length}.", env);
-  }
-  visGoto = (int frame) {
-    current = frame - 1;
-    if (current < 0) current = 0;
-    if (current >= diagrams.length) current = diagrams.length - 1;
-    drawCurrent();
-  };
-  visExit = () {
-    visGoto = (int n) => null;
-    visExit = () => null;
-    diagrams.clear();
-    env.interpreter.renderer(new TextElement(""));
-  };
-  visLast = () => visGoto(diagrams.length);
-  visNext = () => visGoto(current + 2);
-  visPrev = () => visGoto(current);
-  drawCurrent();
-  logMessage("(vis-next), (vis-prev), (vis-first), (vis-last), (vis-goto n) "
-             "(vis-exit)", env);
-  return result;
-} 
+}

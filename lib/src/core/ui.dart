@@ -2,6 +2,8 @@
 /// core interpreter. Implementation is in cs61a_scheme.extra.ui.
 library cs61a_scheme.core.ui;
 
+import 'dart:async';
+
 import 'expressions.dart';
 import 'logging.dart';
 
@@ -29,6 +31,11 @@ abstract class UIElement extends SelfEvaluating {
   toString() => "#[UIElement]";
   // If true, element should be invisible but take up the same amount of space.
   bool spacer = false;
+  // Elements should call this when their contents update and they need to be
+  // redrawn.
+  void update() => _controller.add(null);
+  StreamController _controller = new StreamController.broadcast();
+  Stream get onUpdate => _controller.stream;
 }
 
 class Anchor extends UIElement {
@@ -51,24 +58,19 @@ class Strike extends UIElement {
 
 class BlockType {
   final String id;
-  const BlockType._(this.id);
-  // Letters represent different shapes. Numbers represent different colors.
-  static const BlockType a1 = const BlockType._("a1");
-  static const BlockType a2 = const BlockType._("a2");
-  static const BlockType b1 = const BlockType._("b1");
-  static const BlockType b2 = const BlockType._("b2");
-  toString() => "#[BlockType.$id]";
+  const BlockType(this.id);
+  toString() => "#[BlockType:$id]";
 }
 
 class Block extends UIElement {
   final BlockType type;
   final UIElement inside;
   Block._(this.type, this.inside);
-  Block.a1(this.inside) : type = BlockType.a1;
-  Block.a2(this.inside) : type = BlockType.a2;
-  Block.b1(this.inside) : type = BlockType.b1;
-  Block.b2(this.inside) : type = BlockType.b2;
-  toString() => "#[Block.${type.id}:$inside]";
+  Block.pair(this.inside) : type = const BlockType('pair');
+  Block.vector(this.inside) : type = const BlockType('vector');
+  Block.promise(this.inside) : type = const BlockType('promise');
+  Block.async(this.inside) : type = const BlockType('async');
+  toString() => "#[Block:${type.id}:$inside]";
 }
 
 class BlockGrid extends UIElement {
