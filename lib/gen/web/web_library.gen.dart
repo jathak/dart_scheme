@@ -20,6 +20,7 @@ abstract class _$WebLibraryMixin {
   void applyTheme(Theme theme);
   Future<Expression> schemeImport(List<Expression> args, Frame env);
   Future<Expression> schemeImportInline(Expression id, Frame env);
+  Expression libraryReference(ImportedLibrary imported, SchemeSymbol id);
   Future<Expression> theme(SchemeSymbol theme, Frame env);
   String colorToCss(Color color);
   void importAll(Frame __env) {
@@ -127,6 +128,12 @@ abstract class _$WebLibraryMixin {
     addPrimitive(__env, const SchemeSymbol('import-inline'), (__exprs, __env) {
       return new AsyncExpression(this.schemeImportInline(__exprs[0], __env));
     }, 1);
+    addPrimitive(__env, const SchemeSymbol('lib-ref'), (__exprs, __env) {
+      if (__exprs[0] is! ImportedLibrary || __exprs[1] is! SchemeSymbol)
+        throw new SchemeException(
+            'Argument of invalid type passed to lib-ref.');
+      return this.libraryReference(__exprs[0], __exprs[1]);
+    }, 2);
     addPrimitive(__env, const SchemeSymbol("theme"), (__exprs, __env) {
       if (__exprs[0] is! SchemeSymbol)
         throw new SchemeException('Argument of invalid type passed to theme.');
