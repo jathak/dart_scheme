@@ -94,5 +94,10 @@ class ExtraLibrary extends SchemeLibrary with _$ExtraLibraryMixin {
       return undefined;
     }));
   }
+  
+  @primitive @SchemeSymbol('string-append')
+  String stringAppend(List<Expression> exprs) {
+    return exprs.map((e) => e.display).join('');
+  }
 
 }

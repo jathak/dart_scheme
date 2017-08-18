@@ -1,11 +1,13 @@
 library cs61a_scheme.web.web_library;
 
+import 'dart:async';
 import 'dart:html' as html;
 import 'dart:js';
 
 import 'package:cs61a_scheme/cs61a_scheme_extra.dart';
 
 import 'html_ui.dart';
+import 'imports.dart';
 import 'js_interop.dart';
 import 'theming.dart';
 
@@ -111,8 +113,8 @@ class WebLibrary extends SchemeLibrary with _$WebLibraryMixin {
   @primitive
   Color hex(String hex) => new Color.fromHexString(hex);
   
-  @primitive
-  Theme theme() => new Theme();
+  @primitive @SchemeSymbol("make-theme")
+  Theme makeTheme() => new Theme();
   
   @primitive @SchemeSymbol('theme-set-color!')
   void themeSetColor(Theme theme, SchemeSymbol property, Color color) {
@@ -133,5 +135,48 @@ class WebLibrary extends SchemeLibrary with _$WebLibraryMixin {
   void applyTheme(Theme theme) {
     styleElement.innerHtml = theme.compile(css).compiledCss;
   }
+  
+  @primitive @SchemeSymbol('import')
+  Future<Expression> schemeImport(List<Expression> args, Frame env) async {
+    if (args[0] is! SchemeSymbol && args[0] is! SchemeString) {
+      throw new SchemeException("${args[0]} is not a string or symbol");
+    }
+    List<SchemeSymbol> symbols = [];
+    for (Expression arg in args.skip(1)) {
+      if (arg is SchemeSymbol) {
+        symbols.add(arg);
+      } else {
+        throw new SchemeException("$arg is not a symbol");
+      }
+    }
+    String id = args[0].display;
+    return import(id, symbols, env);
+  }
+  
+  @primitive @SchemeSymbol('import-inline')
+  Future<Expression> schemeImportInline(Expression id, Frame env) async {
+    if (id is! SchemeSymbol && id is! SchemeString) {
+      throw new SchemeException("$id is not a string or symbol");
+    }
+    await import(id.display, null, env, true);
+    return undefined;
+  }
+  
+  @primitive @SchemeSymbol('lib-ref')
+  Expression libraryReference(ImportedLibrary imported, SchemeSymbol id) {
+    return imported.reference(id);
+  }
+  
+  @primitive
+  Future<Expression> theme(SchemeSymbol theme, Frame env) async {
+    ImportedLibrary lib = await import('scm/theme/$theme', [], env);
+    Expression myTheme = lib.reference(const SchemeSymbol('imported-theme'));
+    if (myTheme is! Theme) throw new SchemeException("No theme exists");
+    applyTheme(myTheme);
+    return undefined;
+  }
+  
+  @primitive @SchemeSymbol("color->css")
+  String colorToCss(Color color) => color.toCSS();
   
 }

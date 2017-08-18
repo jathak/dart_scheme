@@ -13,11 +13,15 @@ abstract class _$WebLibraryMixin {
   Color rgb(int r, int g, int b);
   Color rgba(int r, int g, int b, num a);
   Color hex(String hex);
-  Theme theme();
+  Theme makeTheme();
   void themeSetColor(Theme theme, SchemeSymbol property, Color color);
   void themeSetCss(Theme theme, SchemeSymbol property, SchemeString code);
   Theme compileTheme(Theme theme);
   void applyTheme(Theme theme);
+  Future<Expression> schemeImport(List<Expression> args, Frame env);
+  Future<Expression> schemeImportInline(Expression id, Frame env);
+  Future<Expression> theme(SchemeSymbol theme, Frame env);
+  String colorToCss(Color color);
   void importAll(Frame __env) {
     addPrimitive(__env, const SchemeSymbol("close-diagram"), (__exprs, __env) {
       var __value = undefined;
@@ -79,8 +83,8 @@ abstract class _$WebLibraryMixin {
         throw new SchemeException('Argument of invalid type passed to hex.');
       return this.hex((__exprs[0] as SchemeString).value);
     }, 1);
-    addPrimitive(__env, const SchemeSymbol("theme"), (__exprs, __env) {
-      return this.theme();
+    addPrimitive(__env, const SchemeSymbol("make-theme"), (__exprs, __env) {
+      return this.makeTheme();
     }, 0);
     addPrimitive(__env, const SchemeSymbol('theme-set-color!'),
         (__exprs, __env) {
@@ -116,6 +120,23 @@ abstract class _$WebLibraryMixin {
       var __value = undefined;
       this.applyTheme(__exprs[0]);
       return __value;
+    }, 1);
+    addVariablePrimitive(__env, const SchemeSymbol('import'), (__exprs, __env) {
+      return new AsyncExpression(this.schemeImport(__exprs, __env));
+    }, 0, -1);
+    addPrimitive(__env, const SchemeSymbol('import-inline'), (__exprs, __env) {
+      return new AsyncExpression(this.schemeImportInline(__exprs[0], __env));
+    }, 1);
+    addPrimitive(__env, const SchemeSymbol("theme"), (__exprs, __env) {
+      if (__exprs[0] is! SchemeSymbol)
+        throw new SchemeException('Argument of invalid type passed to theme.');
+      return new AsyncExpression(this.theme(__exprs[0], __env));
+    }, 1);
+    addPrimitive(__env, const SchemeSymbol("color->css"), (__exprs, __env) {
+      if (__exprs[0] is! Color)
+        throw new SchemeException(
+            'Argument of invalid type passed to color->css.');
+      return new SchemeString(this.colorToCss(__exprs[0]));
     }, 1);
   }
 }

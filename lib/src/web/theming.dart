@@ -46,12 +46,12 @@ class Color extends SelfEvaluating {
   
   toJS() => this;
   
-  toString() {
+  String toString() {
     if (alpha == 1.0) return '(rgb $red $green $blue)';
     return '(rgba $red $green $blue $alpha)';
   }
   
-  toCSS() => 'rgba($red, $green, $blue, $alpha)';
+  String toCSS() => 'rgba($red, $green, $blue, $alpha)';
 }
 
 class Theme extends SelfEvaluating {
@@ -78,18 +78,17 @@ class Theme extends SelfEvaluating {
   String embedColor(String css, SchemeSymbol symbol, Color color) {
     var symbReg = new RegExp(r'[-[\]{}()*+?.,\\^$|#\s]');
     var val = symbol.value.replaceAllMapped(symbReg, (m) => '\\${m[0]}');
-    var expr = r'/\*!COLOR\|(color|background)\|' + val + r'\*/.*/\*!END\*/';
+    // /*!COLOR|<css-prop>|<scheme-prop>*/<default-code>/*!END*/
+    var expr = r'/\*!COLOR\|(color|background)\|' + val + r'\*/[^/]*/\*!END\*/';
     var regex = new RegExp(expr, multiLine: true);
-    return css.replaceAllMapped(regex, (m) => '${m[1]}: ${color.toCSS()}');
+    return css.replaceAllMapped(regex, (m) => '${m[1]}: ${color.toCSS()};');
   }
-  
-  // /*!COLOR|<css-prop>|<scheme-prop>*/<default-code>/*!END*/
-  // /*!CSS|<scheme-prop>*/<default-code>/*!END*/
   
   String embedCss(String css, SchemeSymbol symbol, SchemeString code) {
     var symbReg = new RegExp(r'[-[\]{}()*+?.,\\^$|#\s]');
     var val = symbol.value.replaceAllMapped(symbReg, (m) => '\\${m[0]}');
-    var expr = r'/\*!CSS\|' + val + r'\*/.*/\*!END\*/';
+    // /*!CSS|<scheme-prop>*/<default-code>/*!END*/
+    var expr = r'/\*!CSS\|' + val + r'\*/[^/]*/\*!END\*/';
     var regex = new RegExp(expr, multiLine: true);
     return css.replaceAll(regex, code.value);
   }
