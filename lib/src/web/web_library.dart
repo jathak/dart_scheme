@@ -35,6 +35,8 @@ class WebLibrary extends SchemeLibrary with _$WebLibraryMixin {
         }
       ]);
     };
+    deserializers['Color'] = new Color(0, 0, 0);
+    deserializers['Theme'] = new Theme();
   }
   
   void importAll(Frame env) {
@@ -118,23 +120,16 @@ class WebLibrary extends SchemeLibrary with _$WebLibraryMixin {
   
   @primitive @SchemeSymbol('theme-set-color!')
   void themeSetColor(Theme theme, SchemeSymbol property, Color color) {
-    theme.compiledCss = null;
     theme.colors[property] = color;
   }
   
   @primitive @SchemeSymbol('theme-set-css!')
   void themeSetCss(Theme theme, SchemeSymbol property, SchemeString code) {
-    theme.compiledCss = null;
     theme.cssProps[property] = code;
   }
   
-  @primitive @SchemeSymbol('compile-theme')
-  Theme compileTheme(Theme theme) => theme.compile(css);
-  
   @primitive @SchemeSymbol('apply-theme')
-  void applyTheme(Theme theme) {
-    styleElement.innerHtml = theme.compile(css).compiledCss;
-  }
+  void applyThemePrimitive(Theme theme) => applyTheme(theme, css, styleElement);
   
   @primitive @SchemeSymbol('import')
   Future<Expression> schemeImport(List<Expression> args, Frame env) async {
@@ -172,7 +167,7 @@ class WebLibrary extends SchemeLibrary with _$WebLibraryMixin {
     ImportedLibrary lib = await import('scm/theme/$theme', [], env);
     Expression myTheme = lib.reference(const SchemeSymbol('imported-theme'));
     if (myTheme is! Theme) throw new SchemeException("No theme exists");
-    applyTheme(myTheme);
+    applyThemePrimitive(myTheme);
     return undefined;
   }
   

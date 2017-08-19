@@ -1,5 +1,7 @@
 library cs61a_scheme.extra.visualization;
 
+import 'dart:async';
+
 import 'package:cs61a_scheme/cs61a_scheme.dart';
 
 import 'diagramming.dart';
@@ -23,7 +25,7 @@ class Visualization extends UIElement {
   int current = 0;
   
   Diagram get currentDiagram => diagrams[current];
-  List<UIElement> headerRow;
+  List<UIElement> buttonRow;
   Expression result;
   
   Visualization(this.code, this.env) {
@@ -47,11 +49,16 @@ class Visualization extends UIElement {
     inter.stopBlockingOnEvent(const SchemeSymbol('pair-mutation'), _makeVisualizeStep);
     inter.stopBlockingOnEvent(const SchemeSymbol('new-frame'), _makeVisualizeStep);
     inter.stopBlockingOnEvent(const SchemeSymbol('return'), _makeVisualizeReturnStep);
-    
-    goto(int index) {
+    bool animating = false;
+    goto(int index, [bool keepAnimating = false]) {
+      if (!keepAnimating) animating = false;
       if (index < 0) index = diagrams.length - 1;
+      if (index >= diagrams.length - 1) {
+        index = diagrams.length - 1;
+        animating = false;
+      }
       current = index;
-      headerRow[2] = new TextElement("${current+1}/${diagrams.length}");
+      buttonRow[2] = new TextElement("${current+1}/${diagrams.length}");
       update();
     }
     Button first = new Button(new TextElement("<<"), () => goto(0));
@@ -59,11 +66,24 @@ class Visualization extends UIElement {
     TextElement status = new TextElement("${current+1}/${diagrams.length}");
     Button next = new Button(new TextElement(">"), () => goto(current + 1));
     Button last = new Button(new TextElement(">>"), () => goto(-1));
-    headerRow = [first, prev, status, next, last];
+    Button animate = new Button(new TextElement("Animate"), () async {
+      if (animating) {
+        animating = false;
+        return;
+      }
+      animating = true;
+      await new Future.delayed(new Duration(seconds: 1));
+      while (animating) {
+        goto(current + 1, true);
+        await new Future.delayed(new Duration(seconds: 1));
+      }
+    });
+    buttonRow = [first, prev, status, next, last, animate];
   }
   
   
   void _addFrames(Frame myEnv, [Expression returnValue = null]) {
+    if (myEnv.tag == '#imported') return;
     if (frameReturnValues.containsKey(myEnv)) {
       frameReturnValues[myEnv] = returnValue;
       return;

@@ -104,12 +104,12 @@ class HtmlRenderer {
   
   Element convertVisualization(Visualization viz, [bool spaced = false]) {
     DivElement wrapper = new DivElement()..classes = ['visualization'];
-    DivElement header = new DivElement()..classes = ['header'];
-    for (UIElement headerItem in viz.headerRow) {
-      header.append(convert(headerItem));
-    }
-    wrapper.append(header);
     wrapper.append(convert(viz.currentDiagram));
+    DivElement footer = new DivElement()..classes = ['footer'];
+    for (UIElement item in viz.buttonRow) {
+      footer.append(convert(item));
+    }
+    wrapper.append(footer);
     return wrapper;
   }
   
@@ -160,6 +160,7 @@ class HtmlRenderer {
   
   Element convertBinding(Binding binding, [bool spaced = false]) {
     DivElement div = new DivElement()..className = 'binding';
+    if (binding.isReturn) div.classes.add('return');
     div.innerHtml = '${binding.symbol}&nbsp;';
     SpanElement span = new SpanElement()..className = 'align-right';
     div.append(span);

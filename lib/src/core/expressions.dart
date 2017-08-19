@@ -8,6 +8,7 @@ import 'package:quiver_hashcode/hashcode.dart';
 
 import 'interpreter.dart';
 import 'logging.dart';
+import 'serialization.dart';
 import 'ui.dart';
 import 'utils.dart';
 
@@ -24,7 +25,7 @@ abstract class Expression {
   bool get isNil => false;
   String get display => toString();
   /// Should return the version of this object that can be passed to JS
-  dynamic toJS();
+  dynamic toJS() => this;
   /// Convenience function since casting as a Pair is very common.
   Pair get pair => this as Pair;
 }
@@ -34,7 +35,7 @@ abstract class SelfEvaluating extends Expression {
   Expression evaluate(Frame env) => this;
 }
 
-class Number extends SelfEvaluating {
+class Number extends SelfEvaluating implements Serializable<Number> {
   final inlineUI = true;
   final bool isInteger;
   final double doubleValue;
@@ -70,6 +71,13 @@ class Number extends SelfEvaluating {
   String toString() => isInteger ? "$bigInt" : "$doubleValue";
 
   num toJS() => isInteger ? num.parse("$bigInt") : doubleValue;
+  
+  Map serialize(s) => {
+    'type': 'Number',
+    'data': toString()
+  };
+  
+  Number deserialize(Map data, d) => new Number.fromString(data['data']);
 
   static Number _operation(Number a, Number b, Function fn) {
     if (a.isInteger && b.isInteger) {
@@ -132,7 +140,7 @@ class Number extends SelfEvaluating {
   int get hashCode => hash3(isInteger, doubleValue, bigInt);
 }
 
-class Boolean extends SelfEvaluating {
+class Boolean extends SelfEvaluating implements Serializable<Boolean> {
   final inlineUI = true;
   final bool value;
   const Boolean._internal(this.value);
@@ -142,12 +150,18 @@ class Boolean extends SelfEvaluating {
   operator ==(other) => other is Boolean && value == other.value;
   int get hashCode => value.hashCode;
   factory Boolean(bool value) => value ? schemeTrue : schemeFalse;
+  
+  Map serialize(s) => {
+    'type': 'Boolean',
+    'value': isTruthy
+  };
+  Boolean deserialize(Map data, d) => new Boolean(data['value']);
 }
 
 const schemeTrue = const Boolean._internal(true);
 const schemeFalse = const Boolean._internal(false);
 
-class SchemeSymbol extends Expression {
+class SchemeSymbol extends Expression implements Serializable<SchemeSymbol> {
   final inlineUI = true;
   final String value;
   // Constant constructor must already use a lowercase String.
@@ -158,9 +172,15 @@ class SchemeSymbol extends Expression {
   operator ==(other) => other is SchemeSymbol && value == other.value;
   int get hashCode => hash2("SchemeSymbol", value);
   toJS() => value;
+  
+  Map serialize(s) => {
+    'type': 'SchemeSymbol',
+    'value': value
+  };
+  SchemeSymbol deserialize(Map data, d) => new SchemeSymbol(data['value']);
 }
 
-class SchemeString extends SelfEvaluating {
+class SchemeString extends SelfEvaluating implements Serializable<SchemeString> {
   final inlineUI = true;
   final String value;
   const SchemeString(this.value);
@@ -170,6 +190,12 @@ class SchemeString extends SelfEvaluating {
   int get hashCode => hash2("SchemeString", value);
   
   toJS() => value;
+  
+  Map serialize(s) => {
+    'type': 'SchemeString',
+    'value': value
+  };
+  SchemeString deserialize(Map data, d) => new SchemeString(data['value']);
 }
 
 class _SchemeListIterator extends Iterator<Expression> {
@@ -205,15 +231,18 @@ abstract class PairOrEmpty extends Expression with IterableMixin<Expression> {
   int get length;
 }
 
-class EmptyList extends SelfEvaluating implements PairOrEmpty {
+class EmptyList extends SelfEvaluating implements PairOrEmpty, Serializable<EmptyList> {
   final inlineUI = true;
   const EmptyList._internal();
   bool isWellFormedList() => true;
   bool get isNil => true;
   toString() => "()";
-  toJS() => nil;
-  @override
-  UIElement draw(diagram) => new Strike();
+  
+  Map serialize(s) => {
+    'type': 'EmptyList'
+  };
+  EmptyList deserialize(Map data, d) => nil;
+  
   // Dummy properties to ensure this works as an iterator
   get first => throw new StateError("empty list");
   final isEmpty = true;
@@ -248,7 +277,7 @@ const nil = const EmptyList._internal();
 
 class Pair<A extends Expression, B extends Expression> extends Expression
     with IterableMixin<Expression>
-    implements PairOrEmpty {
+    implements PairOrEmpty, Serializable<Pair> {
   A first;
   B second;
   Pair(this.first, this.second);
@@ -268,7 +297,15 @@ class Pair<A extends Expression, B extends Expression> extends Expression
 
   Expression evaluate(Frame env) => evalCallExpression(this, env);
   
-  toJS() => this;
+  Map serialize(s) => {
+    'type': 'Pair',
+    'first': s.serialize(first),
+    'second': s.serialize(second)
+  };
+  Pair deserialize(Map data, d) {
+    return new Pair(d.deserialize(data['first']),
+                    d.deserialize(data['second']));
+  }
   
   @override
   UIElement draw(DiagramInterface diagram) {

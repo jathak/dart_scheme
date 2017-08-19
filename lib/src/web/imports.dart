@@ -27,6 +27,7 @@ class ImportedLibrary extends SelfEvaluating {
   static Future<ImportedLibrary> load(String code, Frame parent) async {
     ImportedLibrary library = new ImportedLibrary._internal();
     await library._init(code, new Frame(parent, parent.interpreter));
+    library.env.tag = '#imported';
     return library;
   }
   

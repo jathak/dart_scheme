@@ -1,8 +1,11 @@
 library cs61a_scheme.web.theming;
 
+import 'dart:async';
+import 'dart:html';
+
 import 'package:cs61a_scheme/cs61a_scheme_extra.dart';
 
-class Color extends SelfEvaluating {
+class Color extends SelfEvaluating implements Serializable<Color> {
   int red, green, blue;
   double alpha = 1.0;
   
@@ -44,7 +47,17 @@ class Color extends SelfEvaluating {
     }
   }
   
-  toJS() => this;
+  serialize(s) => {
+    'type': 'Color',
+    'red': red,
+    'green': green,
+    'blue': blue,
+    'alpha': alpha
+  };
+  
+  deserialize(Map data, d) {
+    return new Color(data['red'], data['green'], data['blue'], data['alpha']);
+  }
   
   String toString() {
     if (alpha == 1.0) return '(rgb $red $green $blue)';
@@ -54,32 +67,39 @@ class Color extends SelfEvaluating {
   String toCSS() => 'rgba($red, $green, $blue, $alpha)';
 }
 
-class Theme extends SelfEvaluating {
-  Map<SchemeSymbol, Color> colors;
-  Map<SchemeSymbol, SchemeString> cssProps;
-  String compiledCss;
+StreamController<Theme> _controller = new StreamController();
+
+applyTheme(Theme theme, String css, Element style, [bool notify = true]) {
+  style.innerHtml = theme.compile(css);
+  if (notify) _controller.add(theme);
+}
+
+Stream<Theme> get onThemeChange => _controller.stream.asBroadcastStream();
+
+class Theme extends SelfEvaluating implements Serializable<Theme> {
   
-  Theme() : colors = {}, cssProps = {};
-  Theme._compiled(this.compiledCss);
+  Map<SchemeSymbol, Color> colors = {};
+  Map<SchemeSymbol, SchemeString> cssProps = {};
+  
+  Theme();
   
   toString() => '#theme';
   
-  Theme compile(String css) {
-    if (compiledCss != null) return this;
+  String compile(String css) {
     for (SchemeSymbol symbol in colors.keys) {
       css = embedColor(css, symbol, colors[symbol]);
     }
     for (SchemeSymbol symbol in cssProps.keys) {
       css = embedCss(css, symbol, cssProps[symbol]);
     }
-    return new Theme._compiled(css);
+    return css;
   }
   
   String embedColor(String css, SchemeSymbol symbol, Color color) {
     var symbReg = new RegExp(r'[-[\]{}()*+?.,\\^$|#\s]');
     var val = symbol.value.replaceAllMapped(symbReg, (m) => '\\${m[0]}');
     // /*!COLOR|<css-prop>|<scheme-prop>*/<default-code>/*!END*/
-    var expr = r'/\*!COLOR\|(color|background)\|' + val + r'\*/[^/]*/\*!END\*/';
+    var expr = r'/\*!COLOR\|([a-z\-]*)\|' + val + r'\*/[^/]*/\*!END\*/';
     var regex = new RegExp(expr, multiLine: true);
     return css.replaceAllMapped(regex, (m) => '${m[1]}: ${color.toCSS()};');
   }
@@ -93,5 +113,28 @@ class Theme extends SelfEvaluating {
     return css.replaceAll(regex, code.value);
   }
   
-  toJS() => this;
+  serialize(s) {
+    var colorMap = {};
+    for (SchemeSymbol key in colors.keys) {
+      colorMap[key.value] = s.serialize(colors[key]);
+    }
+    var cssMap = {};
+    for (SchemeSymbol key in cssProps.keys) {
+      cssMap[key.value] = s.serialize(cssProps[key]);
+    }
+    return {'type': 'Theme', 'colors': colorMap, 'css': cssMap};
+  }
+  
+  Theme deserialize(Map data, d) {
+    Theme theme = new Theme();
+    var colorMap = data['colors'];
+    for (String key in colorMap.keys) {
+      theme.colors[new SchemeSymbol(key)] = d.deserialize(colorMap[key]);
+    }
+    var cssMap = data['css'];
+    for (String key in cssMap.keys) {
+      theme.cssProps[new SchemeSymbol(key)] = d.deserialize(cssMap[key]);
+    }
+    return theme;
+  }
 }

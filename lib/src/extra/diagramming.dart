@@ -11,7 +11,8 @@ class Arrow extends UIElement {
 class Binding extends UIElement {
   final SchemeSymbol symbol;
   final UIElement value;
-  Binding(this.symbol, this.value);
+  final bool isReturn;
+  Binding(this.symbol, this.value, [this.isReturn = false]);
 }
 
 class Row extends UIElement {
@@ -36,7 +37,7 @@ class FrameElement extends UIElement {
     }
     if (returnValue != null) {
       var symb = const SchemeSymbol('return');
-      bindings.add(new Binding(symb, diagram.bindingTo(returnValue)));
+      bindings.add(new Binding(symb, diagram.bindingTo(returnValue), true));
     }
   }
 }
@@ -99,6 +100,7 @@ class Diagram extends DiagramInterface {
   }
   
   UIElement pointTo(Expression expression, [int parentRow = null]) {
+    if (expression == nil) return new Strike();
     if (expression.inlineUI) return expression.draw(this);
     if (_known.containsKey(expression)) {
       Anchor anchor = new Anchor();

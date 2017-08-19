@@ -16,8 +16,7 @@ abstract class _$WebLibraryMixin {
   Theme makeTheme();
   void themeSetColor(Theme theme, SchemeSymbol property, Color color);
   void themeSetCss(Theme theme, SchemeSymbol property, SchemeString code);
-  Theme compileTheme(Theme theme);
-  void applyTheme(Theme theme);
+  void applyThemePrimitive(Theme theme);
   Future<Expression> schemeImport(List<Expression> args, Frame env);
   Future<Expression> schemeImportInline(Expression id, Frame env);
   Expression libraryReference(ImportedLibrary imported, SchemeSymbol id);
@@ -108,18 +107,12 @@ abstract class _$WebLibraryMixin {
       this.themeSetCss(__exprs[0], __exprs[1], __exprs[2]);
       return __value;
     }, 3);
-    addPrimitive(__env, const SchemeSymbol('compile-theme'), (__exprs, __env) {
-      if (__exprs[0] is! Theme)
-        throw new SchemeException(
-            'Argument of invalid type passed to compile-theme.');
-      return this.compileTheme(__exprs[0]);
-    }, 1);
     addPrimitive(__env, const SchemeSymbol('apply-theme'), (__exprs, __env) {
       if (__exprs[0] is! Theme)
         throw new SchemeException(
             'Argument of invalid type passed to apply-theme.');
       var __value = undefined;
-      this.applyTheme(__exprs[0]);
+      this.applyThemePrimitive(__exprs[0]);
       return __value;
     }, 1);
     addVariablePrimitive(__env, const SchemeSymbol('import'), (__exprs, __env) {
