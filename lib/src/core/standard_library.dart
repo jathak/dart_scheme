@@ -28,6 +28,11 @@ class StandardLibrary extends SchemeLibrary with _$StandardLibraryMixin {
     throw new SchemeException(message.toString(), true, message);
   }
   
+  @primitive @SchemeSymbol('error-notrace')
+  Expression errorNoTrace(Expression message) {
+    throw new SchemeException(message.toString(), false, message);
+  }
+  
   @primitive Expression eval(Expression expr, Frame env) {
     return schemeEval(expr, env);
   }

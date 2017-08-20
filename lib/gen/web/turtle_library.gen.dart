@@ -1,5 +1,241 @@
 part of cs61a_scheme.web.turtle_library;
 
 abstract class _$TurtleLibraryMixin {
-  void importAll(Frame __env) {}
+  void forward(num distance);
+  void backward(num distance);
+  void left(num angle);
+  void right(num angle);
+  void circle(List<Expression> exprs);
+  void setPosition(num x, num y);
+  void setHeading(num heading);
+  void penUp();
+  void penDown();
+  void turtleClear();
+  void color(Expression color);
+  void beginFill();
+  void endFill();
+  void exitonclick(Frame env);
+  void exit();
+  void bgcolor(Expression color);
+  void pensize(num size);
+  void help(Frame env);
+  void setGridSize(int width, int height);
+  void setCanvasSize(int width, int height);
+  void pixel(num x, num y, Expression color);
+  void pixelsize(int size);
+  num screenWidth();
+  num screenHeight();
+  void unsupported(List<Expression> exprs, Frame env);
+  Turtle get turtle;
+  void importAll(Frame __env) {
+    addPrimitive(__env, const SchemeSymbol('forward'), (__exprs, __env) {
+      if (__exprs[0] is! Number)
+        throw new SchemeException(
+            'Argument of invalid type passed to forward.');
+      turtle.show();
+      var __value = undefined;
+      this.forward(__exprs[0].toJS());
+      return __value;
+    }, 1);
+    __env.bindings[const SchemeSymbol('fd')] =
+        __env.bindings[const SchemeSymbol('forward')];
+    addPrimitive(__env, const SchemeSymbol('backward'), (__exprs, __env) {
+      if (__exprs[0] is! Number)
+        throw new SchemeException(
+            'Argument of invalid type passed to backward.');
+      turtle.show();
+      var __value = undefined;
+      this.backward(__exprs[0].toJS());
+      return __value;
+    }, 1);
+    __env.bindings[const SchemeSymbol('back')] =
+        __env.bindings[const SchemeSymbol('backward')];
+    __env.bindings[const SchemeSymbol('bk')] =
+        __env.bindings[const SchemeSymbol('backward')];
+    addPrimitive(__env, const SchemeSymbol('left'), (__exprs, __env) {
+      if (__exprs[0] is! Number)
+        throw new SchemeException('Argument of invalid type passed to left.');
+      turtle.show();
+      var __value = undefined;
+      this.left(__exprs[0].toJS());
+      return __value;
+    }, 1);
+    __env.bindings[const SchemeSymbol('lt')] =
+        __env.bindings[const SchemeSymbol('left')];
+    addPrimitive(__env, const SchemeSymbol('right'), (__exprs, __env) {
+      if (__exprs[0] is! Number)
+        throw new SchemeException('Argument of invalid type passed to right.');
+      turtle.show();
+      var __value = undefined;
+      this.right(__exprs[0].toJS());
+      return __value;
+    }, 1);
+    __env.bindings[const SchemeSymbol('rt')] =
+        __env.bindings[const SchemeSymbol('right')];
+    addVariablePrimitive(__env, const SchemeSymbol("circle"), (__exprs, __env) {
+      turtle.show();
+      var __value = undefined;
+      this.circle(__exprs);
+      return __value;
+    }, 1, 2);
+    addPrimitive(__env, const SchemeSymbol('setposition'), (__exprs, __env) {
+      if (__exprs[0] is! Number || __exprs[1] is! Number)
+        throw new SchemeException(
+            'Argument of invalid type passed to setposition.');
+      turtle.show();
+      var __value = undefined;
+      this.setPosition(__exprs[0].toJS(), __exprs[1].toJS());
+      return __value;
+    }, 2);
+    __env.bindings[const SchemeSymbol('setpos')] =
+        __env.bindings[const SchemeSymbol('setposition')];
+    __env.bindings[const SchemeSymbol('goto')] =
+        __env.bindings[const SchemeSymbol('setposition')];
+    addPrimitive(__env, const SchemeSymbol('setheading'), (__exprs, __env) {
+      if (__exprs[0] is! Number)
+        throw new SchemeException(
+            'Argument of invalid type passed to setheading.');
+      turtle.show();
+      var __value = undefined;
+      this.setHeading(__exprs[0].toJS());
+      return __value;
+    }, 1);
+    __env.bindings[const SchemeSymbol('seth')] =
+        __env.bindings[const SchemeSymbol('setheading')];
+    addPrimitive(__env, const SchemeSymbol('penup'), (__exprs, __env) {
+      turtle.show();
+      var __value = undefined;
+      this.penUp();
+      return __value;
+    }, 0);
+    __env.bindings[const SchemeSymbol('pu')] =
+        __env.bindings[const SchemeSymbol('penup')];
+    addPrimitive(__env, const SchemeSymbol('pendown'), (__exprs, __env) {
+      turtle.show();
+      var __value = undefined;
+      this.penDown();
+      return __value;
+    }, 0);
+    __env.bindings[const SchemeSymbol('pd')] =
+        __env.bindings[const SchemeSymbol('pendown')];
+    addPrimitive(__env, const SchemeSymbol('turtle-clear'), (__exprs, __env) {
+      turtle.show();
+      var __value = undefined;
+      this.turtleClear();
+      return __value;
+    }, 0);
+    addPrimitive(__env, const SchemeSymbol("color"), (__exprs, __env) {
+      turtle.show();
+      var __value = undefined;
+      this.color(__exprs[0]);
+      return __value;
+    }, 1);
+    addPrimitive(__env, const SchemeSymbol('begin_fill'), (__exprs, __env) {
+      turtle.show();
+      var __value = undefined;
+      this.beginFill();
+      return __value;
+    }, 0);
+    __env.bindings[const SchemeSymbol('begin-fill')] =
+        __env.bindings[const SchemeSymbol('begin_fill')];
+    addPrimitive(__env, const SchemeSymbol('end_fill'), (__exprs, __env) {
+      turtle.show();
+      var __value = undefined;
+      this.endFill();
+      return __value;
+    }, 0);
+    __env.bindings[const SchemeSymbol('end-fill')] =
+        __env.bindings[const SchemeSymbol('end_fill')];
+    addPrimitive(__env, const SchemeSymbol("exitonclick"), (__exprs, __env) {
+      var __value = undefined;
+      this.exitonclick(__env);
+      return __value;
+    }, 0);
+    addPrimitive(__env, const SchemeSymbol('turtle-exit'), (__exprs, __env) {
+      var __value = undefined;
+      this.exit();
+      return __value;
+    }, 0);
+    addPrimitive(__env, const SchemeSymbol("bgcolor"), (__exprs, __env) {
+      turtle.show();
+      var __value = undefined;
+      this.bgcolor(__exprs[0]);
+      return __value;
+    }, 1);
+    addPrimitive(__env, const SchemeSymbol("pensize"), (__exprs, __env) {
+      if (__exprs[0] is! Number)
+        throw new SchemeException(
+            'Argument of invalid type passed to pensize.');
+      turtle.show();
+      var __value = undefined;
+      this.pensize(__exprs[0].toJS());
+      return __value;
+    }, 1);
+    addPrimitive(__env, const SchemeSymbol("help"), (__exprs, __env) {
+      var __value = undefined;
+      this.help(__env);
+      return __value;
+    }, 0);
+    addPrimitive(__env, const SchemeSymbol('turtle-grid'), (__exprs, __env) {
+      if ((__exprs[0] is! Number || !(__exprs[0] as Number).isInteger) ||
+          (__exprs[1] is! Number || !(__exprs[1] as Number).isInteger))
+        throw new SchemeException(
+            'Argument of invalid type passed to turtle-grid.');
+      var __value = undefined;
+      this.setGridSize(__exprs[0].toJS().toInt(), __exprs[1].toJS().toInt());
+      return __value;
+    }, 2);
+    addPrimitive(__env, const SchemeSymbol('turtle-canvas'), (__exprs, __env) {
+      if ((__exprs[0] is! Number || !(__exprs[0] as Number).isInteger) ||
+          (__exprs[1] is! Number || !(__exprs[1] as Number).isInteger))
+        throw new SchemeException(
+            'Argument of invalid type passed to turtle-canvas.');
+      var __value = undefined;
+      this.setCanvasSize(__exprs[0].toJS().toInt(), __exprs[1].toJS().toInt());
+      return __value;
+    }, 2);
+    addPrimitive(__env, const SchemeSymbol("pixel"), (__exprs, __env) {
+      if (__exprs[0] is! Number ||
+          __exprs[1] is! Number ||
+          __exprs[2] is! Expression)
+        throw new SchemeException('Argument of invalid type passed to pixel.');
+      var __value = undefined;
+      this.pixel(__exprs[0].toJS(), __exprs[1].toJS(), __exprs[2]);
+      return __value;
+    }, 3);
+    addPrimitive(__env, const SchemeSymbol("pixelsize"), (__exprs, __env) {
+      if ((__exprs[0] is! Number || !(__exprs[0] as Number).isInteger))
+        throw new SchemeException(
+            'Argument of invalid type passed to pixelsize.');
+      var __value = undefined;
+      this.pixelsize(__exprs[0].toJS().toInt());
+      return __value;
+    }, 1);
+    addPrimitive(__env, const SchemeSymbol('screen_width'), (__exprs, __env) {
+      return new Number.fromNum(this.screenWidth());
+    }, 0);
+    __env.bindings[const SchemeSymbol('screen-width')] =
+        __env.bindings[const SchemeSymbol('screen_width')];
+    addPrimitive(__env, const SchemeSymbol('screen_height'), (__exprs, __env) {
+      return new Number.fromNum(this.screenHeight());
+    }, 0);
+    __env.bindings[const SchemeSymbol('screen-height')] =
+        __env.bindings[const SchemeSymbol('screen_height')];
+    addVariablePrimitive(__env, const SchemeSymbol('unsupported'),
+        (__exprs, __env) {
+      var __value = undefined;
+      this.unsupported(__exprs, __env);
+      return __value;
+    }, 0, -1);
+    __env.bindings[const SchemeSymbol('speed')] =
+        __env.bindings[const SchemeSymbol('unsupported')];
+    __env.bindings[const SchemeSymbol('showturtle')] =
+        __env.bindings[const SchemeSymbol('unsupported')];
+    __env.bindings[const SchemeSymbol('st')] =
+        __env.bindings[const SchemeSymbol('unsupported')];
+    __env.bindings[const SchemeSymbol('hideturtle')] =
+        __env.bindings[const SchemeSymbol('unsupported')];
+    __env.bindings[const SchemeSymbol('ht')] =
+        __env.bindings[const SchemeSymbol('unsupported')];
+  }
 }

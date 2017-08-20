@@ -23,15 +23,22 @@ String generateImportMixin(String sourceCode) {
 String _buildMixin(ClassDeclaration decl) {
   List<String> primitives = [];
   List<String> abstractMethods = [];
+  bool myNeedsTurtle = false;
   for (ClassMember member in decl.members) {
     if (member is MethodDeclaration) {
       for (Annotation annotation in member.metadata) {
         if (annotation.name.toSource() == "primitive") {
+          needsTurtle = false;
           abstractMethods.add(_buildAbstract(member));
           primitives.add(_buildPrimitive(member));
+          myNeedsTurtle = myNeedsTurtle || needsTurtle;
         }
       }
     }
+  }
+  needsTurtle = false;
+  if (myNeedsTurtle) {
+    abstractMethods.add('Turtle get turtle;');
   }
   String mixinName = decl.withClause.mixinTypes[0].name.toSource();
   return """abstract class $mixinName {
@@ -46,13 +53,18 @@ String _buildAbstract(MethodDeclaration method) {
   return "${method.returnType} ${method.name}${method.parameters};";
 }
 
+bool needsTurtle = false;
+
 String _buildPrimitive(MethodDeclaration method) {
   String name = JSON.encode(method.name.toSource().toLowerCase());
+  bool setName = false;
+  List<String> extraNames = [];
   bool variable = false;
   String minArgs = "0", maxArgs = "-1";
   String returning = 'return';
   String after = ";";
   String op = "";
+  String before = "";
   for (Annotation ant in method.metadata) {
     if (ant.name.toSource() == "MinArgs") {
       minArgs = ant.arguments.arguments[0].toSource();
@@ -61,14 +73,21 @@ String _buildPrimitive(MethodDeclaration method) {
       maxArgs = ant.arguments.arguments[0].toSource();
       variable = true;
     } else if (ant.name.toSource() == "SchemeSymbol") {
-      name = ant.arguments.arguments[0].toSource().toLowerCase();
+      if (!setName) {
+        name = ant.arguments.arguments[0].toSource().toLowerCase();
+        setName = true;
+      } else {
+        extraNames.add(ant.arguments.arguments[0].toSource().toLowerCase());
+      }
     } else if (ant.name.toSource() == "TriggerEventAfter") {
       String symbol = ant.arguments.arguments[0].toSource();
       returning = 'var __value =';
-      var val = 'new Pair(__value, __env)';
-      after += " __env.interpreter.triggerEvent($symbol, $val);";
+      after += " __env.interpreter.triggerEvent($symbol, [__value], __env);";
     } else if (ant.name.toSource() == "noeval") {
       op = "Operand";
+    } else if (ant.name.toSource() == 'turtlestart') {
+      needsTurtle = true;
+      before += 'turtle.show();';
     }
   }
   String returnType = method.returnType.toSource();
@@ -109,6 +128,11 @@ String _buildPrimitive(MethodDeclaration method) {
     } else throw new Exception("Primitives may not have optional parameters.");
   }
   String symb = "const SchemeSymbol($name)";
+  var extraSymbs = extraNames.map((name)=>"const SchemeSymbol($name)");
+  String extra = "";
+  for (String symbol in extraSymbs) {
+    extra += '__env.bindings[$symbol] = __env.bindings[$symb];';
+  }
   if (variable) {
     String fn = "this." + method.name.toSource();
     int paramCount = method.parameters.parameters.length;
@@ -117,11 +141,11 @@ String _buildPrimitive(MethodDeclaration method) {
     }
     if (after != "") {
       String args = paramCount == 1 ? '__exprs' : '__exprs, __env';
-      fn = "(__exprs, __env) {$returning $fn($args)$after}";
+      fn = "(__exprs, __env) {$before$returning $fn($args)$after}";
     } else if (paramCount == 1) {
-      fn = "(__exprs, __env) => $fn(__exprs)";
+      fn = "(__exprs, __env) {$before$returning $fn(__exprs)$after}";
     }
-    return "addVariable${op}Primitive(__env, $symb, $fn, $minArgs, $maxArgs);";
+    return "addVariable${op}Primitive(__env, $symb, $fn, $minArgs, $maxArgs);$extra";
   } else {
     List<String> types = [];
     for (FormalParameter param in method.parameters.parameters) {
@@ -166,7 +190,7 @@ String _buildPrimitive(MethodDeclaration method) {
     if (takesFrame) passes.add("__env");
     var passStr = passes.join(",");
     String m = "this." + method.name.toSource();
-    String fn = "(__exprs, __env) { $checks $returning $m($passStr)$after }";
-    return "add${op}Primitive(__env, $symb, $fn, ${types.length});";
+    String fn = "(__exprs, __env) { $checks $before $returning $m($passStr)$after }";
+    return "add${op}Primitive(__env, $symb, $fn, ${types.length});$extra";
   }
 }

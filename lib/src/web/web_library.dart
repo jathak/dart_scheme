@@ -119,8 +119,8 @@ class WebLibrary extends SchemeLibrary with _$WebLibraryMixin {
   Theme makeTheme() => new Theme();
   
   @primitive @SchemeSymbol('theme-set-color!')
-  void themeSetColor(Theme theme, SchemeSymbol property, Color color) {
-    theme.colors[property] = color;
+  void themeSetColor(Theme theme, SchemeSymbol property, Expression color) {
+    theme.colors[property] = new Color.fromAnything(color);
   }
   
   @primitive @SchemeSymbol('theme-set-css!')

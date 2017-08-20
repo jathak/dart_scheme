@@ -20,7 +20,7 @@ Expression doCondForm(PairOrEmpty expressions, Frame env) {
     Expression clause = expressions.pair.first;
     checkForm(clause, 1);
     Expression test;
-    if ((clause.pair.first as SchemeSymbol).value == 'else') {
+    if (clause.pair.first == const SchemeSymbol('else')) {
       test = schemeTrue;
     } else {
       test = schemeEval(clause.pair.first, env);
@@ -46,11 +46,9 @@ Expression doLetForm(PairOrEmpty expressions, Frame env) {
   Expression bindings = expressions.pair.first;
   Expression body = expressions.pair.second;
   Frame letEnv = env.interpreter.implementation.makeLetFrame(bindings, env);
-  env.interpreter.triggerEvent(const SchemeSymbol('new-frame'),
-                               new Pair(nil, letEnv));
+  env.interpreter.triggerEvent(const SchemeSymbol('new-frame'), [], letEnv);
   Expression result = env.interpreter.implementation.evalAll(body, letEnv);
-  env.interpreter.triggerEvent(const SchemeSymbol('return'),
-                               new Pair(result, letEnv));
+  env.interpreter.triggerEvent(const SchemeSymbol('return'), [result], letEnv);
   return result;
 }
 

@@ -54,7 +54,7 @@ Expression evalCallExpression(Pair expr, Frame env) {
   Expression rest = expr.second;
   if (first is SchemeSymbol && env.interpreter.specialForms.containsKey(first)) {
     var result = env.interpreter.specialForms[first](rest, env);
-    env.interpreter.triggerEvent(first, new Pair(rest, env));
+    env.interpreter.triggerEvent(first, [rest], env);
     return result;
   }
   return env.interpreter.implementation.evalProcedureCall(first, rest, env);

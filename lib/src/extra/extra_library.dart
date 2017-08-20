@@ -76,23 +76,40 @@ class ExtraLibrary extends SchemeLibrary with _$ExtraLibraryMixin {
     return new PairOrEmpty.fromIterable(env.bindings.keys);
   }
   
-  @primitive @SchemeSymbol('trigger-event')
-  void triggerEvent(SchemeSymbol id, Expression data, Frame env) {
-    env.interpreter.triggerEvent(id, data);
+  @primitive @SchemeSymbol('trigger-event') @MinArgs(1)
+  void triggerEvent(List<Expression> exprs, Frame env) {
+    if (exprs.first is! SchemeSymbol) {
+      throw new SchemeException('${exprs.first} is not a symbol');
+    }
+    env.interpreter.triggerEvent(exprs[0], exprs.skip(1).toList(), env);
   }
 
   @primitive @SchemeSymbol('listen-for')
   EventListener listenFor(SchemeSymbol id, Procedure onEvent, Frame env) {
-    return new EventListener(id, env.interpreter.events(id).listen((value) {
-      onEvent.apply(new Pair(value, nil), env);
-    }));
+    var callback = (List<Expression> exprs, Frame env) {
+      try {
+        schemeApply(onEvent, new PairOrEmpty.fromIterable(exprs), env);
+      } catch (e) {
+        if (e is SchemeException) {
+          e.addCall(onEvent);
+          var eventPair = new Pair(id, new PairOrEmpty.fromIterable(exprs));
+          e.addCall(new TextMessage('<event ${eventPair}>'));
+        }
+        env.interpreter.logError(e);
+      }
+    };
+    env.interpreter.listenFor(id, callback);
+    return new EventListener(id, callback);
   }
 
   @primitive @SchemeSymbol('cancel-listener')
-  AsyncExpression<Undefined> cancelListener(EventListener listener) {
-    return new AsyncExpression(listener.subscription.cancel().then((e) {
-      return undefined;
-    }));
+  void cancelListener(EventListener listener, Frame env) {
+    env.interpreter.stopListening(listener.id, listener.callback);
+  }
+  
+  @primitive @SchemeSymbol('cancel-all')
+  void cancelAll(SchemeSymbol id, Frame env) {
+    env.interpreter.stopAllListeners(id);
   }
   
   @primitive @SchemeSymbol('string-append')

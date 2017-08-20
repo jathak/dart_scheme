@@ -14,7 +14,7 @@ abstract class _$WebLibraryMixin {
   Color rgba(int r, int g, int b, num a);
   Color hex(String hex);
   Theme makeTheme();
-  void themeSetColor(Theme theme, SchemeSymbol property, Color color);
+  void themeSetColor(Theme theme, SchemeSymbol property, Expression color);
   void themeSetCss(Theme theme, SchemeSymbol property, SchemeString code);
   void applyThemePrimitive(Theme theme);
   Future<Expression> schemeImport(List<Expression> args, Frame env);
@@ -90,7 +90,7 @@ abstract class _$WebLibraryMixin {
         (__exprs, __env) {
       if (__exprs[0] is! Theme ||
           __exprs[1] is! SchemeSymbol ||
-          __exprs[2] is! Color)
+          __exprs[2] is! Expression)
         throw new SchemeException(
             'Argument of invalid type passed to theme-set-color!.');
       var __value = undefined;

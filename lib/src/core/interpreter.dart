@@ -1,10 +1,9 @@
 library cs61a_scheme.core.interpreter;
 
-import 'dart:async';
-
 import 'expressions.dart';
 import 'logging.dart';
 import 'reader.dart';
+import 'procedures.dart';
 import 'project_interface.dart';
 import 'scheme_library.dart';
 import 'special_forms.dart';
@@ -22,34 +21,41 @@ class Interpreter {
   void set logger(Logger logger) => _logger = logger;
   void Function() onExit = () => null;
   int frameCounter = 0;
-  StreamController<Pair<SchemeSymbol, Expression>> _controller;
-  Map<SchemeSymbol, List<void Function(Expression)>> _blocking = {};
   
-  void triggerEvent(SchemeSymbol id, Expression data) {
-    if (_blocking.containsKey(id)) {
-      for (var blocker in _blocking[id]) blocker(data);
+  void Function(dynamic) logError;
+  
+  Map<SchemeSymbol, List<SchemePrimitive>> _eventListeners = {};
+  
+  void triggerEvent(SchemeSymbol id, List<Expression> data, Frame env) {
+    if (_eventListeners.containsKey(id)) {
+      for (var blocker in _eventListeners[id]) blocker(data.toList(), env);
     }
-    _controller.add(new Pair(id, data));
   }
   
-  Stream<Expression> events(SchemeSymbol id) {
-    return _controller.stream.where((pair) => pair.first == id)
-                             .map((pair) => pair.second);
+  void listenFor(SchemeSymbol id, SchemePrimitive callback) {
+    _eventListeners.putIfAbsent(id, () => []).add(callback);
   }
   
-  void blockOnEvent(SchemeSymbol id, void Function(Expression) callback) {
-    _blocking.putIfAbsent(id, () => []).add(callback);
-  }
-  bool stopBlockingOnEvent(SchemeSymbol id, void Function(Expression) callback) {
-    if (_blocking.containsKey(id)) {
-      return _blocking[id].remove(callback);
+  bool stopListening(SchemeSymbol id, SchemePrimitive callback) {
+    if (_eventListeners.containsKey(id)) {
+      return _eventListeners[id].remove(callback);
     }
     return false;
   }
   
+  stopAllListeners(SchemeSymbol id) {
+    _eventListeners[id].clear();
+  }
+  
   Interpreter(this.implementation) {
     globalEnv = new Frame(null, this);
-    _controller = new StreamController<Pair<SchemeSymbol, Expression>>();
+    logError = (error) {
+      if (error is Expression) {
+        logger(error, true);
+      } else {
+        logger(new TextMessage(error.toString()), true);
+      }
+    };
     new StandardLibrary().importAll(globalEnv);
   }
   

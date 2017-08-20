@@ -50,6 +50,11 @@ class _Primitive { const _Primitive(); }
 const _NoEval noeval = const _NoEval();
 class _NoEval { const _NoEval(); }
 
+/// Annotation to call turtle.show()
+/// This may only be used inside of TurtleLibrary.
+const _Turtle turtlestart = const _Turtle();
+class _Turtle { const _Turtle(); }
+
 /// Annotation to specify a name other than the function name for the
 /// Scheme binding.
 

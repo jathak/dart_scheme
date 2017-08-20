@@ -9,9 +9,9 @@ abstract class _$ExtraLibraryMixin {
   Diagram diagram(Frame env);
   Visualization visualize(Expression code, Frame env);
   PairOrEmpty bindings(Frame env);
-  void triggerEvent(SchemeSymbol id, Expression data, Frame env);
+  void triggerEvent(List<Expression> exprs, Frame env);
   EventListener listenFor(SchemeSymbol id, Procedure onEvent, Frame env);
-  AsyncExpression<Undefined> cancelListener(EventListener listener);
+  void cancelListener(EventListener listener, Frame env);
   String stringAppend(List<Expression> exprs);
   void importAll(Frame __env) {
     addPrimitive(__env, const SchemeSymbol("run-async"), (__exprs, __env) {
@@ -52,14 +52,12 @@ abstract class _$ExtraLibraryMixin {
     addPrimitive(__env, const SchemeSymbol("bindings"), (__exprs, __env) {
       return this.bindings(__env);
     }, 0);
-    addPrimitive(__env, const SchemeSymbol('trigger-event'), (__exprs, __env) {
-      if (__exprs[0] is! SchemeSymbol || __exprs[1] is! Expression)
-        throw new SchemeException(
-            'Argument of invalid type passed to trigger-event.');
+    addVariablePrimitive(__env, const SchemeSymbol('trigger-event'),
+        (__exprs, __env) {
       var __value = undefined;
-      this.triggerEvent(__exprs[0], __exprs[1], __env);
+      this.triggerEvent(__exprs, __env);
       return __value;
-    }, 2);
+    }, 1, -1);
     addPrimitive(__env, const SchemeSymbol('listen-for'), (__exprs, __env) {
       if (__exprs[0] is! SchemeSymbol || __exprs[1] is! Procedure)
         throw new SchemeException(
@@ -71,7 +69,9 @@ abstract class _$ExtraLibraryMixin {
       if (__exprs[0] is! EventListener)
         throw new SchemeException(
             'Argument of invalid type passed to cancel-listener.');
-      return this.cancelListener(__exprs[0]);
+      var __value = undefined;
+      this.cancelListener(__exprs[0], __env);
+      return __value;
     }, 1);
     addVariablePrimitive(__env, const SchemeSymbol('string-append'),
         (__exprs, __env) {

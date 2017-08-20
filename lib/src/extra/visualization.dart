@@ -10,9 +10,9 @@ class Button extends UIElement {
   void Function() click;
   UIElement inside;
   Button(this.inside, this.click);
-  Button.forEvent(this.inside, SchemeSymbol id, Expression data, Frame env) {
+  Button.forEvent(this.inside, SchemeSymbol id, List<Expression> data, Frame env) {
     click = () {
-      env.interpreter.triggerEvent(id, data);
+      env.interpreter.triggerEvent(id, data, env);
     };
   }
 }
@@ -31,24 +31,24 @@ class Visualization extends UIElement {
   Visualization(this.code, this.env) {
     Interpreter inter = env.interpreter;
     
-    inter.blockOnEvent(const SchemeSymbol('define'), _makeVisualizeStep);
-    inter.blockOnEvent(const SchemeSymbol('set!'), _makeVisualizeStep);
-    inter.blockOnEvent(const SchemeSymbol('pair-mutation'), _makeVisualizeStep);
-    inter.blockOnEvent(const SchemeSymbol('new-frame'), _makeVisualizeStep);
-    inter.blockOnEvent(const SchemeSymbol('return'), _makeVisualizeReturnStep);
+    inter.listenFor(const SchemeSymbol('define'), _makeVisualizeStep);
+    inter.listenFor(const SchemeSymbol('set!'), _makeVisualizeStep);
+    inter.listenFor(const SchemeSymbol('pair-mutation'), _makeVisualizeStep);
+    inter.listenFor(const SchemeSymbol('new-frame'), _makeVisualizeStep);
+    inter.listenFor(const SchemeSymbol('return'), _makeVisualizeReturnStep);
     
     bool oldStatus = env.interpreter.tailCallOptimized;
     env.interpreter.tailCallOptimized = false;
-    _makeVisualizeStep(new Pair(nil, env));
-    Expression result = schemeEval(code, env);
-    _makeVisualizeStep(new Pair(result, env));
+    _makeVisualizeStep([], env);
+    schemeEval(code, env);
+    _makeVisualizeStep([], env);
     env.interpreter.tailCallOptimized = oldStatus;
     
-    inter.stopBlockingOnEvent(const SchemeSymbol('define'), _makeVisualizeStep);
-    inter.stopBlockingOnEvent(const SchemeSymbol('set!'), _makeVisualizeStep);
-    inter.stopBlockingOnEvent(const SchemeSymbol('pair-mutation'), _makeVisualizeStep);
-    inter.stopBlockingOnEvent(const SchemeSymbol('new-frame'), _makeVisualizeStep);
-    inter.stopBlockingOnEvent(const SchemeSymbol('return'), _makeVisualizeReturnStep);
+    inter.stopListening(const SchemeSymbol('define'), _makeVisualizeStep);
+    inter.stopListening(const SchemeSymbol('set!'), _makeVisualizeStep);
+    inter.stopListening(const SchemeSymbol('pair-mutation'), _makeVisualizeStep);
+    inter.stopListening(const SchemeSymbol('new-frame'), _makeVisualizeStep);
+    inter.stopListening(const SchemeSymbol('return'), _makeVisualizeReturnStep);
     bool animating = false;
     goto(int index, [bool keepAnimating = false]) {
       if (!keepAnimating) animating = false;
@@ -108,22 +108,17 @@ class Visualization extends UIElement {
     diagrams.add(new Diagram.allFrames(passing, active));
   }
   
-  void _makeVisualizeStep(Expression expr) {
-    if (expr is! Pair || expr.pair.second is! Frame) {
-      throw new SchemeException("Invalid event $expr trigged during visualization");
-    }
-    Frame myEnv = expr.pair.second as Frame;
-    _addFrames(myEnv);
-    _addDiagram(myEnv);
+  void _makeVisualizeStep(List<Expression> exprs, Frame env) {
+    _addFrames(env);
+    _addDiagram(env);
   }
   
-  void _makeVisualizeReturnStep(Expression expr) {
-    if (expr is! Pair || expr.pair.second is! Frame) {
-      throw new SchemeException("Invalid event $expr trigged during visualization");
+  void _makeVisualizeReturnStep(List<Expression> exprs, Frame env) {
+    if (exprs.length != 1) {
+      throw new SchemeException("Invalid event $exprs trigged during visualization");
     }
-    Expression returnValue = expr.pair.first;
-    Frame myEnv = expr.pair.second as Frame;
-    _addFrames(myEnv, returnValue);
-    _addDiagram(myEnv);
+    Expression returnValue = exprs[0];
+    _addFrames(env, returnValue);
+    _addDiagram(env);
   }
 }

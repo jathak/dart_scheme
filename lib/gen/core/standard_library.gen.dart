@@ -4,6 +4,7 @@ abstract class _$StandardLibraryMixin {
   Expression apply(Procedure procedure, PairOrEmpty args, Frame env);
   void display(Expression message, Frame env);
   Expression error(Expression message);
+  Expression errorNoTrace(Expression message);
   Expression eval(Expression expr, Frame env);
   Expression exit();
   Expression load(Expression file, Frame env);
@@ -63,6 +64,9 @@ abstract class _$StandardLibraryMixin {
     }, 1);
     addPrimitive(__env, const SchemeSymbol("error"), (__exprs, __env) {
       return this.error(__exprs[0]);
+    }, 1);
+    addPrimitive(__env, const SchemeSymbol('error-notrace'), (__exprs, __env) {
+      return this.errorNoTrace(__exprs[0]);
     }, 1);
     addPrimitive(__env, const SchemeSymbol("eval"), (__exprs, __env) {
       return this.eval(__exprs[0], __env);
@@ -242,8 +246,8 @@ abstract class _$StandardLibraryMixin {
             'Argument of invalid type passed to set-car!.');
       var __value = undefined;
       this.setCar(__exprs[0], __exprs[1]);
-      __env.interpreter.triggerEvent(
-          const SchemeSymbol("pair-mutation"), new Pair(__value, __env));
+      __env.interpreter
+          .triggerEvent(const SchemeSymbol("pair-mutation"), [__value], __env);
       return __value;
     }, 2);
     addPrimitive(__env, const SchemeSymbol("set-cdr!"), (__exprs, __env) {
@@ -252,8 +256,8 @@ abstract class _$StandardLibraryMixin {
             'Argument of invalid type passed to set-cdr!.');
       var __value = undefined;
       this.setCdr(__exprs[0], __exprs[1]);
-      __env.interpreter.triggerEvent(
-          const SchemeSymbol("pair-mutation"), new Pair(__value, __env));
+      __env.interpreter
+          .triggerEvent(const SchemeSymbol("pair-mutation"), [__value], __env);
       return __value;
     }, 2);
     addPrimitive(__env, const SchemeSymbol("runtime-type"), (__exprs, __env) {
