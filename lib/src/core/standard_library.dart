@@ -66,23 +66,7 @@ class StandardLibrary extends SchemeLibrary with _$StandardLibraryMixin {
   @primitive @SchemeSymbol("promise?") bool isPromise(Expression val) => val is Promise;
   @primitive @SchemeSymbol("string?") bool isString(Expression val) => val is SchemeString;
   @primitive @SchemeSymbol("symbol?") bool isSymbol(Expression val) => val is SchemeSymbol;
-  @primitive Expression append(List<Expression> args) {
-    if (args.isEmpty) return nil;
-    List<Expression> lst = [];
-    for (Expression arg in args.take(args.length - 1)) {
-      if (arg.isNil) continue;
-      if (arg is Pair && arg.isWellFormedList()) lst.addAll(arg);
-      else throw new SchemeException("Argument is not a well-formed list.");
-    }
-    Expression result = nil;
-    Expression lastArg = args.last;
-    if (lastArg is PairOrEmpty && lastArg.isWellFormedList()) lst.addAll(lastArg);
-    else result = lastArg;
-    for (Expression expr in lst.reversed) {
-      result = new Pair(expr, result);
-    }
-    return result;
-  }
+  @primitive Expression append(List<Expression> args) => Pair.append(args);
   @primitive Expression car(Pair val) => val.first;
   @primitive Expression cdr(Pair val) => val.second;
   @primitive Pair cons(Expression car, Expression cdr) => new Pair(car, cdr);
@@ -149,6 +133,9 @@ class StandardLibrary extends SchemeLibrary with _$StandardLibraryMixin {
   void setCdr(Pair p, Expression val) {
     p.second = val;
   }
+  @primitive @SchemeSymbol("call/cc")
+  Expression callWithCurrentContinuation(Procedure procedure, Frame env) =>
+    env.interpreter.implementation.callWithCurrentContinuation(procedure, env);
   @primitive @SchemeSymbol("runtime-type")
   String getRuntimeType(Expression expression) {
     return expression.runtimeType.toString();

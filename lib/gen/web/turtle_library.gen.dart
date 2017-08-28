@@ -39,6 +39,7 @@ abstract class _$TurtleLibraryMixin {
     }, 1);
     __env.bindings[const SchemeSymbol('fd')] =
         __env.bindings[const SchemeSymbol('forward')];
+    __env.hidden[const SchemeSymbol('fd')] = true;
     addPrimitive(__env, const SchemeSymbol('backward'), (__exprs, __env) {
       if (__exprs[0] is! Number)
         throw new SchemeException(
@@ -50,8 +51,10 @@ abstract class _$TurtleLibraryMixin {
     }, 1);
     __env.bindings[const SchemeSymbol('back')] =
         __env.bindings[const SchemeSymbol('backward')];
+    __env.hidden[const SchemeSymbol('back')] = true;
     __env.bindings[const SchemeSymbol('bk')] =
         __env.bindings[const SchemeSymbol('backward')];
+    __env.hidden[const SchemeSymbol('bk')] = true;
     addPrimitive(__env, const SchemeSymbol('left'), (__exprs, __env) {
       if (__exprs[0] is! Number)
         throw new SchemeException('Argument of invalid type passed to left.');
@@ -62,6 +65,7 @@ abstract class _$TurtleLibraryMixin {
     }, 1);
     __env.bindings[const SchemeSymbol('lt')] =
         __env.bindings[const SchemeSymbol('left')];
+    __env.hidden[const SchemeSymbol('lt')] = true;
     addPrimitive(__env, const SchemeSymbol('right'), (__exprs, __env) {
       if (__exprs[0] is! Number)
         throw new SchemeException('Argument of invalid type passed to right.');
@@ -72,6 +76,7 @@ abstract class _$TurtleLibraryMixin {
     }, 1);
     __env.bindings[const SchemeSymbol('rt')] =
         __env.bindings[const SchemeSymbol('right')];
+    __env.hidden[const SchemeSymbol('rt')] = true;
     addVariablePrimitive(__env, const SchemeSymbol("circle"), (__exprs, __env) {
       turtle.show();
       var __value = undefined;
@@ -89,8 +94,10 @@ abstract class _$TurtleLibraryMixin {
     }, 2);
     __env.bindings[const SchemeSymbol('setpos')] =
         __env.bindings[const SchemeSymbol('setposition')];
+    __env.hidden[const SchemeSymbol('setpos')] = true;
     __env.bindings[const SchemeSymbol('goto')] =
         __env.bindings[const SchemeSymbol('setposition')];
+    __env.hidden[const SchemeSymbol('goto')] = true;
     addPrimitive(__env, const SchemeSymbol('setheading'), (__exprs, __env) {
       if (__exprs[0] is! Number)
         throw new SchemeException(
@@ -102,6 +109,7 @@ abstract class _$TurtleLibraryMixin {
     }, 1);
     __env.bindings[const SchemeSymbol('seth')] =
         __env.bindings[const SchemeSymbol('setheading')];
+    __env.hidden[const SchemeSymbol('seth')] = true;
     addPrimitive(__env, const SchemeSymbol('penup'), (__exprs, __env) {
       turtle.show();
       var __value = undefined;
@@ -110,6 +118,7 @@ abstract class _$TurtleLibraryMixin {
     }, 0);
     __env.bindings[const SchemeSymbol('pu')] =
         __env.bindings[const SchemeSymbol('penup')];
+    __env.hidden[const SchemeSymbol('pu')] = true;
     addPrimitive(__env, const SchemeSymbol('pendown'), (__exprs, __env) {
       turtle.show();
       var __value = undefined;
@@ -118,6 +127,7 @@ abstract class _$TurtleLibraryMixin {
     }, 0);
     __env.bindings[const SchemeSymbol('pd')] =
         __env.bindings[const SchemeSymbol('pendown')];
+    __env.hidden[const SchemeSymbol('pd')] = true;
     addPrimitive(__env, const SchemeSymbol('turtle-clear'), (__exprs, __env) {
       turtle.show();
       var __value = undefined;
@@ -138,6 +148,7 @@ abstract class _$TurtleLibraryMixin {
     }, 0);
     __env.bindings[const SchemeSymbol('begin-fill')] =
         __env.bindings[const SchemeSymbol('begin_fill')];
+    __env.hidden[const SchemeSymbol('begin-fill')] = true;
     addPrimitive(__env, const SchemeSymbol('end_fill'), (__exprs, __env) {
       turtle.show();
       var __value = undefined;
@@ -146,6 +157,7 @@ abstract class _$TurtleLibraryMixin {
     }, 0);
     __env.bindings[const SchemeSymbol('end-fill')] =
         __env.bindings[const SchemeSymbol('end_fill')];
+    __env.hidden[const SchemeSymbol('end-fill')] = true;
     addPrimitive(__env, const SchemeSymbol("exitonclick"), (__exprs, __env) {
       var __value = undefined;
       this.exitonclick(__env);
@@ -216,11 +228,13 @@ abstract class _$TurtleLibraryMixin {
     }, 0);
     __env.bindings[const SchemeSymbol('screen-width')] =
         __env.bindings[const SchemeSymbol('screen_width')];
+    __env.hidden[const SchemeSymbol('screen-width')] = true;
     addPrimitive(__env, const SchemeSymbol('screen_height'), (__exprs, __env) {
       return new Number.fromNum(this.screenHeight());
     }, 0);
     __env.bindings[const SchemeSymbol('screen-height')] =
         __env.bindings[const SchemeSymbol('screen_height')];
+    __env.hidden[const SchemeSymbol('screen-height')] = true;
     addVariablePrimitive(__env, const SchemeSymbol('unsupported'),
         (__exprs, __env) {
       var __value = undefined;
@@ -229,13 +243,18 @@ abstract class _$TurtleLibraryMixin {
     }, 0, -1);
     __env.bindings[const SchemeSymbol('speed')] =
         __env.bindings[const SchemeSymbol('unsupported')];
+    __env.hidden[const SchemeSymbol('speed')] = true;
     __env.bindings[const SchemeSymbol('showturtle')] =
         __env.bindings[const SchemeSymbol('unsupported')];
+    __env.hidden[const SchemeSymbol('showturtle')] = true;
     __env.bindings[const SchemeSymbol('st')] =
         __env.bindings[const SchemeSymbol('unsupported')];
+    __env.hidden[const SchemeSymbol('st')] = true;
     __env.bindings[const SchemeSymbol('hideturtle')] =
         __env.bindings[const SchemeSymbol('unsupported')];
+    __env.hidden[const SchemeSymbol('hideturtle')] = true;
     __env.bindings[const SchemeSymbol('ht')] =
         __env.bindings[const SchemeSymbol('unsupported')];
+    __env.hidden[const SchemeSymbol('ht')] = true;
   }
 }

@@ -29,10 +29,8 @@ class AsyncExpression<T extends Expression> extends Expression {
     return this;
   }
   
-  AsyncExpression chain(Procedure proc, Frame env) {
-    return new AsyncExpression(_future.then((T e) {
-      return completeEval(proc.apply(new Pair(e, nil), env));
-    }));
+  AsyncExpression chain(Expression Function(T) fn) {
+    return new AsyncExpression(_future.then(fn));
   }
   
   toString() => complete ? "#[async:$result]" : "#[async]";

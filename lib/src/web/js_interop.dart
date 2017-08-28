@@ -6,6 +6,7 @@ import 'dart:js';
 import 'package:cs61a_scheme/cs61a_scheme_extra.dart';
 
 class JsProcedure extends Procedure {
+  final SchemeSymbol name = null;
   final JsFunction fn;
   JsProcedure(this.fn);
   Expression apply(PairOrEmpty args, Frame env) {
@@ -75,7 +76,7 @@ Expression jsEval(String code) {
   }
 }
 
-class SchemeFunction implements Function {
+class SchemeFunction {
   Procedure procedure;
   Frame env;
   SchemeFunction(this.procedure, this.env);
@@ -83,9 +84,8 @@ class SchemeFunction implements Function {
   noSuchMethod(Invocation invocation) {
     if (invocation.memberName == new Symbol("call")) {
       var args = invocation.positionalArguments.map((arg) => jsToScheme(arg));
-      print(invocation.positionalArguments);
       return schemeApply(procedure, new PairOrEmpty.fromIterable(args), env).toJS();
     }
-    throw new SchemeException("Something has gone horrible wrong with wrapped procedures");
+    throw new SchemeException("Something has gone horribly wrong with wrapped procedures");
   }
 }

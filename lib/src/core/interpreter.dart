@@ -98,6 +98,6 @@ class Interpreter {
     const SchemeSymbol('set!') : doSetForm,
     const SchemeSymbol('quasiquote') : doQuasiquoteForm,
     const SchemeSymbol('unquote') : doUnquoteForm,
-    const SchemeSymbol('unquote-splicing') : doUnquoteSplicingForm
+    const SchemeSymbol('unquote-splicing') : doUnquoteForm
   };
 }

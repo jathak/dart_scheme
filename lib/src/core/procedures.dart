@@ -5,7 +5,7 @@ import 'logging.dart';
 import 'ui.dart';
 
 abstract class Procedure extends SelfEvaluating {
-  SchemeSymbol name;
+  SchemeSymbol get name;
   Procedure();
   Expression call(PairOrEmpty operands, Frame env) {
     return env.interpreter.implementation.procedureCall(this, operands, env);
@@ -56,7 +56,7 @@ abstract class UserDefinedProcedure extends Procedure {
 }
 
 class LambdaProcedure extends UserDefinedProcedure {
-  final SchemeSymbol name;
+  SchemeSymbol name;
   final Expression formals;
   final PairOrEmpty body;
   final Frame env;
@@ -104,6 +104,7 @@ class MuProcedure extends UserDefinedProcedure {
 }
 
 class Continuation extends Procedure {
+  final SchemeSymbol name = null;
   static int counter = 0;
   final int id;
   Expression result;

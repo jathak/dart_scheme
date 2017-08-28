@@ -12,6 +12,7 @@ abstract class _$ExtraLibraryMixin {
   void triggerEvent(List<Expression> exprs, Frame env);
   EventListener listenFor(SchemeSymbol id, Procedure onEvent, Frame env);
   void cancelListener(EventListener listener, Frame env);
+  void cancelAll(SchemeSymbol id, Frame env);
   String stringAppend(List<Expression> exprs);
   void importAll(Frame __env) {
     addPrimitive(__env, const SchemeSymbol("run-async"), (__exprs, __env) {
@@ -71,6 +72,14 @@ abstract class _$ExtraLibraryMixin {
             'Argument of invalid type passed to cancel-listener.');
       var __value = undefined;
       this.cancelListener(__exprs[0], __env);
+      return __value;
+    }, 1);
+    addPrimitive(__env, const SchemeSymbol('cancel-all'), (__exprs, __env) {
+      if (__exprs[0] is! SchemeSymbol)
+        throw new SchemeException(
+            'Argument of invalid type passed to cancel-all.');
+      var __value = undefined;
+      this.cancelAll(__exprs[0], __env);
       return __value;
     }, 1);
     addVariablePrimitive(__env, const SchemeSymbol('string-append'),

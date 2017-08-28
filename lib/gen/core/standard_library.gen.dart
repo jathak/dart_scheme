@@ -50,6 +50,7 @@ abstract class _$StandardLibraryMixin {
   Expression cdrStream(Pair p);
   void setCar(Pair p, Expression val);
   void setCdr(Pair p, Expression val);
+  Expression callWithCurrentContinuation(Procedure procedure, Frame env);
   String getRuntimeType(Expression expression);
   void importAll(Frame __env) {
     addPrimitive(__env, const SchemeSymbol("apply"), (__exprs, __env) {
@@ -260,6 +261,12 @@ abstract class _$StandardLibraryMixin {
           .triggerEvent(const SchemeSymbol("pair-mutation"), [__value], __env);
       return __value;
     }, 2);
+    addPrimitive(__env, const SchemeSymbol("call/cc"), (__exprs, __env) {
+      if (__exprs[0] is! Procedure)
+        throw new SchemeException(
+            'Argument of invalid type passed to call/cc.');
+      return this.callWithCurrentContinuation(__exprs[0], __env);
+    }, 1);
     addPrimitive(__env, const SchemeSymbol("runtime-type"), (__exprs, __env) {
       return new SchemeString(this.getRuntimeType(__exprs[0]));
     }, 1);

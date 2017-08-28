@@ -108,17 +108,19 @@ class Visualization extends UIElement {
     diagrams.add(new Diagram.allFrames(passing, active));
   }
   
-  void _makeVisualizeStep(List<Expression> exprs, Frame env) {
+  Undefined _makeVisualizeStep(List<Expression> exprs, Frame env) {
     _addFrames(env);
     _addDiagram(env);
+    return undefined;
   }
   
-  void _makeVisualizeReturnStep(List<Expression> exprs, Frame env) {
+  Undefined _makeVisualizeReturnStep(List<Expression> exprs, Frame env) {
     if (exprs.length != 1) {
       throw new SchemeException("Invalid event $exprs trigged during visualization");
     }
     Expression returnValue = exprs[0];
     _addFrames(env, returnValue);
     _addDiagram(env);
+    return undefined;
   }
 }

@@ -132,6 +132,7 @@ String _buildPrimitive(MethodDeclaration method) {
   String extra = "";
   for (String symbol in extraSymbs) {
     extra += '__env.bindings[$symbol] = __env.bindings[$symb];';
+    extra += '__env.hidden[$symbol] = true;';
   }
   if (variable) {
     String fn = "this." + method.name.toSource();

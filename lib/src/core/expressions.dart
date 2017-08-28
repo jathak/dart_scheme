@@ -329,6 +329,24 @@ class Pair<A extends Expression, B extends Expression> extends Expression
   operator ==(other) => other is Pair && first == other.first &&
                         second == other.second;
   int get hashCode => hash2(first, second);
+
+  static Expression append(List<Expression> args) {
+    if (args.isEmpty) return nil;
+    List<Expression> lst = [];
+    for (Expression arg in args.take(args.length - 1)) {
+      if (arg.isNil) continue;
+      if (arg is Pair && arg.isWellFormedList()) lst.addAll(arg);
+      else throw new SchemeException("Argument is not a well-formed list.");
+    }
+    Expression result = nil;
+    Expression lastArg = args.last;
+    if (lastArg is PairOrEmpty && lastArg.isWellFormedList()) lst.addAll(lastArg);
+    else result = lastArg;
+    for (Expression expr in lst.reversed) {
+      result = new Pair(expr, result);
+    }
+    return result;
+  }
 }
 
 class Undefined extends SelfEvaluating {

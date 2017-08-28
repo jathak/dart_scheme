@@ -94,13 +94,46 @@ Expression doSetForm(PairOrEmpty expressions, Frame env) {
 }
 
 Expression doQuasiquoteForm(PairOrEmpty expressions, Frame env) {
-  throw new UnimplementedError("Special form not yet implemented.");
+  checkForm(expressions, 1, 1);
+  Expression expr = expressions.first;
+  Pair<Expression, Boolean> result = quasiquoteItem(expr, env);
+  if (result.second.isTruthy) {
+    throw new SchemeException("unquote-splicing not in list template: ${expr}");
+  }
+  return result.first;
+}
+
+Pair<Expression, Boolean> quasiquoteItem(
+    Expression v, Frame env,[int level = 1]) {
+  if (v is! Pair) return new Pair(v, schemeFalse);
+  Pair val = v.pair;
+  bool splice = val.first == const SchemeSymbol('unquote-splicing');
+  if (val.first == const SchemeSymbol('unquote') || splice) {
+    if (--level == 0) {
+      Expression exprs = val.second;
+      checkForm(exprs, 1, 1);
+      Expression eval = schemeEval(exprs.pair.first, env);
+      if (splice && !(eval is PairOrEmpty && eval.isWellFormedList())) {
+        throw new SchemeException( 'unquote-splicing used on non-list ${eval}');
+      }
+      return new Pair(eval, new Boolean(splice));
+    }
+  } else if (val.first == const SchemeSymbol('quasiquote')) {
+    level++;
+  }
+  Pair<Expression, Boolean> result = quasiquoteItem(val.first, env, level);
+  Expression first = result.first;
+  splice = result.second.isTruthy;
+  Expression second = quasiquoteItem(val.second, env, level).first;
+  if (splice) {
+    if (!second.isNil) {
+      return new Pair(Pair.append([first, second]), schemeFalse);
+    }
+    return new Pair(first, schemeFalse);
+  }
+  return new Pair(new Pair(first, second), schemeFalse);
 }
 
 Expression doUnquoteForm(PairOrEmpty expressions, Frame env) {
-  throw new UnimplementedError("Special form not yet implemented.");
-}
-
-Expression doUnquoteSplicingForm(PairOrEmpty expressions, Frame env) {
-  throw new UnimplementedError("Special form not yet implemented.");
+  throw new SchemeException("Unquote outside of quasiquote");
 }
