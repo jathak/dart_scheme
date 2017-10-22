@@ -110,7 +110,7 @@ class Number extends SelfEvaluating implements Serializable<Number> {
   operator /(Number other) {
     if (other == Number.ZERO) throw new SchemeException("cannot divide by zero");
     if (!this.isInteger && !other.isInteger) {
-      return new Number.fromDouble(this / other);
+      return new Number.fromDouble(this.doubleValue / other.doubleValue);
     } else if (this.isInteger && other.isInteger) {
       if ((this.bigInt % other.bigInt).is0) return this ~/ other;
     }

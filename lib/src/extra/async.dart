@@ -84,7 +84,7 @@ FutureOr<Expression> asyncEval(Expression exprs, Frame env) {
     Expression first = exprs.first, rest = exprs.second;
     if (first == const SchemeSymbol("await")) {
       checkForm(rest, 1, 1);
-      FutureOr<Expression> result = asyncEval(rest, env);
+      FutureOr<Expression> result = asyncEval(rest.pair.first, env);
       if (result is AsyncExpression) {
         return result.future;
       } else if (result is Future<AsyncExpression>) {
