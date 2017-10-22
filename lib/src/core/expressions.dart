@@ -145,7 +145,7 @@ class Boolean extends SelfEvaluating implements Serializable<Boolean> {
   final bool value;
   const Boolean._internal(this.value);
   bool get isTruthy => value;
-  toString() => value ? "#t" : "#f";
+  toString() => value ? "True" : "False";
   bool toJS() => value;
   operator ==(other) => other is Boolean && value == other.value;
   int get hashCode => value.hashCode;
