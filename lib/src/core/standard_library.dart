@@ -72,6 +72,21 @@ class StandardLibrary extends SchemeLibrary with _$StandardLibraryMixin {
   @primitive Pair cons(Expression car, Expression cdr) => new Pair(car, cdr);
   @primitive Number length(PairOrEmpty lst) => new Number.fromInt(lst.length);
   @primitive PairOrEmpty list(List<Expression> args) => new PairOrEmpty.fromIterable(args);
+
+  @primitive PairOrEmpty map(Procedure fn, PairOrEmpty lst, Frame env) {
+    return new PairOrEmpty.fromIterable(lst.map((item) {
+      return completeEval(fn.apply(new Pair(item, nil), env));
+    }));
+  }
+  @primitive PairOrEmpty filter(Procedure pred, PairOrEmpty lst, Frame env) {
+    return new PairOrEmpty.fromIterable(lst.where((item) {
+      return completeEval(pred.apply(new Pair(item, nil), env)).isTruthy;
+    }));
+  }
+  @primitive Expression reduce(Procedure combiner, PairOrEmpty lst, Frame env) {
+    return lst.reduce((a, b) => combiner.apply(list([a, b]), env));
+  }
+
   @primitive @SchemeSymbol("+") Number add(List<Expression> args) => allNumbers(args).fold(Number.ZERO, (a, b) => a + b);
   @primitive @SchemeSymbol("-") @MinArgs(1) Number sub(List<Expression> args) {
     Iterable<Number> numbers = allNumbers(args);
