@@ -2,9 +2,9 @@ library cs61a_scheme.core.procedures;
 
 import 'expressions.dart';
 import 'logging.dart';
-import 'ui.dart';
+import 'serialization.dart';
 
-abstract class Procedure extends SelfEvaluating {
+abstract class Procedure extends SelfEvaluating with Stubber {
   SchemeSymbol get name;
   Procedure();
   Expression call(PairOrEmpty operands, Frame env) {
@@ -30,7 +30,7 @@ class PrimitiveProcedure extends Procedure {
     : fixedArgs = true, minArgs = args, maxArgs = args;
   PrimitiveProcedure.variable(this.name, this.fn, this.minArgs, [this.maxArgs=-1])
     : fixedArgs = false;
-  
+
   Expression apply(PairOrEmpty arguments, Frame env) {
     return env.interpreter.implementation.primitiveApply(this, arguments, env);
   }
@@ -39,9 +39,9 @@ class PrimitiveProcedure extends Procedure {
 abstract class UserDefinedProcedure extends Procedure {
   Expression get formals;
   PairOrEmpty get body;
-  
+
   Frame makeCallFrame(PairOrEmpty arguments, Frame env);
-  
+
   Expression apply(PairOrEmpty arguments, Frame env) {
     Frame frame = makeCallFrame(arguments, env);
     if (name != null) frame.tag = name.toString();
@@ -50,9 +50,9 @@ abstract class UserDefinedProcedure extends Procedure {
     env.interpreter.triggerEvent(const SchemeSymbol('return'), [result], frame);
     return result;
   }
-  
+
   @override
-  UIElement draw(diag) => new TextElement(new Pair(name, formals).toString());
+  String get stubText => new Pair(name, formals).toString();
 }
 
 class LambdaProcedure extends UserDefinedProcedure {
@@ -60,47 +60,52 @@ class LambdaProcedure extends UserDefinedProcedure {
   final Expression formals;
   final PairOrEmpty body;
   final Frame env;
-  
+
   LambdaProcedure(this.formals, this.body, this.env,
                   [this.name = const SchemeSymbol('λ')]);
-  
+
   Frame makeCallFrame(PairOrEmpty arguments, Frame _) {
     return env.interpreter.implementation.makeLambdaFrame(this, arguments, env);
   }
-  
+
   @override
   toString() => new Pair(new SchemeSymbol('lambda'), new Pair(formals, body)).toString();
-  
+
   @override
-  UIElement draw(diag) {
+  String get stubText {
     var parent = env.id == 0 ? '' : ' [parent=f${env.id}]';
-    var msg = "${new Pair(name, formals)}$parent";
-    return new TextElement(msg);
+    return "${new Pair(name, formals)}$parent";
   }
 }
 
 class MacroProcedure extends LambdaProcedure {
   MacroProcedure(formals, body, env) : super(formals, body, env);
-  
+
   @override
   Expression call(PairOrEmpty operands, Frame env) {
     return env.interpreter.implementation.macroCall(this, operands, env);
   }
-  
+
   toString() => new Pair(new SchemeSymbol('#macro'), new Pair(formals, body)).toString();
+
+  @override
+  String get stubText => super.stubText + ' (macro)';
 }
 
 class MuProcedure extends UserDefinedProcedure {
   SchemeSymbol name;
   final PairOrEmpty formals, body;
-  
+
   MuProcedure(this.formals, this.body, [this.name = const SchemeSymbol('μ')]);
-  
+
   Frame makeCallFrame(PairOrEmpty arguments, Frame env) {
     return env.interpreter.implementation.makeMuFrame(this, arguments, env);
   }
-  
+
   toString() => new Pair(new SchemeSymbol('mu'), new Pair(formals, body)).toString();
+
+  @override
+  String get stubText => super.stubText + ' (mu)';
 }
 
 class Continuation extends Procedure {
@@ -109,10 +114,10 @@ class Continuation extends Procedure {
   final int id;
   Expression result;
   Continuation() : id = counter++;
-  
+
   Expression apply(PairOrEmpty args, Frame env) {
     return env.interpreter.implementation.continuationApply(this, args, env);
   }
-  
+
   toString() => "#[continuation$id]";
 }

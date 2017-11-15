@@ -1,6 +1,6 @@
 name: cs61a_scheme
 description: Dart implementation of 61A Scheme.
-version: 2.0.0-beta
+version: 2.0.0-beta2
 homepage: https://scheme.cs61a.org
 author: CS 61A Staff <cs61a@berkeley.edu>
 

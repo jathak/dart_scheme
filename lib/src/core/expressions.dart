@@ -50,12 +50,12 @@ class Number extends SelfEvaluating implements Serializable<Number> {
   factory Number.fromInt(int value) {
     return new Number.fromBigInt(new BigInt.fromJsInt(value));
   }
-  
+
   factory Number.fromNum(num value) {
     if (value is int) return new Number.fromInt(value);
     return new Number.fromDouble(value);
   }
-  
+
   static final ZERO = new Number.fromInt(0);
   static final ONE = new Number.fromInt(1);
   static final TWO = new Number.fromInt(2);
@@ -71,12 +71,12 @@ class Number extends SelfEvaluating implements Serializable<Number> {
   String toString() => isInteger ? "$bigInt" : "$doubleValue";
 
   num toJS() => isInteger ? num.parse("$bigInt") : doubleValue;
-  
+
   Map serialize(s) => {
     'type': 'Number',
     'data': toString()
   };
-  
+
   Number deserialize(Map data, d) => new Number.fromString(data['data']);
 
   static Number _operation(Number a, Number b, Function fn) {
@@ -150,7 +150,7 @@ class Boolean extends SelfEvaluating implements Serializable<Boolean> {
   operator ==(other) => other is Boolean && value == other.value;
   int get hashCode => value.hashCode;
   factory Boolean(bool value) => value ? schemeTrue : schemeFalse;
-  
+
   Map serialize(s) => {
     'type': 'Boolean',
     'value': isTruthy
@@ -172,7 +172,7 @@ class SchemeSymbol extends Expression implements Serializable<SchemeSymbol> {
   operator ==(other) => other is SchemeSymbol && value == other.value;
   int get hashCode => hash2("SchemeSymbol", value);
   toJS() => value;
-  
+
   Map serialize(s) => {
     'type': 'SchemeSymbol',
     'value': value
@@ -188,9 +188,9 @@ class SchemeString extends SelfEvaluating implements Serializable<SchemeString> 
   get display => value;
   operator ==(other) => other is SchemeString && value == other.value;
   int get hashCode => hash2("SchemeString", value);
-  
+
   toJS() => value;
-  
+
   Map serialize(s) => {
     'type': 'SchemeString',
     'value': value
@@ -219,7 +219,7 @@ class _NilIterator extends Iterator<Expression> {
   moveNext() => false;
 }
 
-abstract class PairOrEmpty extends Expression with IterableMixin<Expression> {
+abstract class PairOrEmpty extends Expression with IterableMixin<Expression> implements Serializable<PairOrEmpty> {
   bool isWellFormedList();
   factory PairOrEmpty.fromIterable(Iterable<Expression> iterable) {
     PairOrEmpty result = nil;
@@ -237,12 +237,12 @@ class EmptyList extends SelfEvaluating implements PairOrEmpty, Serializable<Empt
   bool isWellFormedList() => true;
   bool get isNil => true;
   toString() => "()";
-  
+
   Map serialize(s) => {
     'type': 'EmptyList'
   };
   EmptyList deserialize(Map data, d) => nil;
-  
+
   // Dummy properties to ensure this works as an iterator
   get first => throw new StateError("empty list");
   final isEmpty = true;
@@ -281,7 +281,7 @@ class Pair<A extends Expression, B extends Expression> extends Expression
   A first;
   B second;
   Pair(this.first, this.second);
-  
+
   bool isWellFormedList() {
     PairOrEmpty current = this;
     while (!current.isNil) {
@@ -296,7 +296,7 @@ class Pair<A extends Expression, B extends Expression> extends Expression
   Iterator<Expression> get iterator => new _SchemeListIterator(this);
 
   Expression evaluate(Frame env) => evalCallExpression(this, env);
-  
+
   Map serialize(s) => {
     'type': 'Pair',
     'first': s.serialize(first),
@@ -306,7 +306,7 @@ class Pair<A extends Expression, B extends Expression> extends Expression
     return new Pair(d.deserialize(data['first']),
                     d.deserialize(data['second']));
   }
-  
+
   @override
   UIElement draw(DiagramInterface diagram) {
     int parentRow = diagram.currentRow;
@@ -314,7 +314,7 @@ class Pair<A extends Expression, B extends Expression> extends Expression
     UIElement left = diagram.pointTo(first, parentRow);
     return new BlockGrid.pair(new Block.pair(left), new Block.pair(right));
   }
- 
+
   toString() {
     String result = "($first";
     Expression current = second;
@@ -349,12 +349,17 @@ class Pair<A extends Expression, B extends Expression> extends Expression
   }
 }
 
-class Undefined extends SelfEvaluating {
+class Undefined extends SelfEvaluating implements Serializable<Undefined> {
   const Undefined._internal();
   bool get isNil => false;
   toString() => "undefined";
   toJS() => Undefined.jsUndefined;
   static var jsUndefined = null;
+
+  Map serialize(s) => {
+    'type': 'Undefined'
+  };
+  Undefined deserialize(Map data, d) => undefined;
 }
 
 const undefined = const Undefined._internal();
@@ -384,14 +389,15 @@ class Thunk extends Expression {
   toString() => 'Thunk($expr in f${env.id})';
 }
 
-class Promise extends SelfEvaluating {
+class Promise extends SelfEvaluating implements Serializable<Promise> {
   Expression expr;
-  final Frame env;
+  Frame env;
   bool _evaluated = false;
   Promise(this.expr, this.env);
   Expression force() {
     if (!_evaluated) {
       expr = schemeEval(expr, env);
+      env = null;
       _evaluated = true;
     }
     return expr;
@@ -403,16 +409,27 @@ class Promise extends SelfEvaluating {
     var inside = _evaluated ? diagram.pointTo(expr) : new TextElement("⋯");
     return new Block.promise(inside);
   }
+
+  Map serialize(s) => {
+    'type': 'Promise',
+    'expr': s.serialize(expr),
+    'env': s.serialize(env),
+    'evaluated': _evaluated
+  };
+  Promise deserialize(Map data, d) {
+    return new Promise(d.deserialize(data['expr']), d.deserialize(data['env']))
+      .._evaluated = data['evaluated'];
+  }
 }
 
-class Frame extends SelfEvaluating {
+class Frame extends SelfEvaluating implements Serializable<Frame> {
   Frame parent;
   Interpreter interpreter;
   String tag;
   int id;
   Map<SchemeSymbol, Expression> bindings = {};
   Map<SchemeSymbol, bool> hidden = {};
-  Frame(this.parent, this.interpreter) : id = interpreter.frameCounter++;
+  Frame(this.parent, this.interpreter) : id = interpreter?.frameCounter++;
   void define(SchemeSymbol symbol, Expression value, [bool hide = false]) {
     interpreter.implementation.defineInFrame(symbol, value, this);
     hidden[symbol] = hide;
@@ -428,9 +445,35 @@ class Frame extends SelfEvaluating {
     if (parent == null) throw new SchemeException("$symbol is not bound");
     parent.update(symbol, value);
   }
-  
+
   Frame makeChildFrame(Expression formals, Expression vals) {
     return interpreter.implementation.makeChildOf(formals, vals, this);
   }
   toJS() => this;
+
+  Map serialize(s) => {
+    'type': 'Frame',
+    'parent': s.serialize(parent),
+    'tag': tag,
+    'id': id,
+    'bindings': new Map<String, Map>.fromIterables(
+      bindings.keys.map((k)=>k.value),
+      bindings.values.map((v)=>s.serialize(v))
+    ),
+    'hidden': new Map<String, bool>.fromIterables(
+      hidden.keys.map((k)=>k.value), hidden.values
+    ),
+  };
+  Frame deserialize(Map data, d) {
+    Frame frame = new Frame(d.deserialize(data['parent']), null);
+    frame.interpreter = d.interpreter;
+    frame.id = data['id'];
+    frame.tag = data['tag'];
+    for (var key in data['bindings'].keys) {
+      SchemeSymbol symb = new SchemeSymbol.runtime(key);
+      frame.bindings[symb] = d.deserialize(data['bindings'][key]);
+      frame.hidden[symb] = data['hidden'][key];
+    }
+    return frame;
+  }
 }
