@@ -219,7 +219,7 @@ class _NilIterator extends Iterator<Expression> {
   moveNext() => false;
 }
 
-abstract class PairOrEmpty extends Expression with IterableMixin<Expression> implements Serializable<PairOrEmpty> {
+abstract class PairOrEmpty extends Expression with IterableMixin<Expression> {
   bool isWellFormedList();
   factory PairOrEmpty.fromIterable(Iterable<Expression> iterable) {
     PairOrEmpty result = nil;
