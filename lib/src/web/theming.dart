@@ -15,14 +15,14 @@ applyTheme(Theme theme, String css, Element style, [bool notify = true]) {
 Stream<Theme> get onThemeChange => _controller.stream.asBroadcastStream();
 
 class Theme extends SelfEvaluating implements Serializable<Theme> {
-  
+
   Map<SchemeSymbol, Color> colors = {};
   Map<SchemeSymbol, SchemeString> cssProps = {};
-  
+
   Theme();
-  
+
   toString() => '#theme';
-  
+
   String compile(String css) {
     for (SchemeSymbol symbol in colors.keys) {
       css = embedColor(css, symbol, colors[symbol]);
@@ -32,7 +32,7 @@ class Theme extends SelfEvaluating implements Serializable<Theme> {
     }
     return css;
   }
-  
+
   String embedColor(String css, SchemeSymbol symbol, Color color) {
     var symbReg = new RegExp(r'[-[\]{}()*+?.,\\^$|#\s]');
     var val = symbol.value.replaceAllMapped(symbReg, (m) => '\\${m[0]}');
@@ -41,7 +41,7 @@ class Theme extends SelfEvaluating implements Serializable<Theme> {
     var regex = new RegExp(expr, multiLine: true);
     return css.replaceAllMapped(regex, (m) => '${m[1]}: ${color.toCSS()};');
   }
-  
+
   String embedCss(String css, SchemeSymbol symbol, SchemeString code) {
     var symbReg = new RegExp(r'[-[\]{}()*+?.,\\^$|#\s]');
     var val = symbol.value.replaceAllMapped(symbReg, (m) => '\\${m[0]}');
@@ -50,28 +50,28 @@ class Theme extends SelfEvaluating implements Serializable<Theme> {
     var regex = new RegExp(expr, multiLine: true);
     return css.replaceAll(regex, code.value);
   }
-  
-  serialize(s) {
+
+  serialize() {
     var colorMap = {};
     for (SchemeSymbol key in colors.keys) {
-      colorMap[key.value] = s.serialize(colors[key]);
+      colorMap[key.value] = colors[key].serialize();
     }
     var cssMap = {};
     for (SchemeSymbol key in cssProps.keys) {
-      cssMap[key.value] = s.serialize(cssProps[key]);
+      cssMap[key.value] = cssProps[key].serialize();
     }
     return {'type': 'Theme', 'colors': colorMap, 'css': cssMap};
   }
-  
-  Theme deserialize(Map data, d) {
+
+  Theme deserialize(Map data) {
     Theme theme = new Theme();
     var colorMap = data['colors'];
     for (String key in colorMap.keys) {
-      theme.colors[new SchemeSymbol(key)] = d.deserialize(colorMap[key]);
+      theme.colors[new SchemeSymbol(key)] = Serialization.deserialize(colorMap[key]);
     }
     var cssMap = data['css'];
     for (String key in cssMap.keys) {
-      theme.cssProps[new SchemeSymbol(key)] = d.deserialize(cssMap[key]);
+      theme.cssProps[new SchemeSymbol(key)] = Serialization.deserialize(cssMap[key]);
     }
     return theme;
   }
@@ -80,13 +80,13 @@ class Theme extends SelfEvaluating implements Serializable<Theme> {
 class Color extends SelfEvaluating implements Serializable<Color> {
   final int red, green, blue;
   final double alpha;
-  
+
   const Color(this.red, this.green, this.blue, [this.alpha = 1.0]);
-  
+
   static const white = const Color(255, 255, 255);
   static const black = const Color(0, 0, 0);
   static const transparent = const Color(0, 0, 0, 0.0);
-  
+
   factory Color.fromHexString(String str) {
     str = str.toLowerCase();
     if (str.startsWith("#")) str = str.substring(1);
@@ -101,12 +101,12 @@ class Color extends SelfEvaluating implements Serializable<Color> {
     int blue = _toInt(str[4])*16 + _toInt(str[5]);
     return new Color(red, green, blue);
   }
-  
+
   factory Color.fromString(String str) {
     if (Color.names.containsKey(str)) str = Color.names[str];
     return new Color.fromHexString(str);
   }
-  
+
   factory Color.fromAnything(dynamic expr) {
     if (expr is Color) return expr;
     if (expr is SchemeString) return new Color.fromString(expr.value);
@@ -114,7 +114,7 @@ class Color extends SelfEvaluating implements Serializable<Color> {
     if (expr is String) return new Color.fromString(expr);
     throw new SchemeException('Could not interpret $expr as a color.');
   }
-  
+
   static int _toInt(String hexChar) {
     switch (hexChar) {
       case '0': return 0;
@@ -136,26 +136,26 @@ class Color extends SelfEvaluating implements Serializable<Color> {
       default: throw new SchemeException("$hexChar is not a valid hexadecimal");
     }
   }
-  
-  serialize(s) => {
+
+  serialize() => {
     'type': 'Color',
     'red': red,
     'green': green,
     'blue': blue,
     'alpha': alpha
   };
-  
-  deserialize(Map data, d) {
+
+  deserialize(Map data) {
     return new Color(data['red'], data['green'], data['blue'], data['alpha']);
   }
-  
+
   String toString() {
     if (alpha == 1.0) return '(rgb $red $green $blue)';
     return '(rgba $red $green $blue $alpha)';
   }
-  
+
   String toCSS() => 'rgba($red, $green, $blue, $alpha)';
-  
+
   static const Map<String, String> names = const {
     "aliceblue": "f0f8ff",
     "antiquewhite": "faebd7",

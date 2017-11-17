@@ -50,12 +50,12 @@ class Number extends SelfEvaluating implements Serializable<Number> {
   factory Number.fromInt(int value) {
     return new Number.fromBigInt(new BigInt.fromJsInt(value));
   }
-  
+
   factory Number.fromNum(num value) {
     if (value is int) return new Number.fromInt(value);
     return new Number.fromDouble(value);
   }
-  
+
   static final ZERO = new Number.fromInt(0);
   static final ONE = new Number.fromInt(1);
   static final TWO = new Number.fromInt(2);
@@ -71,13 +71,13 @@ class Number extends SelfEvaluating implements Serializable<Number> {
   String toString() => isInteger ? "$bigInt" : "$doubleValue";
 
   num toJS() => isInteger ? num.parse("$bigInt") : doubleValue;
-  
-  Map serialize(s) => {
+
+  Map serialize() => {
     'type': 'Number',
     'data': toString()
   };
-  
-  Number deserialize(Map data, d) => new Number.fromString(data['data']);
+
+  Number deserialize(Map data) => new Number.fromString(data['data']);
 
   static Number _operation(Number a, Number b, Function fn) {
     if (a.isInteger && b.isInteger) {
@@ -150,12 +150,12 @@ class Boolean extends SelfEvaluating implements Serializable<Boolean> {
   operator ==(other) => other is Boolean && value == other.value;
   int get hashCode => value.hashCode;
   factory Boolean(bool value) => value ? schemeTrue : schemeFalse;
-  
-  Map serialize(s) => {
+
+  Map serialize() => {
     'type': 'Boolean',
     'value': isTruthy
   };
-  Boolean deserialize(Map data, d) => new Boolean(data['value']);
+  Boolean deserialize(Map data) => new Boolean(data['value']);
 }
 
 const schemeTrue = const Boolean._internal(true);
@@ -172,12 +172,12 @@ class SchemeSymbol extends Expression implements Serializable<SchemeSymbol> {
   operator ==(other) => other is SchemeSymbol && value == other.value;
   int get hashCode => hash2("SchemeSymbol", value);
   toJS() => value;
-  
-  Map serialize(s) => {
+
+  Map serialize() => {
     'type': 'SchemeSymbol',
     'value': value
   };
-  SchemeSymbol deserialize(Map data, d) => new SchemeSymbol(data['value']);
+  SchemeSymbol deserialize(Map data) => new SchemeSymbol(data['value']);
 }
 
 class SchemeString extends SelfEvaluating implements Serializable<SchemeString> {
@@ -188,14 +188,14 @@ class SchemeString extends SelfEvaluating implements Serializable<SchemeString> 
   get display => value;
   operator ==(other) => other is SchemeString && value == other.value;
   int get hashCode => hash2("SchemeString", value);
-  
+
   toJS() => value;
-  
-  Map serialize(s) => {
+
+  Map serialize() => {
     'type': 'SchemeString',
     'value': value
   };
-  SchemeString deserialize(Map data, d) => new SchemeString(data['value']);
+  SchemeString deserialize(Map data) => new SchemeString(data['value']);
 }
 
 class _SchemeListIterator extends Iterator<Expression> {
@@ -231,18 +231,13 @@ abstract class PairOrEmpty extends Expression with IterableMixin<Expression> {
   int get length;
 }
 
-class EmptyList extends SelfEvaluating implements PairOrEmpty, Serializable<EmptyList> {
+class EmptyList extends SelfEvaluating implements PairOrEmpty {
   final inlineUI = true;
   const EmptyList._internal();
   bool isWellFormedList() => true;
   bool get isNil => true;
   toString() => "()";
-  
-  Map serialize(s) => {
-    'type': 'EmptyList'
-  };
-  EmptyList deserialize(Map data, d) => nil;
-  
+
   // Dummy properties to ensure this works as an iterator
   get first => throw new StateError("empty list");
   final isEmpty = true;
@@ -276,12 +271,11 @@ class EmptyList extends SelfEvaluating implements PairOrEmpty, Serializable<Empt
 const nil = const EmptyList._internal();
 
 class Pair<A extends Expression, B extends Expression> extends Expression
-    with IterableMixin<Expression>
-    implements PairOrEmpty, Serializable<Pair> {
+    with IterableMixin<Expression> implements PairOrEmpty {
   A first;
   B second;
   Pair(this.first, this.second);
-  
+
   bool isWellFormedList() {
     PairOrEmpty current = this;
     while (!current.isNil) {
@@ -296,17 +290,7 @@ class Pair<A extends Expression, B extends Expression> extends Expression
   Iterator<Expression> get iterator => new _SchemeListIterator(this);
 
   Expression evaluate(Frame env) => evalCallExpression(this, env);
-  
-  Map serialize(s) => {
-    'type': 'Pair',
-    'first': s.serialize(first),
-    'second': s.serialize(second)
-  };
-  Pair deserialize(Map data, d) {
-    return new Pair(d.deserialize(data['first']),
-                    d.deserialize(data['second']));
-  }
-  
+
   @override
   UIElement draw(DiagramInterface diagram) {
     int parentRow = diagram.currentRow;
@@ -314,7 +298,7 @@ class Pair<A extends Expression, B extends Expression> extends Expression
     UIElement left = diagram.pointTo(first, parentRow);
     return new BlockGrid.pair(new Block.pair(left), new Block.pair(right));
   }
- 
+
   toString() {
     String result = "($first";
     Expression current = second;
@@ -428,7 +412,7 @@ class Frame extends SelfEvaluating {
     if (parent == null) throw new SchemeException("$symbol is not bound");
     parent.update(symbol, value);
   }
-  
+
   Frame makeChildFrame(Expression formals, Expression vals) {
     return interpreter.implementation.makeChildOf(formals, vals, this);
   }
