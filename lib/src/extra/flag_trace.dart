@@ -10,7 +10,7 @@ import 'package:cs61a_scheme/cs61a_scheme.dart';
 
 import 'diagramming.dart';
 
-class FlagTraceBuilder {
+/*class FlagTraceBuilder {
   FlagTrace trace;
   FlagTraceBuilder(List<Expression> code, Frame env) {
     trace = new FlagTrace(code.join('\n'));
@@ -100,7 +100,7 @@ class FlagTrace {
     trace.steps = data['steps'].map(Serialization.deserialize).toList();
     return trace;
   }
-}
+}*/
 
 class FlagStep extends SelfEvaluating with Serializable<FlagStep> {
   Diagram diagram;
