@@ -23,7 +23,7 @@ class Binding extends UIElement {
   final bool isReturn;
   Binding(this.symbol, this.value, [this.isReturn = false]);
   Map serialize() => finishSerialize({
-    'type': 'Arrow',
+    'type': 'Binding',
     'symbol': symbol.serialize(),
     'value': value.serialize()
   });
