@@ -15,6 +15,8 @@ class Button extends UIElement {
       env.interpreter.triggerEvent(id, data, env);
     };
   }
+  serialize() => throw new UnsupportedError('Buttons cannot be serialized');
+  deserialize(data) => null;
 }
 
 class Visualization extends UIElement {
@@ -23,27 +25,27 @@ class Visualization extends UIElement {
   List<Diagram> diagrams = [];
   Map<Frame, Expression> frameReturnValues = new Map.identity();
   int current = 0;
-  
+
   Diagram get currentDiagram => diagrams[current];
   List<UIElement> buttonRow;
   Expression result;
-  
+
   Visualization(this.code, this.env) {
     Interpreter inter = env.interpreter;
-    
+
     inter.listenFor(const SchemeSymbol('define'), _makeVisualizeStep);
     inter.listenFor(const SchemeSymbol('set!'), _makeVisualizeStep);
     inter.listenFor(const SchemeSymbol('pair-mutation'), _makeVisualizeStep);
     inter.listenFor(const SchemeSymbol('new-frame'), _makeVisualizeStep);
     inter.listenFor(const SchemeSymbol('return'), _makeVisualizeReturnStep);
-    
+
     bool oldStatus = env.interpreter.tailCallOptimized;
     env.interpreter.tailCallOptimized = false;
     _makeVisualizeStep([], env);
     schemeEval(code, env);
     _makeVisualizeStep([], env);
     env.interpreter.tailCallOptimized = oldStatus;
-    
+
     inter.stopListening(const SchemeSymbol('define'), _makeVisualizeStep);
     inter.stopListening(const SchemeSymbol('set!'), _makeVisualizeStep);
     inter.stopListening(const SchemeSymbol('pair-mutation'), _makeVisualizeStep);
@@ -80,8 +82,8 @@ class Visualization extends UIElement {
     });
     buttonRow = [first, prev, status, next, last, animate];
   }
-  
-  
+
+
   void _addFrames(Frame myEnv, [Expression returnValue = null]) {
     if (myEnv.tag == '#imported') return;
     if (frameReturnValues.containsKey(myEnv)) {
@@ -97,7 +99,7 @@ class Visualization extends UIElement {
     }
     if (myEnv.parent != null) _addFrames(myEnv.parent);
   }
-  
+
   void _addDiagram(Frame active) {
     List<Frame> frames = frameReturnValues.keys.toList()..sort((a, b) {
       return a.id - b.id;
@@ -107,13 +109,13 @@ class Visualization extends UIElement {
     }).toList();
     diagrams.add(new Diagram.allFrames(passing, active));
   }
-  
+
   Undefined _makeVisualizeStep(List<Expression> exprs, Frame env) {
     _addFrames(env);
     _addDiagram(env);
     return undefined;
   }
-  
+
   Undefined _makeVisualizeReturnStep(List<Expression> exprs, Frame env) {
     if (exprs.length != 1) {
       throw new SchemeException("Invalid event $exprs trigged during visualization");
@@ -123,4 +125,6 @@ class Visualization extends UIElement {
     _addDiagram(env);
     return undefined;
   }
+  serialize() => throw new UnsupportedError('Visualizations cannot be serialized');
+  deserialize(data) => null;
 }
