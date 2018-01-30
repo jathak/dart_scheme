@@ -16,12 +16,12 @@ in the dart_scheme_impl repo of our org. A skeleton of this implementation is
 available publicly [here][skeleton]. We ask that you do not distribute the
 source code for a `ProjectInterface` implementation.
 
-Additionally, if you are a Berkeley student, **distributing an implementation of
-`ProjectInterface` constitutes academic dishonesty as described in our
-[course policies][policy]**, as the implementation is close enough to the Scheme
-project's to be considered distribution of solutions, despite the change of
-language from Python to Dart. This applies even if you are not currently taking
-61A.
+Additionally, if you are a Berkeley student, **publicly distributing an
+implementation of `ProjectInterface` constitutes academic dishonesty as
+described in our [course policies][policy]**, as the implementation is close
+enough to the Scheme project's to be considered distribution of solutions,
+despite the change of language from Python to Dart. This applies even if you are
+not currently taking 61A.
 
 
 [policy]: https://cs61a.org/articles/about.html
