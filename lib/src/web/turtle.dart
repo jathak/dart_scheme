@@ -236,6 +236,23 @@ class Turtle {
   rotate(n) {
     heading += n;
   }
-  
+
+  drawPixel(num x, num y, Color color) {
+    num realX = x * pixelSize;
+    num realY = y * pixelSize;
+    num offsetX = realX + pixelSize;
+    num offsetY = realY + pixelSize;
+
+    context.setFillColorRgb(color.red, color.blue, color.green);
+    context.beginPath();
+    context.moveTo(realX, realY);
+    context.lineTo(realX, offsetY);
+    context.lineTo(offsetX, offsetY);
+    context.lineTo(offsetX, realY);
+    context.lineTo(realX, realY);
+    context.closePath();
+    context.fill();
+    context.setFillColorRgb(penColor.red, penColor.blue, penColor.green);
+  }
   
 }

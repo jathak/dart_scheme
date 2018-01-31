@@ -120,9 +120,9 @@ class TurtleLibrary extends SchemeLibrary with _$TurtleLibraryMixin {
     turtle.elementHeight = height;
   }
   
-  @primitive
+  @primitive @turtlestart
   void pixel(num x, num y, Expression color) {
-    
+    turtle.drawPixel(x, y, new Color.fromAnything(color));
   }
   
   @primitive 

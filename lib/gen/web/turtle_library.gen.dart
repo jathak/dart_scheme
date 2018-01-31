@@ -211,6 +211,7 @@ abstract class _$TurtleLibraryMixin {
           __exprs[1] is! Number ||
           __exprs[2] is! Expression)
         throw new SchemeException('Argument of invalid type passed to pixel.');
+      turtle.show();
       var __value = undefined;
       this.pixel(__exprs[0].toJS(), __exprs[1].toJS(), __exprs[2]);
       return __value;
