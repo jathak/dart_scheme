@@ -16,16 +16,20 @@ abstract class Expression {
   const Expression();
   Expression evaluate(Frame env);
   bool get isTruthy => true;
+
   /// If true, this expression should be inlined in diagrams.
   /// If false, it should be added to the objects with an arrow to it.
   bool get inlineUI => false;
+
   /// Constructs a UIElement for this expression, adding elements to the diagram
   /// as necessary.
   UIElement draw(DiagramInterface diagram) => new TextElement(toString());
   bool get isNil => false;
   String get display => toString();
+
   /// Should return the version of this object that can be passed to JS
   dynamic toJS() => this;
+
   /// Convenience function since casting as a Pair is very common.
   Pair get pair => this as Pair;
 }
@@ -72,10 +76,7 @@ class Number extends SelfEvaluating implements Serializable<Number> {
 
   num toJS() => isInteger ? num.parse("$bigInt") : doubleValue;
 
-  Map serialize() => {
-    'type': 'Number',
-    'data': toString()
-  };
+  Map serialize() => {'type': 'Number', 'data': toString()};
 
   Number deserialize(Map data) => new Number.fromString(data['data']);
 
@@ -104,9 +105,7 @@ class Number extends SelfEvaluating implements Serializable<Number> {
 
   operator +(Number other) => _operation(this, other, (a, b) => a + b);
   operator -(Number other) => _operation(this, other, (a, b) => a - b);
-  operator -() => isInteger
-      ? new Number.fromBigInt(-bigInt)
-      : new Number.fromDouble(-doubleValue);
+  operator -() => isInteger ? new Number.fromBigInt(-bigInt) : new Number.fromDouble(-doubleValue);
   operator /(Number other) {
     if (other == Number.ZERO) throw new SchemeException("cannot divide by zero");
     if (!this.isInteger && !other.isInteger) {
@@ -123,6 +122,7 @@ class Number extends SelfEvaluating implements Serializable<Number> {
     if (other == Number.ZERO) throw new SchemeException("cannot divide by zero");
     return _operation(this, other, (a, b) => a ~/ b);
   }
+
   operator *(Number other) => _operation(this, other, (a, b) => a * b);
   operator %(Number other) => _operation(this, other, (a, b) => a % b);
   operator <(Number other) => compareTo(other) < 0;
@@ -151,10 +151,7 @@ class Boolean extends SelfEvaluating implements Serializable<Boolean> {
   int get hashCode => value.hashCode;
   factory Boolean(bool value) => value ? schemeTrue : schemeFalse;
 
-  Map serialize() => {
-    'type': 'Boolean',
-    'value': isTruthy
-  };
+  Map serialize() => {'type': 'Boolean', 'value': isTruthy};
   Boolean deserialize(Map data) => new Boolean(data['value']);
 }
 
@@ -173,10 +170,7 @@ class SchemeSymbol extends Expression implements Serializable<SchemeSymbol> {
   int get hashCode => hash2("SchemeSymbol", value);
   toJS() => value;
 
-  Map serialize() => {
-    'type': 'SchemeSymbol',
-    'value': value
-  };
+  Map serialize() => {'type': 'SchemeSymbol', 'value': value};
   SchemeSymbol deserialize(Map data) => new SchemeSymbol(data['value']);
 }
 
@@ -191,10 +185,7 @@ class SchemeString extends SelfEvaluating implements Serializable<SchemeString> 
 
   toJS() => value;
 
-  Map serialize() => {
-    'type': 'SchemeString',
-    'value': value
-  };
+  Map serialize() => {'type': 'SchemeString', 'value': value};
   SchemeString deserialize(Map data) => new SchemeString(data['value']);
 }
 
@@ -214,6 +205,7 @@ class _SchemeListIterator extends Iterator<Expression> {
     return false;
   }
 }
+
 class _NilIterator extends Iterator<Expression> {
   get current => null;
   moveNext() => false;
@@ -251,11 +243,12 @@ class EmptyList extends SelfEvaluating implements PairOrEmpty {
   every(f) => true;
   elementAt(f) => throw new StateError("empty list");
   expand<T>(f) => <T>[];
-  firstWhere(test, {orElse=null}) => orElse == null ? throw new StateError("empty list") : orElse();
+  firstWhere(test, {orElse = null}) =>
+      orElse == null ? throw new StateError("empty list") : orElse();
   fold<T>(init, combine) => init;
   forEach(f) => null;
   join([sep]) => "";
-  lastWhere(test, {orElse=null}) => firstWhere(test, orElse:orElse);
+  lastWhere(test, {orElse = null}) => firstWhere(test, orElse: orElse);
   List<T> map<T>(Function fn) => [];
   reduce(comb) => throw new StateError("empty list");
   singleWhere(test) => throw new StateError("empty list");
@@ -271,7 +264,8 @@ class EmptyList extends SelfEvaluating implements PairOrEmpty {
 const nil = const EmptyList._internal();
 
 class Pair<A extends Expression, B extends Expression> extends Expression
-    with IterableMixin<Expression> implements PairOrEmpty {
+    with IterableMixin<Expression>
+    implements PairOrEmpty {
   A first;
   B second;
   Pair(this.first, this.second);
@@ -310,8 +304,8 @@ class Pair<A extends Expression, B extends Expression> extends Expression
     if (!identical(current, nil)) result += " . $current";
     return result + ")";
   }
-  operator ==(other) => other is Pair && first == other.first &&
-                        second == other.second;
+
+  operator ==(other) => other is Pair && first == other.first && second == other.second;
   int get hashCode => hash2(first, second);
 
   static Expression append(List<Expression> args) {
@@ -319,13 +313,19 @@ class Pair<A extends Expression, B extends Expression> extends Expression
     List<Expression> lst = [];
     for (Expression arg in args.take(args.length - 1)) {
       if (arg.isNil) continue;
-      if (arg is Pair && arg.isWellFormedList()) lst.addAll(arg);
-      else throw new SchemeException("Argument is not a well-formed list.");
+      if (arg is Pair && arg.isWellFormedList()) {
+        lst.addAll(arg);
+      } else {
+        throw new SchemeException("Argument is not a well-formed list.");
+      }
     }
     Expression result = nil;
     Expression lastArg = args.last;
-    if (lastArg is PairOrEmpty && lastArg.isWellFormedList()) lst.addAll(lastArg);
-    else result = lastArg;
+    if (lastArg is PairOrEmpty && lastArg.isWellFormedList()) {
+      lst.addAll(lastArg);
+    } else {
+      result = lastArg;
+    }
     for (Expression expr in lst.reversed) {
       result = new Pair(expr, result);
     }
@@ -364,6 +364,7 @@ class Thunk extends Expression {
       rethrow;
     }
   }
+
   toJS() => throw new StateError("Thunks should not be passed to JS");
   toString() => 'Thunk($expr in f${env.id})';
 }
@@ -380,6 +381,7 @@ class Promise extends SelfEvaluating {
     }
     return expr;
   }
+
   toJS() => this;
   toString() => "#[promise (${_evaluated ? '' : 'not '}forced)]";
   @override
@@ -401,9 +403,11 @@ class Frame extends SelfEvaluating {
     interpreter.implementation.defineInFrame(symbol, value, this);
     hidden[symbol] = hide;
   }
+
   Expression lookup(SchemeSymbol symbol) {
     return interpreter.implementation.lookupInFrame(symbol, this);
   }
+
   void update(SchemeSymbol symbol, Expression value) {
     if (bindings.containsKey(symbol)) {
       bindings[symbol] = value;
@@ -416,5 +420,6 @@ class Frame extends SelfEvaluating {
   Frame makeChildFrame(Expression formals, Expression vals) {
     return interpreter.implementation.makeChildOf(formals, vals, this);
   }
+
   toJS() => this;
 }

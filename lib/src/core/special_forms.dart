@@ -103,8 +103,7 @@ Expression doQuasiquoteForm(PairOrEmpty expressions, Frame env) {
   return result.first;
 }
 
-Pair<Expression, Boolean> quasiquoteItem(
-    Expression v, Frame env,[int level = 1]) {
+Pair<Expression, Boolean> quasiquoteItem(Expression v, Frame env, [int level = 1]) {
   if (v is! Pair) return new Pair(v, schemeFalse);
   Pair val = v.pair;
   bool splice = val.first == const SchemeSymbol('unquote-splicing');
@@ -114,7 +113,7 @@ Pair<Expression, Boolean> quasiquoteItem(
       checkForm(exprs, 1, 1);
       Expression eval = schemeEval(exprs.pair.first, env);
       if (splice && !(eval is PairOrEmpty && eval.isWellFormedList())) {
-        throw new SchemeException( 'unquote-splicing used on non-list ${eval}');
+        throw new SchemeException('unquote-splicing used on non-list ${eval}');
       }
       return new Pair(eval, new Boolean(splice));
     }

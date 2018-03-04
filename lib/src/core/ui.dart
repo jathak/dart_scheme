@@ -64,9 +64,7 @@ abstract class UIElement extends SelfEvaluating implements Serializable {
   Map finishSerialize(Map data) {
     if (_anchors.isNotEmpty) {
       data['anchors'] = new Map<String, dynamic>.fromIterables(
-        _anchors.keys.map((k)=>k._id),
-        _anchors.values.map((v)=>v.serialize())
-      );
+          _anchors.keys.map((k) => k._id), _anchors.values.map((v) => v.serialize()));
     }
     if (spacer) data['spacer'] = spacer;
     return data;
@@ -75,9 +73,8 @@ abstract class UIElement extends SelfEvaluating implements Serializable {
   void finishDeserialize(Map data) {
     if (data.containsKey('anchors')) {
       _anchors = new Map<Direction, Anchor>.fromIterables(
-        data['anchors'].keys.map((k) => new Direction(k)),
-        data['anchors'].values.map(Serialization.deserialize)
-      );
+          data['anchors'].keys.map((k) => new Direction(k)),
+          data['anchors'].values.map(Serialization.deserialize));
     }
     if (data.containsKey('spacer')) spacer = data['spacer'];
   }
@@ -93,9 +90,9 @@ class Anchor extends UIElement {
   toString() => "#[Anchor:$id]";
 
   Map serialize() => {
-    'type': 'Anchor',
-    'id': id,
-  };
+        'type': 'Anchor',
+        'id': id,
+      };
   Anchor deserialize(Map data) {
     return new Anchor.withId(data['id']);
   }
@@ -107,9 +104,9 @@ class TextElement extends UIElement {
   toString() => "#[TextElement:$text]";
 
   Map serialize() => finishSerialize({
-    'type': 'TextElement',
-    'text': text,
-  });
+        'type': 'TextElement',
+        'text': text,
+      });
   TextElement deserialize(Map data) {
     return new TextElement(data['text'])..finishDeserialize(data);
   }
@@ -119,9 +116,7 @@ class Strike extends UIElement {
   Strike();
   toString() => "#[Strike]";
 
-  Map serialize() => finishSerialize({
-    'type': 'Strike'
-  });
+  Map serialize() => finishSerialize({'type': 'Strike'});
   Strike deserialize(Map data) {
     return new Strike()..finishDeserialize(data);
   }
@@ -142,14 +137,11 @@ class Block extends UIElement {
   Block.promise(this.inside) : type = const BlockType('promise');
   Block.async(this.inside) : type = const BlockType('async');
   toString() => "#[Block:${type.id}:$inside]";
-  Map serialize() => finishSerialize({
-    'type': 'Block',
-    'blockType': type.id,
-    'inside': inside.serialize()
-  });
+  Map serialize() =>
+      finishSerialize({'type': 'Block', 'blockType': type.id, 'inside': inside.serialize()});
   Block deserialize(Map data) {
-    return new Block._(new BlockType(data['blockType']),
-      Serialization.deserialize(data['inside']))..finishDeserialize(data);
+    return new Block._(new BlockType(data['blockType']), Serialization.deserialize(data['inside']))
+      ..finishDeserialize(data);
   }
 }
 
@@ -171,8 +163,7 @@ class BlockGrid extends UIElement {
     _rows = 1;
     _columns = row.length;
   }
-  BlockGrid.column(List<Block> col)
-    : _grid = new List.from(col.map((b) => new List.filled(1, b))) {
+  BlockGrid.column(List<Block> col) : _grid = new List.from(col.map((b) => new List.filled(1, b))) {
     if (col.isEmpty) throw new SchemeException("Empty block column");
     _rows = col.length;
     _columns = 1;
@@ -182,30 +173,37 @@ class BlockGrid extends UIElement {
   Iterable<Block> rowAt(int index) sync* {
     yield* _grid[index];
   }
+
   Iterable<Block> columnAt(int index) sync* {
     for (List<Block> row in _grid) {
       yield row[index];
     }
   }
-  BlockGrid toSpacer() => new BlockGrid(_grid.map((row)=>row.map((item) {
-    if (item is Anchor) return new TextMessage("x");
-    return item;
-  }).toList()).toList())..spacer = true;
+
+  BlockGrid toSpacer() => new BlockGrid(_grid
+      .map((row) => row.map((item) {
+            if (item is Anchor) return new TextMessage("x");
+            return item;
+          }).toList())
+      .toList())
+    ..spacer = true;
   toString() => "#$_grid";
 
   Map serialize() => finishSerialize({
-    'type': 'BlockGrid',
-    'grid': _grid.map((row) => row.map((item) => item.serialize()).toList()).toList()
-  });
+        'type': 'BlockGrid',
+        'grid': _grid.map((row) => row.map((item) => item.serialize()).toList()).toList()
+      });
   BlockGrid deserialize(Map data) {
     return new BlockGrid(data['grid'].map((row) {
       return row.map((item) => Serialization.deserialize(item)).toList();
-    }).toList())..finishDeserialize(data);
+    }).toList())
+      ..finishDeserialize(data);
   }
 }
 
 abstract class DiagramInterface extends UIElement {
   int get currentRow;
+
   /// If expression.inlineUI is true, returns expression.draw(this).
   /// If not, returns an anchor that is linked to expression.draw(this).
   /// If parentRow is set, the new object will be on a new line, with spacing

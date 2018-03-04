@@ -12,7 +12,7 @@ void checkForm(Expression expressions, int min, [int max = -1]) {
       throw new SchemeException("$expressions may contain at most $max items.");
     }
     return;
-  } 
+  }
   throw new SchemeException("$expressions is not a valid list.");
 }
 
@@ -26,6 +26,7 @@ void checkFormals(Expression formals) {
     }
     symbols.add(symbol);
   }
+
   while (formals is Pair) {
     checkAndAdd(formals.pair.first);
     formals = formals.pair.second;
@@ -36,7 +37,7 @@ void checkFormals(Expression formals) {
 Expression schemeEval(Expression expr, Frame env) {
   try {
     return completeEval(expr.evaluate(env));
-  } on SchemeException catch(e) {
+  } on SchemeException catch (e) {
     e.addCall(expr);
     rethrow;
   }
@@ -66,8 +67,8 @@ addPrimitive(Frame env, SchemeSymbol name, SchemePrimitive fn, int args) {
   env.define(name, new PrimitiveProcedure.fixed(name, fn, args), true);
 }
 
-addVariablePrimitive(Frame env, SchemeSymbol name, SchemePrimitive fn,
-    int minArgs, [int maxArgs = -1]) {
+addVariablePrimitive(Frame env, SchemeSymbol name, SchemePrimitive fn, int minArgs,
+    [int maxArgs = -1]) {
   var p = new PrimitiveProcedure.variable(name, fn, minArgs, maxArgs);
   env.define(name, p, true);
 }

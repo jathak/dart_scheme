@@ -8,7 +8,7 @@ import 'expressions.dart';
 /// The other import functions load one or more of the bindings by first
 /// importing all bindings into a child of the provided environment and then
 /// copying the selected names over.
-/// 
+///
 /// For easy use with libraries of simple Dart functions, see the
 /// @register annotation.
 abstract class SchemeLibrary {
@@ -16,12 +16,12 @@ abstract class SchemeLibrary {
   void importAll(Frame env) {
     throw new UnimplementedError();
   }
-  
+
   /// Loads only the single named binding into env.
   void importSingle(Frame env, SchemeSymbol name) {
     import(env, [name]);
   }
-  
+
   /// Loads only the listed bindings into env.
   void import(Frame env, Iterable<SchemeSymbol> names) {
     Frame inner = new Frame(env, env.interpreter);
@@ -34,26 +34,30 @@ abstract class SchemeLibrary {
   }
 }
 
-
 /// Annotation on a SchemeLibrary to generate importAll.
 /// importAll should not be overriden in user code.
-const _Register register = const _Register();
-class _Register { const _Register(); }
+const _Library library = const _Library();
 
-/// Annotation on each primitive procedure to register.
-const _Primitive primitive = const _Primitive();
-class _Primitive { const _Primitive(); }
+class _Library {
+  const _Library();
+}
 
 /// Annotation to make a SpecialFormPrimitiveProcedure
 /// This procedure is defined in the extra library, so don't use this inside
 /// the core library.
 const _NoEval noeval = const _NoEval();
-class _NoEval { const _NoEval(); }
+
+class _NoEval {
+  const _NoEval();
+}
 
 /// Annotation to call turtle.show()
 /// This may only be used inside of TurtleLibrary.
 const _Turtle turtlestart = const _Turtle();
-class _Turtle { const _Turtle(); }
+
+class _Turtle {
+  const _Turtle();
+}
 
 /// Annotation to specify a name other than the function name for the
 /// Scheme binding.

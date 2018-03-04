@@ -63,6 +63,7 @@ class Visualization extends UIElement {
       buttonRow[2] = new TextElement("${current+1}/${diagrams.length}");
       update();
     }
+
     Button first = new Button(new TextElement("<<"), () => goto(0));
     Button prev = new Button(new TextElement("<"), () => goto(current - 1));
     TextElement status = new TextElement("${current+1}/${diagrams.length}");
@@ -83,7 +84,6 @@ class Visualization extends UIElement {
     buttonRow = [first, prev, status, next, last, animate];
   }
 
-
   void _addFrames(Frame myEnv, [Expression returnValue = null]) {
     if (myEnv.tag == '#imported') return;
     if (frameReturnValues.containsKey(myEnv)) {
@@ -101,9 +101,7 @@ class Visualization extends UIElement {
   }
 
   void _addDiagram(Frame active) {
-    List<Frame> frames = frameReturnValues.keys.toList()..sort((a, b) {
-      return a.id - b.id;
-    });
+    List<Frame> frames = frameReturnValues.keys.toList()..sort((a, b) => a.id - b.id);
     List<Pair<Frame, Expression>> passing = frames.map((frame) {
       return new Pair(frame, frameReturnValues[frame]);
     }).toList();
@@ -125,6 +123,7 @@ class Visualization extends UIElement {
     _addDiagram(env);
     return undefined;
   }
+
   serialize() => throw new UnsupportedError('Visualizations cannot be serialized');
   deserialize(data) => null;
 }

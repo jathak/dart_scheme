@@ -19,7 +19,7 @@ buildLibrary(String name) async {
   String mixin = generateImportMixin(source);
   String dottedName = name.replaceAll("/", ".");
   String code = "part of cs61a_scheme.${dottedName};\n\n$mixin";
-  code = new DartFormatter().format(code);
+  code = new DartFormatter(pageWidth: 100).format(code);
   var output = new File("lib/gen/$name.gen.dart");
   if (!await output.exists()) await output.create(recursive: true);
   await output.writeAsString(code);

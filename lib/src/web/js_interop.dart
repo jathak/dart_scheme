@@ -13,7 +13,7 @@ class JsProcedure extends Procedure {
     var result = fn.apply(args.map((arg) => arg.toJS()).toList());
     return jsToScheme(result);
   }
-  
+
   toJS() => fn;
 }
 
@@ -25,6 +25,7 @@ class JsExpression extends SelfEvaluating {
     if (objString.length > 20) objString.substring(0, 17) + "...";
     return "#[js:$objString]";
   }
+
   toJS() => obj;
 }
 
@@ -36,6 +37,7 @@ class NativeExpression extends SelfEvaluating {
     if (objString.length > 20) objString.substring(0, 17) + "...";
     return "#[native:$objString]";
   }
+
   toJS() => obj;
 }
 
@@ -57,11 +59,8 @@ Expression jsObjectToScheme(JsObject obj) {
   var type = context['Object']['prototype']['toString'].callMethod('call', [obj]);
   if (type == '[object Promise]') {
     var completer = new Completer();
-    obj.callMethod('then', [
-      completer.complete,
-      completer.completeError
-    ]);
-    var future = completer.future.then((result)=>jsToScheme(result));
+    obj.callMethod('then', [completer.complete, completer.completeError]);
+    var future = completer.future.then((result) => jsToScheme(result));
     return new AsyncExpression(future)..jsPromise = obj;
   }
   return new JsExpression(obj);

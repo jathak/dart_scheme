@@ -15,7 +15,6 @@ applyTheme(Theme theme, String css, Element style, [bool notify = true]) {
 Stream<Theme> get onThemeChange => _controller.stream.asBroadcastStream();
 
 class Theme extends SelfEvaluating implements Serializable<Theme> {
-
   Map<SchemeSymbol, Color> colors = {};
   Map<SchemeSymbol, SchemeString> cssProps = {};
 
@@ -91,14 +90,14 @@ class Color extends SelfEvaluating implements Serializable<Color> {
     str = str.toLowerCase();
     if (str.startsWith("#")) str = str.substring(1);
     if (str.length == 3) {
-      str = str[0]*2 + str[1]*2 + str[2]*2;
+      str = str[0] * 2 + str[1] * 2 + str[2] * 2;
     }
     if (str.length != 6) {
       throw new SchemeException("#$str is not a valid color");
     }
-    int red = _toInt(str[0])*16 + _toInt(str[1]);
-    int green = _toInt(str[2])*16 + _toInt(str[3]);
-    int blue = _toInt(str[4])*16 + _toInt(str[5]);
+    int red = _toInt(str[0]) * 16 + _toInt(str[1]);
+    int green = _toInt(str[2]) * 16 + _toInt(str[3]);
+    int blue = _toInt(str[4]) * 16 + _toInt(str[5]);
     return new Color(red, green, blue);
   }
 
@@ -117,33 +116,44 @@ class Color extends SelfEvaluating implements Serializable<Color> {
 
   static int _toInt(String hexChar) {
     switch (hexChar) {
-      case '0': return 0;
-      case '1': return 1;
-      case '2': return 2;
-      case '3': return 3;
-      case '4': return 4;
-      case '5': return 5;
-      case '6': return 6;
-      case '7': return 7;
-      case '8': return 8;
-      case '9': return 9;
-      case 'a': return 10;
-      case 'b': return 11;
-      case 'c': return 12;
-      case 'd': return 13;
-      case 'e': return 14;
-      case 'f': return 15;
-      default: throw new SchemeException("$hexChar is not a valid hexadecimal");
+      case '0':
+        return 0;
+      case '1':
+        return 1;
+      case '2':
+        return 2;
+      case '3':
+        return 3;
+      case '4':
+        return 4;
+      case '5':
+        return 5;
+      case '6':
+        return 6;
+      case '7':
+        return 7;
+      case '8':
+        return 8;
+      case '9':
+        return 9;
+      case 'a':
+        return 10;
+      case 'b':
+        return 11;
+      case 'c':
+        return 12;
+      case 'd':
+        return 13;
+      case 'e':
+        return 14;
+      case 'f':
+        return 15;
+      default:
+        throw new SchemeException("$hexChar is not a valid hexadecimal");
     }
   }
 
-  serialize() => {
-    'type': 'Color',
-    'red': red,
-    'green': green,
-    'blue': blue,
-    'alpha': alpha
-  };
+  serialize() => {'type': 'Color', 'red': red, 'green': green, 'blue': blue, 'alpha': alpha};
 
   deserialize(Map data) {
     return new Color(data['red'], data['green'], data['blue'], data['alpha']);

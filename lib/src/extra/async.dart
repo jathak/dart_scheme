@@ -12,7 +12,7 @@ class AsyncExpression<T extends Expression> extends Expression {
   T _result;
   T get result => _result;
   Object jsPromise = null;
-  
+
   AsyncExpression(Future<T> future) {
     _future = future.then((e) async {
       while (e is AsyncExpression) {
@@ -23,22 +23,22 @@ class AsyncExpression<T extends Expression> extends Expression {
       return e;
     });
   }
-  
+
   Expression evaluate(Frame env) {
     if (complete) return result;
     return this;
   }
-  
+
   AsyncExpression chain(Expression Function(T) fn) {
     return new AsyncExpression(_future.then(fn));
   }
-  
+
   toString() => complete ? "#[async:$result]" : "#[async]";
   toJS() => jsPromise ?? AsyncExpression.makePromise(this);
   static dynamic Function(AsyncExpression) makePromise = (expr) {
     throw new UnimplementedError("JS interop must be loaded for AsyncExpression.toJS() to work.");
   };
-  
+
   @override
   UIElement draw(DiagramInterface diagram) {
     UIElement inside = complete ? diagram.pointTo(result) : new TextElement("async");
@@ -48,7 +48,7 @@ class AsyncExpression<T extends Expression> extends Expression {
 
 class AsyncLambdaProcedure extends LambdaProcedure {
   AsyncLambdaProcedure(formals, body, env) : super(formals, body, env);
-  
+
   AsyncExpression apply(PairOrEmpty arguments, Frame env) {
     Frame frame = makeCallFrame(arguments, env);
     FutureOr<Expression> expr = env.interpreter.implementation.asyncEvalAll(body, frame);
@@ -92,7 +92,7 @@ FutureOr<Expression> asyncEval(Expression exprs, Frame env) {
       } else {
         return result;
       }
-    } else if (asyncSpecialForms.containsKey(first)){
+    } else if (asyncSpecialForms.containsKey(first)) {
       return asyncSpecialForms[first](rest, env);
     } else if (env.interpreter.specialForms.containsKey(first)) {
       return env.interpreter.specialForms[first](rest, env);
@@ -105,14 +105,14 @@ FutureOr<Expression> asyncEval(Expression exprs, Frame env) {
 }
 
 Map<SchemeSymbol, AsyncSpecialForm> asyncSpecialForms = {
-  const SchemeSymbol('define') : asyncDefineForm,
-  const SchemeSymbol('if') : asyncIfForm,
-  const SchemeSymbol('cond') : asyncCondForm,
-  const SchemeSymbol('and') : asyncAndForm,
-  const SchemeSymbol('or') : asyncOrForm,
-  const SchemeSymbol('let') : asyncLetForm,
-  const SchemeSymbol('begin') : asyncBeginForm,
-  const SchemeSymbol('cons-stream') : asyncConsStreamForm,
+  const SchemeSymbol('define'): asyncDefineForm,
+  const SchemeSymbol('if'): asyncIfForm,
+  const SchemeSymbol('cond'): asyncCondForm,
+  const SchemeSymbol('and'): asyncAndForm,
+  const SchemeSymbol('or'): asyncOrForm,
+  const SchemeSymbol('let'): asyncLetForm,
+  const SchemeSymbol('begin'): asyncBeginForm,
+  const SchemeSymbol('cons-stream'): asyncConsStreamForm,
   /*const SchemeSymbol('set!') : asyncSetForm,
   const SchemeSymbol('quasiquote') : asyncQuasiquoteForm,
   const SchemeSymbol('unquote') : asyncUnquoteForm,

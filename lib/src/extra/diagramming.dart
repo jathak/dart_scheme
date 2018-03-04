@@ -6,14 +6,10 @@ class Arrow extends SelfEvaluating implements Serializable<Arrow> {
   final Anchor start, end;
   Arrow(this.start, this.end);
   toString() => "#Arrow($start->$end)";
-  Map serialize() => {
-    'type': 'Arrow',
-    'start': start.serialize(),
-    'end': end.serialize()
-  };
+  Map serialize() => {'type': 'Arrow', 'start': start.serialize(), 'end': end.serialize()};
   Arrow deserialize(Map data) {
-    return new Arrow(Serialization.deserialize(data['start']),
-      Serialization.deserialize(data['start']));
+    return new Arrow(
+        Serialization.deserialize(data['start']), Serialization.deserialize(data['start']));
   }
 }
 
@@ -22,14 +18,12 @@ class Binding extends UIElement {
   final UIElement value;
   final bool isReturn;
   Binding(this.symbol, this.value, [this.isReturn = false]);
-  Map serialize() => finishSerialize({
-    'type': 'Binding',
-    'symbol': symbol.serialize(),
-    'value': value.serialize()
-  });
+  Map serialize() => finishSerialize(
+      {'type': 'Binding', 'symbol': symbol.serialize(), 'value': value.serialize()});
   Binding deserialize(Map data) {
-    return new Binding(Serialization.deserialize(data['symbol']),
-      Serialization.deserialize(data['value']))..finishDeserialize(data);
+    return new Binding(
+        Serialization.deserialize(data['symbol']), Serialization.deserialize(data['value']))
+      ..finishDeserialize(data);
   }
 }
 
@@ -37,13 +31,10 @@ class Row extends UIElement {
   final List<UIElement> elements;
   Row(this.elements);
   toString() => elements.toString();
-  Map serialize() => finishSerialize({
-    'type': 'Row',
-    'elements': elements.map((el) => el.serialize()).toList()
-  });
+  Map serialize() =>
+      finishSerialize({'type': 'Row', 'elements': elements.map((el) => el.serialize()).toList()});
   Row deserialize(Map data) =>
-    new Row(data['elements'].map(Serialization.deserialize).toList())
-      ..finishDeserialize(data);
+      new Row(data['elements'].map(Serialization.deserialize).toList())..finishDeserialize(data);
 }
 
 class FrameElement extends UIElement {
@@ -65,6 +56,7 @@ class FrameElement extends UIElement {
       bindings.add(new Binding(symb, diagram.bindingTo(returnValue), true));
     }
   }
+
   FrameElement._deserialize(Map data) {
     id = data['id'];
     tag = data['tag'];
@@ -74,13 +66,13 @@ class FrameElement extends UIElement {
   }
 
   Map serialize() => finishSerialize({
-    'type': 'FrameElement',
-    'id': id,
-    'tag': tag,
-    'parentId' : parentId,
-    'active': active,
-    'bindings': bindings.map((el) => el.serialize()).toList()
-  });
+        'type': 'FrameElement',
+        'id': id,
+        'tag': tag,
+        'parentId': parentId,
+        'active': active,
+        'bindings': bindings.map((el) => el.serialize()).toList()
+      });
 
   FrameElement deserialize(Map data) {
     return new FrameElement._deserialize(data)..finishDeserialize(data);
@@ -102,11 +94,11 @@ class Diagram extends DiagramInterface {
   }
 
   Map serialize() => finishSerialize({
-    'type': 'Diagram',
-    'frames': frames.map((frame) => frame.serialize()).toList(),
-    'rows': rows.map((row) => row.serialize()).toList(),
-    'arrows': arrows.map((arrow) => arrow.serialize()).toList()
-  });
+        'type': 'Diagram',
+        'frames': frames.map((frame) => frame.serialize()).toList(),
+        'rows': rows.map((row) => row.serialize()).toList(),
+        'arrows': arrows.map((arrow) => arrow.serialize()).toList()
+      });
 
   Diagram._deserialize(Map data) {
     frames = data['frames'].map(Serialization.deserialize).toList();

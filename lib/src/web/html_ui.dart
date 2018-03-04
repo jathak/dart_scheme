@@ -10,16 +10,16 @@ class HtmlRenderer {
   Element container;
   JsObject jsPlumb;
   Iterable connections;
-  
+
   static int anchorCount = 0;
-  
+
   HtmlRenderer(this.container, JsObject masterJsPlumb) {
     jsPlumb = masterJsPlumb.callMethod('getInstance');
     container.classes.add('render');
   }
-  
+
   List<StreamSubscription> subs = [];
-  
+
   void render(UIElement element) {
     var oldSubscriptions = subs;
     subs = [];
@@ -37,17 +37,25 @@ class HtmlRenderer {
       render(element);
     }));
   }
-  
+
   void refreshConnections() {
     if (connections == null) return;
     var base = new JsObject.jsify({
-      'endpoint': ['Dot', {'radius': 3}],
+      'endpoint': [
+        'Dot',
+        {'radius': 3}
+      ],
       'connector': 'StateMachine',
-      'overlays': [['Arrow',
-        {'length': 10, 'width': 7, 'foldback': 0.55, 'location': 1}]],
+      'overlays': [
+        [
+          'Arrow',
+          {'length': 10, 'width': 7, 'foldback': 0.55, 'location': 1}
+        ]
+      ],
       'paintStyle': {'strokeStyle': '#bebebe', 'lineWidth': 1},
       'endpointStyles': [
-        {'fillStyle': '#bebebe'}, {'fillStyle': 'transparent'},
+        {'fillStyle': '#bebebe'},
+        {'fillStyle': 'transparent'},
       ]
     });
     jsPlumb?.callMethod('reset');
@@ -68,10 +76,10 @@ class HtmlRenderer {
       }));
     }
   }
-  
+
   Map<int, String> trueAnchorIds = {};
   Map<int, Direction> anchorDirections = {};
-  
+
   Element convert(UIElement element, [bool spaced = false]) {
     Element node = _convertRaw(element, spaced);
     if (element.spacer || spaced) {
@@ -101,7 +109,7 @@ class HtmlRenderer {
     if (element is Strike) return convertStrike(element, spaced);
     throw new SchemeException("Cannot render $element");
   }
-  
+
   Element convertVisualization(Visualization viz, [bool spaced = false]) {
     DivElement wrapper = new DivElement()..classes = ['visualization'];
     wrapper.append(convert(viz.currentDiagram));
@@ -112,7 +120,7 @@ class HtmlRenderer {
     wrapper.append(footer);
     return wrapper;
   }
-  
+
   Element convertButton(Button button, [bool spaced = false]) {
     DivElement element = new DivElement()..classes = ['button'];
     element.append(convert(button.inside));
@@ -143,7 +151,7 @@ class HtmlRenderer {
   Element convertFrameElement(FrameElement frame, [bool spaced = false]) {
     DivElement div = new DivElement();
     div.id = 'frame${frame.id}';
-    div.classes.add(frame.active ? 'current-frame': 'other-frame');
+    div.classes.add(frame.active ? 'current-frame' : 'other-frame');
     DivElement header = new DivElement();
     String name = frame.id == 0 ? 'Global frame' : 'f${frame.id}';
     String parent = "";
@@ -157,7 +165,7 @@ class HtmlRenderer {
     }
     return div;
   }
-  
+
   Element convertBinding(Binding binding, [bool spaced = false]) {
     DivElement div = new DivElement()..className = 'binding';
     if (binding.isReturn) div.classes.add('return');
@@ -167,7 +175,7 @@ class HtmlRenderer {
     span.append(convert(binding.value, spaced || binding.spacer));
     return div;
   }
-  
+
   Element convertRow(Row row, [bool spaced = false]) {
     DivElement div = new DivElement()..className = 'row';
     for (UIElement element in row.elements) {
@@ -175,18 +183,18 @@ class HtmlRenderer {
     }
     return div;
   }
-  
+
   Element convertTextElement(TextElement text, [bool spaced = false]) {
     return new SpanElement()..text = text.text;
   }
-  
+
   Element convertBlock(Block block, [bool spaced = false]) {
     DivElement div = new DivElement();
     div.classes = ['block', block.type.id];
     div.append(convert(block.inside, spaced || block.spacer));
     return div;
   }
-  
+
   Element convertBlockGrid(BlockGrid blockGrid, [bool spaced = false]) {
     if (blockGrid.rowCount != 1) {
       throw new SchemeException("Multiple BlockGrid rows not yet implemented");
@@ -198,7 +206,7 @@ class HtmlRenderer {
     }
     return div;
   }
-  
+
   Element convertAnchor(Anchor anchor, [bool spaced = false]) {
     if (spaced) {
       return new SpanElement()..innerHtml = '&nbsp';
@@ -206,13 +214,17 @@ class HtmlRenderer {
     String htmlAnchorId = 'trueAnchor${anchorCount++}';
     trueAnchorIds[anchor.id] = htmlAnchorId;
     anchorDirections[anchor.id] = null;
-    return new SpanElement()..id = htmlAnchorId..innerHtml = '&nbsp;';
+    return new SpanElement()
+      ..id = htmlAnchorId
+      ..innerHtml = '&nbsp;';
   }
-  
+
   Element convertStrike(Strike strike, [bool spaced = false]) {
-    return new SpanElement()..innerHtml = '-'..classes = ['strike'];
+    return new SpanElement()
+      ..innerHtml = '-'
+      ..classes = ['strike'];
   }
-  
+
   List<num> _anchorForDirection(Direction dir) {
     if (dir == Direction.left) return [0, 0.5, 1, 0, 0, 0];
     if (dir == Direction.topLeft) return [0, 0, 1, 0, 0, 0];
@@ -224,7 +236,7 @@ class HtmlRenderer {
     if (dir == Direction.bottomRight) return [1, 1, 1, 0, 0, 0];
     return [0.5, 0.5, 1, 0, 0, 0];
   }
-  
+
   makeConnection(Arrow arrow) {
     String startId = 'anchor${arrow.start.id}';
     String endId = 'anchor${arrow.end.id}';

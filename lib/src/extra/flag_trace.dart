@@ -14,14 +14,14 @@ class FlagTrace {
   List<FlagStep> steps = [];
   String code;
   String language;
-  FlagTrace(this.code, [this.language='scheme']);
+  FlagTrace(this.code, [this.language = 'scheme']);
 
   Map serialize() => {
-    'type': 'FlagTrace',
-    'code': code,
-    'language': language,
-    'steps': steps.map((s) => s.serialize()).toList()
-  };
+        'type': 'FlagTrace',
+        'code': code,
+        'language': language,
+        'steps': steps.map((s) => s.serialize()).toList()
+      };
 
   FlagTrace deserialize(Map data) {
     var trace = new FlagTrace(data['code'], data['language']);
@@ -36,15 +36,13 @@ class FlagStep extends SelfEvaluating with Serializable<FlagStep> {
   FlagStep(this.diagram, this.flags);
 
   Map serialize() => {
-    'type': 'FlagStep',
-    'diagram': diagram.serialize(),
-    'flags': flags.map((f) => f.serialize()).toList()
-  };
+        'type': 'FlagStep',
+        'diagram': diagram.serialize(),
+        'flags': flags.map((f) => f.serialize()).toList()
+      };
 
-  FlagStep deserialize(Map data) => new FlagStep(
-    Serialization.deserialize(data['diagram']),
-    data['flags'].map(Serialization.deserialize).toList()
-  );
+  FlagStep deserialize(Map data) => new FlagStep(Serialization.deserialize(data['diagram']),
+      data['flags'].map(Serialization.deserialize).toList());
 }
 
 class Flag extends SelfEvaluating with Serializable<Flag> {
@@ -55,12 +53,12 @@ class Flag extends SelfEvaluating with Serializable<Flag> {
   Flag(this.callExpression, this.frameId);
 
   Map serialize() => {
-    'type': 'Flag',
-    'callExpression': callExpression,
-    'operands': operands.map((f) => f.serialize()).toList(),
-    'frameId': frameId,
-    'body': body.map((f) => f.serialize()).toList()
-  };
+        'type': 'Flag',
+        'callExpression': callExpression,
+        'operands': operands.map((f) => f.serialize()).toList(),
+        'frameId': frameId,
+        'body': body.map((f) => f.serialize()).toList()
+      };
 
   Flag deserialize(Map data) {
     var flag = new Flag(data['callExpression'], data['frameId']);

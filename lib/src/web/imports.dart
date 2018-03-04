@@ -8,9 +8,9 @@ import 'package:cs61a_scheme/cs61a_scheme_extra.dart';
 class ImportedLibrary extends SelfEvaluating {
   Frame env;
   String code;
-  
+
   ImportedLibrary._internal();
-  
+
   _init(String code, Frame containing) async {
     this.code = code;
     env = containing;
@@ -23,37 +23,37 @@ class ImportedLibrary extends SelfEvaluating {
       }
     }
   }
-  
+
   static Future<ImportedLibrary> load(String code, Frame parent) async {
     ImportedLibrary library = new ImportedLibrary._internal();
     await library._init(code, new Frame(parent, parent.interpreter));
     library.env.tag = '#imported';
     return library;
   }
-  
+
   static Future<ImportedLibrary> loadInline(String code, Frame env) async {
     ImportedLibrary library = new ImportedLibrary._internal();
     await library._init(code, env);
     return library;
   }
-  
+
   Expression reference(SchemeSymbol symbol) {
     if (!env.bindings.containsKey(symbol)) {
       throw new SchemeException("Cannot find $symbol in library");
     }
     return env.bindings[symbol];
   }
-  
+
   void extract(SchemeSymbol symbol, Frame parent, [bool hide = true]) {
     parent.define(symbol, reference(symbol));
   }
-  
+
   toJS() => this;
   toString() => '#imported-library';
 }
 
-Future<ImportedLibrary> import(String id, List<SchemeSymbol> imports,
-    Frame env, [bool inline = false]) async {
+Future<ImportedLibrary> import(String id, List<SchemeSymbol> imports, Frame env,
+    [bool inline = false]) async {
   String code;
   if (id.startsWith('scm/')) {
     code = await html.HttpRequest.getString('$id.scm');

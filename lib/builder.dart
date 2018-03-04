@@ -11,7 +11,7 @@ String generateImportMixin(String sourceCode) {
   for (CompilationUnitMember decl in ast.declarations) {
     if (decl is ClassDeclaration) {
       for (Annotation annotation in decl.metadata) {
-        if (annotation.name.toSource() == "register") {
+        if (annotation.name.toSource() == "library") {
           return _buildMixin(decl);
         }
       }
@@ -26,13 +26,12 @@ String _buildMixin(ClassDeclaration decl) {
   bool myNeedsTurtle = false;
   for (ClassMember member in decl.members) {
     if (member is MethodDeclaration) {
-      for (Annotation annotation in member.metadata) {
-        if (annotation.name.toSource() == "primitive") {
-          needsTurtle = false;
-          abstractMethods.add(_buildAbstract(member));
-          primitives.add(_buildPrimitive(member));
-          myNeedsTurtle = myNeedsTurtle || needsTurtle;
-        }
+      String name = member.name.toSource();
+      if (!name.startsWith('import') && !name.startsWith('_')) {
+        needsTurtle = false;
+        abstractMethods.add(_buildAbstract(member));
+        primitives.add(_buildPrimitive(member));
+        myNeedsTurtle = myNeedsTurtle || needsTurtle;
       }
     }
   }
@@ -125,10 +124,12 @@ String _buildPrimitive(MethodDeclaration method) {
       if (param.type.toSource() == "List<Expression>") {
         variable = true;
       }
-    } else throw new Exception("Primitives may not have optional parameters.");
+    } else {
+      throw new Exception("Primitives may not have optional parameters.");
+    }
   }
   String symb = "const SchemeSymbol($name)";
-  var extraSymbs = extraNames.map((name)=>"const SchemeSymbol($name)");
+  var extraSymbs = extraNames.map((name) => "const SchemeSymbol($name)");
   String extra = "";
   for (String symbol in extraSymbs) {
     extra += '__env.bindings[$symbol] = __env.bindings[$symb];';
@@ -155,7 +156,9 @@ String _buildPrimitive(MethodDeclaration method) {
           throw new Exception("Primitive parameters must be typed.");
         }
         types.add(param.type.toSource());
-      } else throw new Exception("Primitives may not have optional parameters.");
+      } else {
+        throw new Exception("Primitives may not have optional parameters.");
+      }
     }
     bool takesFrame = types.length > 0 && types.last == "Frame";
     if (takesFrame) types.removeLast();
