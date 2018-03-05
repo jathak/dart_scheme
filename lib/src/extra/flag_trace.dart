@@ -103,7 +103,7 @@ class FlagTraceBuilder {
     inter.stopListening(const SchemeSymbol('define'), _step);
     inter.stopListening(const SchemeSymbol('set!'), _step);
     inter.stopListening(const SchemeSymbol('pair-mutation'), _step);
-    inter.stopListening(const SchemeSymbol('new-frame'), _step);
+    inter.stopListening(const SchemeSymbol('new-frame'), _frameStep);
     inter.stopListening(const SchemeSymbol('pre-user-call'), _userCall);
     inter.stopListening(const SchemeSymbol('call-expression'), _callExpr);
     inter.stopListening(const SchemeSymbol('return'), _returnStep);
