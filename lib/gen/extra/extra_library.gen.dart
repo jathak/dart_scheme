@@ -14,6 +14,10 @@ abstract class _$ExtraLibraryMixin {
   void cancelListener(EventListener listener, Frame env);
   void cancelAll(SchemeSymbol id, Frame env);
   String stringAppend(List<Expression> exprs);
+  FlagTrace trace(Expression code, Frame env);
+  Visualization traceToVisualization(FlagTrace trace);
+  String serialize(Serializable expr);
+  Expression deserialize(String json);
   void importAll(Frame __env) {
     addPrimitive(__env, const SchemeSymbol("run-async"), (__exprs, __env) {
       if (__exprs[0] is! Procedure)
@@ -76,5 +80,23 @@ abstract class _$ExtraLibraryMixin {
     addVariablePrimitive(__env, const SchemeSymbol('string-append'), (__exprs, __env) {
       return new SchemeString(this.stringAppend(__exprs));
     }, 0, -1);
+    addOperandPrimitive(__env, const SchemeSymbol("trace"), (__exprs, __env) {
+      return this.trace(__exprs[0], __env);
+    }, 1);
+    addPrimitive(__env, const SchemeSymbol('trace->visualization'), (__exprs, __env) {
+      if (__exprs[0] is! FlagTrace)
+        throw new SchemeException('Argument of invalid type passed to trace->visualization.');
+      return this.traceToVisualization(__exprs[0]);
+    }, 1);
+    addPrimitive(__env, const SchemeSymbol("serialize"), (__exprs, __env) {
+      if (__exprs[0] is! Serializable)
+        throw new SchemeException('Argument of invalid type passed to serialize.');
+      return new SchemeString(this.serialize(__exprs[0]));
+    }, 1);
+    addPrimitive(__env, const SchemeSymbol("deserialize"), (__exprs, __env) {
+      if (__exprs[0] is! SchemeString)
+        throw new SchemeException('Argument of invalid type passed to deserialize.');
+      return this.deserialize((__exprs[0] as SchemeString).value);
+    }, 1);
   }
 }

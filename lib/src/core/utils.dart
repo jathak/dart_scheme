@@ -58,6 +58,7 @@ Expression evalCallExpression(Pair expr, Frame env) {
     env.interpreter.triggerEvent(first, [rest], env);
     return result;
   }
+  env.interpreter.triggerEvent(const SchemeSymbol('call-expression'), [expr], env);
   return env.interpreter.implementation.evalProcedureCall(first, rest, env);
 }
 

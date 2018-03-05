@@ -3,7 +3,6 @@ library cs61a_scheme.core.serialization;
 import 'dart:convert' show JSON;
 
 import 'expressions.dart';
-import 'logging.dart';
 import 'ui.dart';
 
 final Map<String, Serializable> deserializers = {
@@ -14,21 +13,14 @@ final Map<String, Serializable> deserializers = {
   'Anchor': new Anchor(),
 };
 
-abstract class Serializable<T extends Expression> {
+abstract class Serializable<T extends Expression> extends Expression {
   Map serialize();
   T deserialize(Map data);
 }
 
 class Serialization {
-  static Map serialize(Expression expr) {
-    if (expr is! Serializable) {
-      throw new SchemeException('$expr is not serializable');
-    }
-    return (expr as Serializable).serialize();
-  }
-
-  static String serializeToJson(Expression expr) {
-    return JSON.encode(serialize(expr));
+  static String serializeToJson(Serializable expr) {
+    return JSON.encode(expr.serialize());
   }
 
   static Expression deserialize(Map data) {
