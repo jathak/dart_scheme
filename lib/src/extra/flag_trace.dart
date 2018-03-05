@@ -10,6 +10,17 @@ import 'package:cs61a_scheme/cs61a_scheme.dart';
 
 import 'diagramming.dart';
 
+initTraceDeserializers() {
+  deserializers['FlagTrace'] = new FlagTrace(null);
+  deserializers['FlagStep'] = new FlagStep(null, null);
+  deserializers['Flag'] = new Flag(null, null);
+  deserializers['Arrow'] = new Arrow(null, null);
+  deserializers['Binding'] = new Binding(null, null);
+  deserializers['Row'] = new Row(null);
+  deserializers['FrameElement'] = FrameElement.stub;
+  deserializers['Diagram'] = Diagram.stub;
+}
+
 class FlagTrace extends SelfEvaluating implements Serializable<FlagTrace> {
   List<FlagStep> steps = [];
   String code;

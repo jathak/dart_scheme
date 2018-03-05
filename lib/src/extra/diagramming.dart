@@ -9,7 +9,7 @@ class Arrow extends SelfEvaluating implements Serializable<Arrow> {
   Map serialize() => {'type': 'Arrow', 'start': start.serialize(), 'end': end.serialize()};
   Arrow deserialize(Map data) {
     return new Arrow(
-        Serialization.deserialize(data['start']), Serialization.deserialize(data['start']));
+        Serialization.deserialize(data['start']), Serialization.deserialize(data['end']));
   }
 }
 
@@ -18,11 +18,15 @@ class Binding extends UIElement {
   final UIElement value;
   final bool isReturn;
   Binding(this.symbol, this.value, [this.isReturn = false]);
-  Map serialize() => finishSerialize(
-      {'type': 'Binding', 'symbol': symbol.serialize(), 'value': value.serialize()});
+  Map serialize() => finishSerialize({
+        'type': 'Binding',
+        'symbol': symbol.serialize(),
+        'value': value.serialize(),
+        'isReturn': isReturn
+      });
   Binding deserialize(Map data) {
-    return new Binding(
-        Serialization.deserialize(data['symbol']), Serialization.deserialize(data['value']))
+    return new Binding(Serialization.deserialize(data['symbol']),
+        Serialization.deserialize(data['value']), data['isReturn'])
       ..finishDeserialize(data);
   }
 }
@@ -62,7 +66,7 @@ class FrameElement extends UIElement {
     tag = data['tag'];
     parentId = data['parentId'];
     active = data['active'];
-    bindings = data['bindings'].map(Serialization.deserialize).toList();
+    bindings = data['bindings']?.map(Serialization.deserialize)?.toList();
   }
 
   Map serialize() => finishSerialize({
@@ -77,6 +81,9 @@ class FrameElement extends UIElement {
   FrameElement deserialize(Map data) {
     return new FrameElement._deserialize(data)..finishDeserialize(data);
   }
+
+  // Used to intialize the deserializer
+  static FrameElement stub = new FrameElement._deserialize({});
 }
 
 class Diagram extends DiagramInterface {
@@ -101,14 +108,17 @@ class Diagram extends DiagramInterface {
       });
 
   Diagram._deserialize(Map data) {
-    frames = data['frames'].map(Serialization.deserialize).toList();
-    rows = data['rows'].map(Serialization.deserialize).toList();
-    arrows = data['arrows'].map(Serialization.deserialize).toList();
+    frames = data['frames']?.map(Serialization.deserialize)?.toList();
+    rows = data['rows']?.map(Serialization.deserialize)?.toList();
+    arrows = data['arrows']?.map(Serialization.deserialize)?.toList();
   }
 
   Diagram deserialize(Map data) {
     return new Diagram._deserialize(data)..finishDeserialize(data);
   }
+
+  // Used to intialize the deserializer
+  static Diagram stub = new Diagram._deserialize({});
 
   _finish() {
     for (int row in _rowHowMany.keys.toList()..sort()) {

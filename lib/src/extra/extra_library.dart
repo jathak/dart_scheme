@@ -17,6 +17,10 @@ part '../../gen/extra/extra_library.gen.dart';
 /// the primitives and performs type checking on arguments).
 @library
 class ExtraLibrary extends SchemeLibrary with _$ExtraLibraryMixin {
+  ExtraLibrary() {
+    initTraceDeserializers();
+  }
+
   void importAll(Frame env) {
     super.importAll(env);
     env.interpreter.specialForms[const SchemeSymbol('define-async')] = doDefineAsync;
