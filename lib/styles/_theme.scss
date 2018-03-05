@@ -1,0 +1,244 @@
+// This file is designed to be processed by the Scheme Interpreter's theme.
+// /*!COLOR|<css-prop>|<scheme-prop>*/<default-code>/*!END*/
+// /*!CSS|<scheme-prop>*/<default-code>/*!END*/
+
+@mixin spec-keyword {
+  /*!COLOR|color|spec-keyword*/ color: #e6db74; /*!END*/
+  /*!CSS|spec-keyword*/ /*!END*/
+  &:hover {
+    /*!COLOR|color|spec-keyword-hover*/ /*!END*/
+    /*!CSS|spec-keyword-hover*/ /*!END*/
+  }
+}
+
+@mixin extra-keyword {
+  /*!COLOR|color|extra-keyword*/ color: #a6e22e; /*!END*/
+  /*!CSS|extra-keyword*/ /*!END*/
+  &:hover {
+    /*!COLOR|color|extra-keyword-hover*/ /*!END*/
+    /*!CSS|extra-keyword-hover*/ /*!END*/
+  }
+}
+
+@mixin text {
+  /*!COLOR|color|text*/ color: #fff; /*!END*/
+  /*!CSS|text*/ /*!END*/
+  &:hover {
+    /*!COLOR|color|text-hover*/ /*!END*/
+    /*!CSS|text-hover*/ /*!END*/
+  }
+}
+
+@mixin number {
+  /*!COLOR|color|number*/ color: #ae81ff; /*!END*/
+  /*!CSS|number*/ /*!END*/
+  &:hover {
+    /*!COLOR|color|number-hover*/ /*!END*/
+    /*!CSS|number-hover*/ /*!END*/
+  }
+}
+
+@mixin boolean {
+  /*!COLOR|color|boolean*/ color: #ae81ff; /*!END*/
+  /*!CSS|boolean*/ /*!END*/
+  &:hover {
+    /*!COLOR|color|boolean-hover*/ /*!END*/
+    /*!CSS|boolean-hover*/ /*!END*/
+  }
+}
+
+@mixin string {
+  /*!COLOR|color|string*/ color: #e6db74; /*!END*/
+  /*!CSS|string*/ /*!END*/
+  &:hover {
+    /*!COLOR|color|string-hover*/ /*!END*/
+    /*!CSS|string-hover*/ /*!END*/
+  }
+}
+
+@mixin procedure {
+  /*!COLOR|color|procedure*/ color: #f92672; /*!END*/
+  /*!CSS|procedure*/ /*!END*/
+  &:hover {
+    /*!COLOR|color|procedure-hover*/ /*!END*/
+    /*!CSS|procedure-hover*/ /*!END*/
+  }
+}
+
+@mixin symbol {
+  /*!COLOR|color|symbol*/ color: #66d9ef; /*!END*/
+  /*!CSS|symbol*/ /*!END*/
+  &:hover {
+    /*!COLOR|color|symbol-hover*/ /*!END*/
+    /*!CSS|symbol-hover*/ /*!END*/
+  }
+}
+
+@mixin comment {
+  /*!COLOR|color|comment*/ color: #75715e; /*!END*/
+  /*!CSS|comment*/ /*!END*/
+  &:hover {
+    /*!COLOR|color|comment-hover*/ /*!END*/
+    /*!CSS|comment-hover*/ /*!END*/
+  }
+}
+
+@mixin error {
+  /*!COLOR|color|error*/ color: #f00; /*!END*/
+  /*!CSS|error*/ /*!END*/
+  &:hover {
+    /*!COLOR|color|error-hover*/ /*!END*/
+    /*!CSS|error-hover*/ /*!END*/
+  }
+}
+
+@mixin link {
+  /*!COLOR|color|link*/ color: #33b5e5; /*!END*/
+  /*!CSS|link*/ text-decoration: none; /*!END*/
+  &:hover {
+    /*!COLOR|color|link-hover*/ color: #99cc00; /*!END*/
+    /*!CSS|link-hover*/ /*!END*/
+  }
+}
+
+@mixin prompt {
+  /*!COLOR|color|prompt*/ color: #0f0; /*!END*/
+  /*!CSS|prompt*/ /*!END*/
+  &:hover {
+    /*!COLOR|color|prompt-hover*/ /*!END*/
+    /*!CSS|prompt-hover*/ /*!END*/
+  }
+}
+
+@mixin status {
+  /*!COLOR|color|status*/ color: #aaa; /*!END*/
+  /*!CSS|status*/ /*!END*/
+  &:hover {
+    /*!COLOR|color|status-hover*/ /*!END*/
+    /*!CSS|status-hover*/ /*!END*/
+  }
+}
+
+@mixin render {
+  /*!COLOR|color|render*/ color: #fff; /*!END*/
+  /*!CSS|render*/ /*!END*/
+  &:hover {
+    /*!COLOR|color|render-hover*/ /*!END*/
+    /*!CSS|render-hover*/ /*!END*/
+  }
+}
+
+@mixin binding-box {
+  /*!COLOR|border-color|render*/ border-color: #fff; /*!END*/
+  &:hover {
+    /*!COLOR|border-color|render-hover*/ /*!END*/
+  }
+}
+
+@mixin return-value {
+  /*!COLOR|color|return-value*/ color: #ff8; /*!END*/
+  /*!CSS|return-value*/
+  font-weight: 700;
+  font-style: italic;
+  /*!END*/
+  &:hover {
+    /*!COLOR|color|return-value-hover*/ /*!END*/
+    /*!CSS|return-value-hover*/ /*!END*/
+  }
+}
+
+@mixin arrow {
+  /*!COLOR|fill|arrow*/ color: #fff; /*!END*/
+  /*!COLOR|stroke|arrow*/ color: #fff; /*!END*/
+  /*!CSS|arrow*/ /*!END*/
+  &:hover {
+    /*!COLOR|fill|arrow-hover*/ /*!END*/
+    /*!COLOR|fill|arrow-hover*/ /*!END*/
+    /*!CSS|arrow-hover*/ /*!END*/
+  }
+}
+
+@mixin button-text {
+  /*!COLOR|color|button-text*/ color: #fff; /*!END*/
+  /*!CSS|button-text*/ /*!END*/
+  &:hover {
+    /*!COLOR|color|button-text-hover*/ /*!END*/
+    /*!CSS|button-text-hover*/ /*!END*/
+  }
+}
+
+@mixin background {
+  /*!COLOR|background|background*/ background: #181818; /*!END*/
+}
+
+@mixin current-frame {
+  /*!COLOR|background|current-frame*/ background: rgba(85, 119, 255, 0.8); /*!END*/
+  /*!CSS|current-frame*/ /*!END*/
+  &:hover {
+    /*!COLOR|background|current-frame-hover*/ /*!END*/
+    /*!CSS|current-frame-hover*/ /*!END*/
+  }
+}
+
+@mixin other-frame {
+  /*!COLOR|background|other-frame*/ background: rgba(68, 68, 68, 0.8); /*!END*/
+  /*!CSS|other-frame*/ /*!END*/
+  &:hover {
+    /*!COLOR|background|other-frame-hover*/ /*!END*/
+    /*!CSS|other-frame-hover*/ /*!END*/
+  }
+}
+
+@mixin pair {
+  /*!COLOR|background|pair*/ background: rgba(234, 154, 86, 0.8); /*!END*/
+  /*!CSS|pair*/ border: 0.1em solid #181818; /*!END*/
+  &:hover {
+    /*!COLOR|background|pair-hover*/ /*!END*/
+    /*!CSS|pair-hover*/ /*!END*/
+  }
+}
+
+@mixin vector {
+  /*!COLOR|background|vector*/ background: rgba(234, 154, 86, 0.8); /*!END*/
+  /*!CSS|vector*/ border: 0.1em solid #181818; /*!END*/
+  &:hover {
+    /*!COLOR|background|vector-hover*/ /*!END*/
+    /*!CSS|vector-hover*/ /*!END*/
+  }
+}
+
+@mixin promise {
+  /*!COLOR|background|promise*/ background: rgba(234, 154, 86, 0.8); /*!END*/
+  /*!CSS|promise*/ border: 0.1em solid #181818; /*!END*/
+  &:hover {
+    /*!COLOR|background|promise-hover*/ /*!END*/
+    /*!CSS|promise-hover*/ /*!END*/
+  }
+}
+
+@mixin async-block {
+  /*!COLOR|background|async-block*/ background: rgba(255, 255, 0, 0.8); /*!END*/
+  /*!CSS|async-block*/ border: 0.1em solid #181818; /*!END*/
+  &:hover {
+    /*!COLOR|background|async-block-hover*/ /*!END*/
+    /*!CSS|async-block-hover*/ /*!END*/
+  }
+}
+
+@mixin async-log {
+  /*!COLOR|color|async-log*/ color: #ff0; /*!END*/
+  /*!CSS|async-log*/ font-style: italic; /*!END*/
+  &:hover {
+    /*!COLOR|color|async-log-hover*/ /*!END*/
+    /*!CSS|async-log-hover*/ /*!END*/
+  }
+}
+
+@mixin button {
+  /*!COLOR|background|button*/ background: rgba(85, 119, 255, 0.8); /*!END*/
+  /*!CSS|button*/ /*!END*/
+  &:hover {
+    /*!COLOR|background|button-hover*/ background: rgba(85, 119, 255, 0.6) /*!END*/
+    /*!CSS|button-hover*/ /*!END*/
+  }
+}
