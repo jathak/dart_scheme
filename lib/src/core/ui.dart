@@ -52,7 +52,6 @@ abstract class UIElement extends SelfEvaluating implements Serializable {
   Map<Direction, Anchor> _anchors = {};
   Anchor anchor(Direction dir) => _anchors.putIfAbsent(dir, () => new Anchor());
   Iterable<Direction> get anchoredDirections => _anchors.keys;
-  toString() => "#[UIElement]";
   // If true, element should be invisible but take up the same amount of space.
   bool spacer = false;
   // Elements should call this when their contents update and they need to be
@@ -114,7 +113,6 @@ class TextElement extends UIElement {
 
 class Strike extends UIElement {
   Strike();
-  toString() => "#[Strike]";
 
   Map serialize() => finishSerialize({'type': 'Strike'});
   Strike deserialize(Map data) {

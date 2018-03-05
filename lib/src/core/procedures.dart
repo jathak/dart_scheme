@@ -45,6 +45,11 @@ abstract class UserDefinedProcedure extends Procedure {
 
   Frame makeCallFrame(PairOrEmpty arguments, Frame env);
 
+  Expression call(PairOrEmpty operands, Frame env) {
+    env.interpreter.triggerEvent(const SchemeSymbol('pre-user-call'), [], env);
+    return super.call(operands, env);
+  }
+
   Expression apply(PairOrEmpty arguments, Frame env) {
     Frame frame = makeCallFrame(arguments, env);
     if (name != null) frame.tag = name.toString();

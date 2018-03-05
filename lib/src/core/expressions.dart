@@ -27,6 +27,8 @@ abstract class Expression {
   bool get isNil => false;
   String get display => toString();
 
+  String toString() => '#[$runtimeType]';
+
   /// Should return the version of this object that can be passed to JS
   dynamic toJS() => this;
 
