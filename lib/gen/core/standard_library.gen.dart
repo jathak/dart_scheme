@@ -24,7 +24,7 @@ abstract class _$StandardLibraryMixin {
   Expression car(Pair val);
   Expression cdr(Pair val);
   Pair cons(Expression car, Expression cdr);
-  Number length(PairOrEmpty lst);
+  num length(PairOrEmpty lst);
   PairOrEmpty list(List<Expression> args);
   Number add(List<Expression> args);
   Number sub(List<Expression> args);
@@ -135,7 +135,7 @@ abstract class _$StandardLibraryMixin {
     addPrimitive(__env, const SchemeSymbol("length"), (__exprs, __env) {
       if (__exprs[0] is! PairOrEmpty)
         throw new SchemeException('Argument of invalid type passed to length.');
-      return this.length(__exprs[0]);
+      return new Number.fromNum(this.length(__exprs[0]));
     }, 1);
     addVariablePrimitive(__env, const SchemeSymbol("list"), (__exprs, __env) {
       return this.list(__exprs);

@@ -112,7 +112,7 @@ Pair<Expression, Boolean> quasiquoteItem(Expression v, Frame env, [int level = 1
       Expression exprs = val.second;
       checkForm(exprs, 1, 1);
       Expression eval = schemeEval(exprs.pair.first, env);
-      if (splice && !(eval is PairOrEmpty && eval.isWellFormedList())) {
+      if (splice && !(eval is PairOrEmpty && eval.wellFormed)) {
         throw new SchemeException('unquote-splicing used on non-list ${eval}');
       }
       return new Pair(eval, new Boolean(splice));

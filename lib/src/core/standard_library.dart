@@ -61,7 +61,7 @@ class StandardLibrary extends SchemeLibrary with _$StandardLibraryMixin {
   bool isInteger(Expression val) => val is Number && val.isInteger;
 
   @SchemeSymbol("list?")
-  bool isList(Expression val) => val is PairOrEmpty && val.isWellFormedList();
+  bool isList(Expression val) => val is PairOrEmpty && val.wellFormed;
 
   @SchemeSymbol("number?")
   bool isNumber(Expression val) => val is Number;
@@ -92,7 +92,7 @@ class StandardLibrary extends SchemeLibrary with _$StandardLibraryMixin {
 
   Pair cons(Expression car, Expression cdr) => new Pair(car, cdr);
 
-  Number length(PairOrEmpty lst) => new Number.fromInt(lst.length);
+  num length(PairOrEmpty lst) => lst.lengthOrCycle;
 
   PairOrEmpty list(List<Expression> args) => new PairOrEmpty.fromIterable(args);
 

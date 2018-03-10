@@ -5,7 +5,7 @@ import 'logging.dart';
 import 'procedures.dart';
 
 void checkForm(Expression expressions, int min, [int max = -1]) {
-  if (expressions is PairOrEmpty && expressions.isWellFormedList()) {
+  if (expressions is PairOrEmpty && expressions.wellFormed) {
     int length = expressions.length;
     if (length < min) throw new SchemeException("$expressions must contain at least $min items.");
     if (max > -1 && length > max) {

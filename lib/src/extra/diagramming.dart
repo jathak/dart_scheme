@@ -95,7 +95,7 @@ class Diagram extends DiagramInterface {
       drawEnvironment(expression);
       frames.last.active = true;
     } else {
-      rows[0].elements.insert(0, expression.draw(this));
+      rows[0].elements.insert(0, _build(expression));
     }
     _finish();
   }
@@ -120,20 +120,6 @@ class Diagram extends DiagramInterface {
   // Used to intialize the deserializer
   static Diagram stub = new Diagram._deserialize({});
 
-  _finish() {
-    for (int row in _rowHowMany.keys.toList()..sort()) {
-      int missing = rows[_rowParent[row]].elements.length - _rowHowMany[row];
-      rows[_rowParent[row]].elements.take(missing).forEach((e) {
-        if (e is BlockGrid) {
-          rows[row].elements.insert(0, e.spacer ? e : e.toSpacer());
-        }
-      });
-    }
-    _known.clear();
-  }
-
-  Map<Expression, UIElement> _known = new Map.identity();
-
   Diagram.allFrames(List<Pair<Frame, Expression>> framePairs, Frame active) {
     for (Pair<Frame, Expression> framePair in framePairs) {
       frames.add(new FrameElement(framePair.first, this, framePair.second)
@@ -146,17 +132,49 @@ class Diagram extends DiagramInterface {
   Map<int, int> _rowHowMany = {};
   Map<int, int> _rowParent = {};
 
-  UIElement bindingTo(Expression expression) {
-    if (expression.inlineUI) return expression.draw(this);
-    if (_known.containsKey(expression)) {
-      Anchor anchor = new Anchor();
-      arrows.add(new Arrow(anchor, _known[expression].anchor(Direction.left)));
-      return anchor;
+  _finish() {
+    for (int row in _rowHowMany.keys.toList()..sort()) {
+      int missing = rows[_rowParent[row]].elements.length - _rowHowMany[row];
+      rows[_rowParent[row]].elements.take(missing).forEach((e) {
+        if (e is BlockGrid) {
+          rows[row].elements.insert(0, e.spacer ? e : e.toSpacer());
+        }
+      });
     }
-    if (rows.last.elements.isNotEmpty) rows.add(new Row([]));
-    int myRow = rows.length - 1;
+    for (Pair<Anchor, Expression> item in _incompleteArrows) {
+      arrows.add(new Arrow(item.first, _known[item.second].anchor(Direction.left)));
+    }
+    _known.clear();
+    _incompleteArrows.clear();
+  }
+
+  Map<Expression, UIElement> _known = new Map.identity();
+  List<Pair<Anchor, Expression>> _incompleteArrows = [];
+
+  Anchor _handleExisting(Expression expression) {
+    Anchor anchor = new Anchor();
+    UIElement element = _known[expression];
+    if (element == null) {
+      _incompleteArrows.add(new Pair(anchor, expression));
+    } else {
+      arrows.add(new Arrow(anchor, element.anchor(Direction.left)));
+    }
+    return anchor;
+  }
+
+  UIElement _build(Expression expression) {
+    _known[expression] = null;
     UIElement element = expression.draw(this);
     _known[expression] = element;
+    return element;
+  }
+
+  UIElement bindingTo(Expression expression) {
+    if (expression.inlineUI) return expression.draw(this);
+    if (_known.containsKey(expression)) return _handleExisting(expression);
+    if (rows.last.elements.isNotEmpty) rows.add(new Row([]));
+    int myRow = rows.length - 1;
+    UIElement element = _build(expression);
     rows[myRow].elements.insert(0, element);
     Anchor anchor = new Anchor();
     arrows.add(new Arrow(anchor, element.anchor(Direction.left)));
@@ -166,15 +184,10 @@ class Diagram extends DiagramInterface {
   UIElement pointTo(Expression expression, [int parentRow = null]) {
     if (expression == nil) return new Strike();
     if (expression.inlineUI) return expression.draw(this);
-    if (_known.containsKey(expression)) {
-      Anchor anchor = new Anchor();
-      arrows.add(new Arrow(anchor, _known[expression].anchor(Direction.left)));
-      return anchor;
-    }
+    if (_known.containsKey(expression)) return _handleExisting(expression);
     if (parentRow != null) rows.add(new Row([]));
     int myRow = rows.length - 1;
-    UIElement element = expression.draw(this);
-    _known[expression] = element;
+    UIElement element = _build(expression);
     rows[myRow].elements.insert(0, element);
     if (parentRow != null) {
       _rowParent[myRow] = parentRow;

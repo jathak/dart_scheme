@@ -196,7 +196,7 @@ class _SchemeListIterator extends Iterator<Expression> {
   Pair pair;
   _SchemeListIterator(Pair start) {
     pair = start;
-    if (!pair.isWellFormedList()) throw new TypeError();
+    if (!pair.wellFormed) throw new TypeError();
   }
   bool moveNext() {
     if (pair != null) {
@@ -214,7 +214,11 @@ class _NilIterator extends Iterator<Expression> {
 }
 
 abstract class PairOrEmpty extends Expression with IterableMixin<Expression> {
-  bool isWellFormedList();
+  bool get wellFormed;
+
+  @deprecated
+  bool isWellFormedList() => wellFormed;
+
   factory PairOrEmpty.fromIterable(Iterable<Expression> iterable) {
     PairOrEmpty result = nil;
     for (Expression item in iterable.toList().reversed) {
@@ -223,14 +227,18 @@ abstract class PairOrEmpty extends Expression with IterableMixin<Expression> {
     return result;
   }
   int get length;
+  num get lengthOrCycle;
 }
 
 class EmptyList extends SelfEvaluating implements PairOrEmpty {
   final inlineUI = true;
   const EmptyList._internal();
+  bool get wellFormed => true;
   bool isWellFormedList() => true;
   bool get isNil => true;
   toString() => "()";
+
+  num get lengthOrCycle => 0;
 
   // Dummy properties to ensure this works as an iterator
   get first => throw new StateError("empty list");
@@ -272,15 +280,21 @@ class Pair<A extends Expression, B extends Expression> extends Expression
   B second;
   Pair(this.first, this.second);
 
-  bool isWellFormedList() {
-    PairOrEmpty current = this;
-    while (!current.isNil) {
-      if (current.pair.second is! PairOrEmpty) {
-        return false;
-      }
-      current = current.pair.second;
+  bool get wellFormed => second is PairOrEmpty && (second as PairOrEmpty).wellFormed;
+  bool isWellFormedList() => wellFormed;
+
+  num get lengthOrCycle {
+    Expression slow = this;
+    Expression fast = this;
+    int length = 0;
+    while (fast is Pair && fast.second is Pair) {
+      slow = slow.pair.second;
+      fast = fast.pair.second.pair.second;
+      length += 2;
+      if (identical(slow, fast)) return double.INFINITY;
     }
-    return true;
+    if (!wellFormed) throw new SchemeException("Malformed list");
+    return length + (fast is Pair ? 1 : 0);
   }
 
   Iterator<Expression> get iterator => new _SchemeListIterator(this);
@@ -295,17 +309,23 @@ class Pair<A extends Expression, B extends Expression> extends Expression
     return new BlockGrid.pair(new Block.pair(left), new Block.pair(right));
   }
 
-  toString() {
-    String result = "($first";
-    Expression current = second;
-    while (current is Pair) {
-      Pair pair = current as Pair;
-      result += " ${pair.first}";
-      current = pair.second;
+  /// We use a recursive approach here to ensure that lists with cycles
+  /// cause a stack overflow instead of looping forever.
+  _internalString(bool inCdr) {
+    String rest;
+    if (identical(second, nil)) {
+      rest = "";
+    } else if (second is Pair) {
+      rest = " " + second.pair._internalString(true);
+    } else {
+      rest = " . $second";
     }
-    if (!identical(current, nil)) result += " . $current";
-    return result + ")";
+    String core = '$first$rest';
+    print(inCdr);
+    return inCdr ? core : '($core)';
   }
+
+  toString() => _internalString(false);
 
   operator ==(other) => other is Pair && first == other.first && second == other.second;
   int get hashCode => hash2(first, second);
@@ -315,7 +335,7 @@ class Pair<A extends Expression, B extends Expression> extends Expression
     List<Expression> lst = [];
     for (Expression arg in args.take(args.length - 1)) {
       if (arg.isNil) continue;
-      if (arg is Pair && arg.isWellFormedList()) {
+      if (arg is Pair && arg.wellFormed) {
         lst.addAll(arg);
       } else {
         throw new SchemeException("Argument is not a well-formed list.");
@@ -323,7 +343,7 @@ class Pair<A extends Expression, B extends Expression> extends Expression
     }
     Expression result = nil;
     Expression lastArg = args.last;
-    if (lastArg is PairOrEmpty && lastArg.isWellFormedList()) {
+    if (lastArg is PairOrEmpty && lastArg.wellFormed) {
       lst.addAll(lastArg);
     } else {
       result = lastArg;
