@@ -4,6 +4,7 @@ import 'dart:math' show pow;
 
 import 'expressions.dart';
 import 'logging.dart';
+import 'numbers.dart';
 import 'procedures.dart';
 import 'scheme_library.dart';
 import 'utils.dart';

@@ -78,8 +78,3 @@ addVariablePrimitive(
   var p = new PrimitiveProcedure.variable(name, fn, minArgs, maxArgs);
   env.define(name, p, true);
 }
-
-Iterable<Number> allNumbers(List<Expression> expr) {
-  return expr.map((ex) =>
-      ex is Number ? ex : throw new SchemeException("$ex is not a number."));
-}
