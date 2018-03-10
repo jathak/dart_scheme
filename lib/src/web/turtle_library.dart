@@ -45,12 +45,14 @@ class TurtleLibrary extends SchemeLibrary with _$TurtleLibraryMixin {
   @MinArgs(1)
   @MaxArgs(2)
   void circle(List<Expression> exprs) {
-    if (exprs[0] is! Number) throw new SchemeException('${exprs[0]} is not a number');
+    if (exprs[0] is! Number)
+      throw new SchemeException('${exprs[0]} is not a number');
     if (exprs.length == 1) {
       turtle.circle(exprs[0].toJS());
       return;
     }
-    if (exprs[1] is! Number) throw new SchemeException('${exprs[1]} is not a number');
+    if (exprs[1] is! Number)
+      throw new SchemeException('${exprs[1]} is not a number');
     turtle.circle(exprs[0].toJS(), exprs[1].toJS());
   }
 
@@ -162,6 +164,7 @@ class TurtleLibrary extends SchemeLibrary with _$TurtleLibraryMixin {
   @SchemeSymbol('hideturtle')
   @SchemeSymbol('ht')
   void unsupported(List<Expression> exprs, Frame env) {
-    env.interpreter.logger(new TextMessage('Unsupported turtle command.'), true);
+    env.interpreter
+        .logger(new TextMessage('Unsupported turtle command.'), true);
   }
 }

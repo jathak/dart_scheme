@@ -6,10 +6,11 @@ class Arrow extends SelfEvaluating implements Serializable<Arrow> {
   final Anchor start, end;
   Arrow(this.start, this.end);
   toString() => "#Arrow($start->$end)";
-  Map serialize() => {'type': 'Arrow', 'start': start.serialize(), 'end': end.serialize()};
+  Map serialize() =>
+      {'type': 'Arrow', 'start': start.serialize(), 'end': end.serialize()};
   Arrow deserialize(Map data) {
-    return new Arrow(
-        Serialization.deserialize(data['start']), Serialization.deserialize(data['end']));
+    return new Arrow(Serialization.deserialize(data['start']),
+        Serialization.deserialize(data['end']));
   }
 }
 
@@ -35,10 +36,13 @@ class Row extends UIElement {
   final List<UIElement> elements;
   Row(this.elements);
   toString() => elements.toString();
-  Map serialize() =>
-      finishSerialize({'type': 'Row', 'elements': elements.map((el) => el.serialize()).toList()});
+  Map serialize() => finishSerialize({
+        'type': 'Row',
+        'elements': elements.map((el) => el.serialize()).toList()
+      });
   Row deserialize(Map data) =>
-      new Row(data['elements'].map(Serialization.deserialize).toList())..finishDeserialize(data);
+      new Row(data['elements'].map(Serialization.deserialize).toList())
+        ..finishDeserialize(data);
 }
 
 class FrameElement extends UIElement {
@@ -142,7 +146,8 @@ class Diagram extends DiagramInterface {
       });
     }
     for (Pair<Anchor, Expression> item in _incompleteArrows) {
-      arrows.add(new Arrow(item.first, _known[item.second].anchor(Direction.left)));
+      arrows.add(
+          new Arrow(item.first, _known[item.second].anchor(Direction.left)));
     }
     _known.clear();
     _incompleteArrows.clear();

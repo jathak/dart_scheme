@@ -97,7 +97,8 @@ class StandardLibrary extends SchemeLibrary with _$StandardLibraryMixin {
   PairOrEmpty list(List<Expression> args) => new PairOrEmpty.fromIterable(args);
 
   @SchemeSymbol("+")
-  Number add(List<Expression> args) => allNumbers(args).fold(Number.ZERO, (a, b) => a + b);
+  Number add(List<Expression> args) =>
+      allNumbers(args).fold(Number.zero, (a, b) => a + b);
 
   @SchemeSymbol("-")
   @MinArgs(1)
@@ -108,22 +109,23 @@ class StandardLibrary extends SchemeLibrary with _$StandardLibraryMixin {
   }
 
   @SchemeSymbol("*")
-  Number mul(List<Expression> args) => allNumbers(args).fold(Number.ONE, (a, b) => a * b);
+  Number mul(List<Expression> args) =>
+      allNumbers(args).fold(Number.one, (a, b) => a * b);
 
   @SchemeSymbol("/")
   @MinArgs(1)
   Number truediv(List<Expression> args) {
     Iterable<Number> numbers = allNumbers(args);
-    if (numbers.length == 1) return Number.ONE / (numbers.first);
+    if (numbers.length == 1) return Number.one / (numbers.first);
     return numbers.skip(1).fold(numbers.first, (a, b) => a / b);
   }
 
-  Number abs(Number arg) => arg < Number.ZERO ? -arg : arg;
+  Number abs(Number arg) => arg < Number.zero ? -arg : arg;
 
   Number expt(Number base, Number power) {
     if (power.isInteger) {
-      Number total = Number.ONE;
-      for (Number i = Number.ZERO; i < power; i += Number.ONE) {
+      Number total = Number.one;
+      for (Number i = Number.zero; i < power; i += Number.one) {
         total *= base;
       }
       return total;
@@ -137,7 +139,8 @@ class StandardLibrary extends SchemeLibrary with _$StandardLibraryMixin {
 
   Number remainder(Number a, Number b) {
     Number mod = modulo(a, b);
-    while ((mod < Number.ZERO && a > Number.ZERO) || (mod > Number.ZERO && a < Number.ZERO)) {
+    while ((mod < Number.zero && a > Number.zero) ||
+        (mod > Number.zero && a < Number.zero)) {
       mod -= a;
     }
     return mod;
@@ -173,13 +176,13 @@ class StandardLibrary extends SchemeLibrary with _$StandardLibraryMixin {
   bool ge(Number x, Number y) => x >= y;
 
   @SchemeSymbol("even?")
-  bool isEven(Number x) => x % Number.TWO == Number.ZERO;
+  bool isEven(Number x) => x % Number.two == Number.zero;
 
   @SchemeSymbol("odd?")
-  bool isOdd(Number x) => x % Number.TWO == Number.ONE;
+  bool isOdd(Number x) => x % Number.two == Number.one;
 
   @SchemeSymbol("zero?")
-  bool isZero(Number x) => x == Number.ZERO;
+  bool isZero(Number x) => x == Number.zero;
 
   Expression force(Promise p) => p.force();
 
@@ -200,7 +203,7 @@ class StandardLibrary extends SchemeLibrary with _$StandardLibraryMixin {
 
   @SchemeSymbol("call/cc")
   Expression callWithCurrentContinuation(Procedure procedure, Frame env) =>
-      env.interpreter.implementation.callWithCurrentContinuation(procedure, env);
+      env.interpreter.impl.callWithCurrentContinuation(procedure, env);
 
   @SchemeSymbol("runtime-type")
   String getRuntimeType(Expression expression) {

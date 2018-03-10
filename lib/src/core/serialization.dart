@@ -7,7 +7,7 @@ import 'logging.dart';
 import 'ui.dart';
 
 final Map<String, Serializable> deserializers = {
-  'Number': Number.ZERO,
+  'Number': Number.zero,
   'Boolean': schemeTrue,
   'SchemeSymbol': const SchemeSymbol('x'),
   'SchemeString': const SchemeString('x'),

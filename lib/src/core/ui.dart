@@ -63,7 +63,8 @@ abstract class UIElement extends SelfEvaluating implements Serializable {
   Map finishSerialize(Map data) {
     if (_anchors.isNotEmpty) {
       data['anchors'] = new Map<String, dynamic>.fromIterables(
-          _anchors.keys.map((k) => k._id), _anchors.values.map((v) => v.serialize()));
+          _anchors.keys.map((k) => k._id),
+          _anchors.values.map((v) => v.serialize()));
     }
     if (spacer) data['spacer'] = spacer;
     return data;
@@ -84,7 +85,8 @@ class Anchor extends UIElement {
   final int id;
   Anchor() : id = nextId++;
   Anchor.withId(this.id);
-  Anchor anchor(dir) => throw new UnimplementedError('Anchors cannot have anchors of their own.');
+  Anchor anchor(dir) =>
+      throw new UnimplementedError('Anchors cannot have anchors of their own.');
 
   toString() => "#[Anchor:$id]";
 
@@ -135,10 +137,11 @@ class Block extends UIElement {
   Block.promise(this.inside) : type = const BlockType('promise');
   Block.async(this.inside) : type = const BlockType('async');
   toString() => "#[Block:${type.id}:$inside]";
-  Map serialize() =>
-      finishSerialize({'type': 'Block', 'blockType': type.id, 'inside': inside.serialize()});
+  Map serialize() => finishSerialize(
+      {'type': 'Block', 'blockType': type.id, 'inside': inside.serialize()});
   Block deserialize(Map data) {
-    return new Block._(new BlockType(data['blockType']), Serialization.deserialize(data['inside']))
+    return new Block._(new BlockType(data['blockType']),
+        Serialization.deserialize(data['inside']))
       ..finishDeserialize(data);
   }
 }
@@ -153,7 +156,8 @@ class BlockGrid extends UIElement {
     _rows = _grid.length;
     for (List<Block> row in _grid) {
       if (_columns == null) _columns = row.length;
-      if (row.length != _columns) throw new SchemeException("Jagged block grid");
+      if (row.length != _columns)
+        throw new SchemeException("Jagged block grid");
     }
   }
   BlockGrid.row(List<Block> row) : _grid = new List.filled(1, row) {
@@ -161,7 +165,8 @@ class BlockGrid extends UIElement {
     _rows = 1;
     _columns = row.length;
   }
-  BlockGrid.column(List<Block> col) : _grid = new List.from(col.map((b) => new List.filled(1, b))) {
+  BlockGrid.column(List<Block> col)
+      : _grid = new List.from(col.map((b) => new List.filled(1, b))) {
     if (col.isEmpty) throw new SchemeException("Empty block column");
     _rows = col.length;
     _columns = 1;
@@ -189,7 +194,9 @@ class BlockGrid extends UIElement {
 
   Map serialize() => finishSerialize({
         'type': 'BlockGrid',
-        'grid': _grid.map((row) => row.map((item) => item.serialize()).toList()).toList()
+        'grid': _grid
+            .map((row) => row.map((item) => item.serialize()).toList())
+            .toList()
       });
   BlockGrid deserialize(Map data) {
     return new BlockGrid(data['grid'].map((row) {

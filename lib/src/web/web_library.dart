@@ -29,7 +29,8 @@ class WebLibrary extends SchemeLibrary with _$WebLibraryMixin {
       return new JsObject(context['Promise'], [
         (resolve, reject) {
           expr.future.then((result) => resolve.apply([result.toJS()]),
-              onError: (error) => reject.apply([error is Expression ? error.toJS() : error]));
+              onError: (error) =>
+                  reject.apply([error is Expression ? error.toJS() : error]));
         }
       ]);
     };
@@ -39,7 +40,8 @@ class WebLibrary extends SchemeLibrary with _$WebLibraryMixin {
 
   void importAll(Frame env) {
     super.importAll(env);
-    env.interpreter.renderer = new HtmlRenderer(renderContainer, jsPlumb).render;
+    env.interpreter.renderer =
+        new HtmlRenderer(renderContainer, jsPlumb).render;
     Procedure.jsProcedure = (procedure) {
       return new SchemeFunction(procedure, env);
     };
@@ -92,7 +94,8 @@ class WebLibrary extends SchemeLibrary with _$WebLibraryMixin {
   @SchemeSymbol("js-object")
   Expression jsObject(List<Expression> expressions) {
     if (expressions[0] is! SchemeSymbol && expressions[0] is! SchemeString) {
-      throw new SchemeException("JS constructor name must be a string or symbol");
+      throw new SchemeException(
+          "JS constructor name must be a string or symbol");
     }
     var args = expressions.skip(1).map((e) => e.toJS()).toList();
     return jsToScheme(new JsObject(context[expressions.first.display], args));

@@ -23,8 +23,10 @@ class ExtraLibrary extends SchemeLibrary with _$ExtraLibraryMixin {
 
   void importAll(Frame env) {
     super.importAll(env);
-    env.interpreter.specialForms[const SchemeSymbol('define-async')] = doDefineAsync;
-    env.interpreter.specialForms[const SchemeSymbol('lambda-async')] = doAsyncLambda;
+    env.interpreter.specialForms[const SchemeSymbol('define-async')] =
+        doDefineAsync;
+    env.interpreter.specialForms[const SchemeSymbol('lambda-async')] =
+        doAsyncLambda;
   }
 
   @SchemeSymbol("run-async")
@@ -39,8 +41,10 @@ class ExtraLibrary extends SchemeLibrary with _$ExtraLibraryMixin {
       completer.completeError(new SchemeException("${args[0]}"));
       return undefined;
     };
-    var resolve = new PrimitiveProcedure.fixed(const SchemeSymbol("async:resolve"), resolver, 1);
-    var reject = new PrimitiveProcedure.fixed(const SchemeSymbol("async:reject"), rejecter, 1);
+    var resolve = new PrimitiveProcedure.fixed(
+        const SchemeSymbol("async:resolve"), resolver, 1);
+    var reject = new PrimitiveProcedure.fixed(
+        const SchemeSymbol("async:reject"), rejecter, 1);
     var operands = new PairOrEmpty.fromIterable([resolve, reject]);
     new Future.microtask(() => completeEval(proc.apply(operands, env)));
     return completer.future;
@@ -49,11 +53,13 @@ class ExtraLibrary extends SchemeLibrary with _$ExtraLibraryMixin {
   @SchemeSymbol("run-after")
   Future<Expression> runAfter(Number millis, Procedure proc, Frame env) {
     var duration = new Duration(milliseconds: millis.toJS());
-    return new Future.delayed(duration, () => completeEval(proc.apply(nil, env)));
+    return new Future.delayed(
+        duration, () => completeEval(proc.apply(nil, env)));
   }
 
   @SchemeSymbol("completed?")
-  Boolean isCompleted(AsyncExpression expr) => expr.complete ? schemeTrue : schemeFalse;
+  Boolean isCompleted(AsyncExpression expr) =>
+      expr.complete ? schemeTrue : schemeFalse;
 
   void render(UIElement ui, Frame env) {
     env.interpreter.renderer(ui);

@@ -16,7 +16,7 @@ class ImportedLibrary extends SelfEvaluating {
     env = containing;
     List<Expression> tokens = tokenizeLines(code.split('\n')).toList();
     while (tokens.isNotEmpty) {
-      Expression expr = schemeRead(tokens, env.interpreter.implementation);
+      Expression expr = schemeRead(tokens, env.interpreter.impl);
       Expression result = schemeEval(expr, env);
       if (result is AsyncExpression) {
         await result.future;

@@ -20,13 +20,15 @@ abstract class ProjectInterface {
   Expression lookupInFrame(SchemeSymbol symbol, Frame env);
 
   /// Analagous to PrimitiveProcedure.apply in Problem 4
-  Expression primitiveApply(PrimitiveProcedure procedure, PairOrEmpty args, Frame env);
+  Expression primitiveApply(
+      PrimitiveProcedure procedure, PairOrEmpty args, Frame env);
 
   /// Analagous to part of scheme_eval implemented in Problem 5
   Expression evalProcedureCall(Expression first, Expression rest, Frame env);
 
   /// Analagous to Procedure.eval_call in Problem 5
-  Expression procedureCall(Procedure procedure, PairOrEmpty operands, Frame env);
+  Expression procedureCall(
+      Procedure procedure, PairOrEmpty operands, Frame env);
 
   /// Analagous to do_define_form in Problems 6 and 10
   Expression doDefineForm(PairOrEmpty expressions, Frame env);
@@ -72,10 +74,12 @@ abstract class ProjectInterface {
   Expression callWithCurrentContinuation(Procedure procedure, Frame env);
 
   /// Analagous to part of ContinuationProcedure.apply in Problem 21 (EC)
-  Expression continuationApply(Continuation procedure, PairOrEmpty args, Frame env);
+  Expression continuationApply(
+      Continuation procedure, PairOrEmpty args, Frame env);
 
   /// Analagous to MacroProcedure.eval_call in Problem 22 (EC)
-  Expression macroCall(MacroProcedure procedure, PairOrEmpty operands, Frame env);
+  Expression macroCall(
+      MacroProcedure procedure, PairOrEmpty operands, Frame env);
 
   /// Analagous to do_define_macro in Problem 22
   Expression doDefineMacro(PairOrEmpty expressions, Frame env);
@@ -90,7 +94,8 @@ abstract class ProjectInterface {
   Future<Expression> asyncOrForm(PairOrEmpty expressions, Frame env);
 
   /// Async version of evalCondResult
-  Future<Expression> asyncCondResult(PairOrEmpty clause, Frame env, Expression test);
+  Future<Expression> asyncCondResult(
+      PairOrEmpty clause, Frame env, Expression test);
 
   /// Async version of evalAll
   Future<Expression> asyncEvalAll(PairOrEmpty expressions, Frame env);
@@ -99,10 +104,12 @@ abstract class ProjectInterface {
   Future<Frame> asyncLetFrame(PairOrEmpty bindings, Frame env);
 
   /// Async version of evalProcedureCall
-  Future<Expression> asyncEvalProcedureCall(Expression first, Expression rest, Frame env);
+  Future<Expression> asyncEvalProcedureCall(
+      Expression first, Expression rest, Frame env);
 
   /// Async version of procedureCall
-  Future<Expression> asyncProcedureCall(Procedure procedure, PairOrEmpty operands, Frame env);
+  Future<Expression> asyncProcedureCall(
+      Procedure procedure, PairOrEmpty operands, Frame env);
 
   /// Implements define-async. Similar to a regular procedure define.
   Expression doDefineAsync(PairOrEmpty expressions, Frame env);
@@ -125,14 +132,16 @@ abstract class UnimplementedContinuations {
     throw new UnimplementedError("Continuations not supported");
   }
 
-  Expression continuationApply(Continuation procedure, PairOrEmpty args, Frame env) {
+  Expression continuationApply(
+      Continuation procedure, PairOrEmpty args, Frame env) {
     throw new UnimplementedError("Continuations not supported");
   }
 }
 
 /// Use this as a mixin when not implementing macros
 abstract class UnimplementedMacros {
-  Expression macroCall(MacroProcedure procedure, PairOrEmpty operands, Frame env) {
+  Expression macroCall(
+      MacroProcedure procedure, PairOrEmpty operands, Frame env) {
     throw new UnimplementedError("Macros not supported");
   }
 
@@ -155,7 +164,8 @@ abstract class UnimplementedAsync {
     throw new UnimplementedError("Async/await not supported");
   }
 
-  Future<Expression> asyncCondResult(PairOrEmpty clause, Frame env, Expression test) {
+  Future<Expression> asyncCondResult(
+      PairOrEmpty clause, Frame env, Expression test) {
     throw new UnimplementedError("Async/await not supported");
   }
 
@@ -167,11 +177,13 @@ abstract class UnimplementedAsync {
     throw new UnimplementedError("Async/await not supported");
   }
 
-  Future<Expression> asyncEvalProcedureCall(Expression first, Expression rest, Frame env) {
+  Future<Expression> asyncEvalProcedureCall(
+      Expression first, Expression rest, Frame env) {
     throw new UnimplementedError("Async/await not supported");
   }
 
-  Future<Expression> asyncProcedureCall(Procedure procedure, PairOrEmpty operands, Frame env) {
+  Future<Expression> asyncProcedureCall(
+      Procedure procedure, PairOrEmpty operands, Frame env) {
     throw new UnimplementedError("Async/await not supported");
   }
 

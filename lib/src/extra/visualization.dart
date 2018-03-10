@@ -11,7 +11,8 @@ class Button extends UIElement {
   void Function() click;
   UIElement inside;
   Button(this.inside, this.click);
-  Button.forEvent(this.inside, SchemeSymbol id, List<Expression> data, Frame env) {
+  Button.forEvent(
+      this.inside, SchemeSymbol id, List<Expression> data, Frame env) {
     click = () {
       env.interpreter.triggerEvent(id, data, env);
     };
@@ -49,7 +50,8 @@ class Visualization extends UIElement {
 
     inter.stopListening(const SchemeSymbol('define'), _makeVisualizeStep);
     inter.stopListening(const SchemeSymbol('set!'), _makeVisualizeStep);
-    inter.stopListening(const SchemeSymbol('pair-mutation'), _makeVisualizeStep);
+    inter.stopListening(
+        const SchemeSymbol('pair-mutation'), _makeVisualizeStep);
     inter.stopListening(const SchemeSymbol('new-frame'), _makeVisualizeStep);
     inter.stopListening(const SchemeSymbol('return'), _makeVisualizeReturnStep);
 
@@ -112,7 +114,8 @@ class Visualization extends UIElement {
   }
 
   void _addDiagram(Frame active) {
-    List<Frame> frames = frameReturnValues.keys.toList()..sort((a, b) => a.id - b.id);
+    List<Frame> frames = frameReturnValues.keys.toList()
+      ..sort((a, b) => a.id - b.id);
     List<Pair<Frame, Expression>> passing = frames.map((frame) {
       return new Pair(frame, frameReturnValues[frame]);
     }).toList();
@@ -127,7 +130,8 @@ class Visualization extends UIElement {
 
   Undefined _makeVisualizeReturnStep(List<Expression> exprs, Frame env) {
     if (exprs.length != 1) {
-      throw new SchemeException("Invalid event $exprs trigged during visualization");
+      throw new SchemeException(
+          "Invalid event $exprs trigged during visualization");
     }
     Expression returnValue = exprs[0];
     _addFrames(env, returnValue);
@@ -135,6 +139,7 @@ class Visualization extends UIElement {
     return undefined;
   }
 
-  serialize() => throw new UnsupportedError('Visualizations cannot be serialized');
+  serialize() =>
+      throw new UnsupportedError('Visualizations cannot be serialized');
   deserialize(data) => null;
 }

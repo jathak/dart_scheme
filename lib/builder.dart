@@ -167,10 +167,12 @@ String _buildPrimitive(MethodDeclaration method) {
     var pieces = [];
     for (int i = 0; i < types.length; i++) {
       if (types[i] == 'int') {
-        pieces.add("(__exprs[$i] is! Number || !(__exprs[$i] as Number).isInteger)");
+        pieces.add(
+            "(__exprs[$i] is! Number || !(__exprs[$i] as Number).isInteger)");
         passes.add("__exprs[$i].toJS().toInt()");
       } else if (types[i] == 'double') {
-        pieces.add("(__exprs[$i] is! Number || (__exprs[$i] as Number).isInteger)");
+        pieces.add(
+            "(__exprs[$i] is! Number || (__exprs[$i] as Number).isInteger)");
         passes.add("__exprs[$i].toJS().toDouble()");
       } else if (types[i] == 'num') {
         pieces.add("__exprs[$i] is! Number");
@@ -193,8 +195,8 @@ String _buildPrimitive(MethodDeclaration method) {
     }
     if (takesFrame) passes.add("__env");
     var passStr = passes.join(",");
-    String m = "this." + method.name.toSource();
-    String fn = "(__exprs, __env) { $checks $before $returning $m($passStr)$after }";
+    var m = "this." + method.name.toSource();
+    var fn = "(__exprs, __env){$checks $before $returning $m($passStr)$after }";
     return "add${op}Primitive(__env, $symb, $fn, ${types.length});$extra";
   }
 }

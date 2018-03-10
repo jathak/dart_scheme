@@ -52,7 +52,8 @@ class FlagStep extends SelfEvaluating implements Serializable<FlagStep> {
         'flags': flags.map((f) => f.serialize()).toList()
       };
 
-  FlagStep deserialize(Map data) => new FlagStep(Serialization.deserialize(data['diagram']),
+  FlagStep deserialize(Map data) => new FlagStep(
+      Serialization.deserialize(data['diagram']),
       data['flags'].map(Serialization.deserialize).toList());
 }
 
@@ -197,7 +198,8 @@ class FlagTraceBuilder {
   }
 
   Diagram _makeDiagram(Frame active) {
-    List<Frame> frames = _frameReturnValues.keys.toList()..sort((a, b) => a.id - b.id);
+    List<Frame> frames = _frameReturnValues.keys.toList()
+      ..sort((a, b) => a.id - b.id);
     List<Pair<Frame, Expression>> passing = frames.map((frame) {
       return new Pair(frame, _frameReturnValues[frame]);
     }).toList();

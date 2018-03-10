@@ -8,11 +8,11 @@ import 'utils.dart' show checkForm, schemeEval;
 typedef Expression SpecialForm(PairOrEmpty expressions, Frame env);
 
 Expression doDefineForm(PairOrEmpty expressions, Frame env) {
-  return env.interpreter.implementation.doDefineForm(expressions, env);
+  return env.interpreter.impl.doDefineForm(expressions, env);
 }
 
 Expression doIfForm(PairOrEmpty expressions, Frame env) {
-  return env.interpreter.implementation.doIfForm(expressions, env);
+  return env.interpreter.impl.doIfForm(expressions, env);
 }
 
 Expression doCondForm(PairOrEmpty expressions, Frame env) {
@@ -26,7 +26,7 @@ Expression doCondForm(PairOrEmpty expressions, Frame env) {
       test = schemeEval(clause.pair.first, env);
     }
     if (test.isTruthy) {
-      return env.interpreter.implementation.evalCondResult(clause, env, test);
+      return env.interpreter.impl.evalCondResult(clause, env, test);
     }
     expressions = expressions.pair.second;
   }
@@ -34,39 +34,39 @@ Expression doCondForm(PairOrEmpty expressions, Frame env) {
 }
 
 Expression doAndForm(PairOrEmpty expressions, Frame env) {
-  return env.interpreter.implementation.doAndForm(expressions, env);
+  return env.interpreter.impl.doAndForm(expressions, env);
 }
 
 Expression doOrForm(PairOrEmpty expressions, Frame env) {
-  return env.interpreter.implementation.doOrForm(expressions, env);
+  return env.interpreter.impl.doOrForm(expressions, env);
 }
 
 Expression doLetForm(PairOrEmpty expressions, Frame env) {
   checkForm(expressions, 2);
   Expression bindings = expressions.pair.first;
   Expression body = expressions.pair.second;
-  Frame letEnv = env.interpreter.implementation.makeLetFrame(bindings, env);
+  Frame letEnv = env.interpreter.impl.makeLetFrame(bindings, env);
   env.interpreter.triggerEvent(const SchemeSymbol('new-frame'), [], letEnv);
-  Expression result = env.interpreter.implementation.evalAll(body, letEnv);
+  Expression result = env.interpreter.impl.evalAll(body, letEnv);
   env.interpreter.triggerEvent(const SchemeSymbol('return'), [result], letEnv);
   return result;
 }
 
 Expression doBeginForm(PairOrEmpty expressions, Frame env) {
   checkForm(expressions, 1);
-  return env.interpreter.implementation.evalAll(expressions, env);
+  return env.interpreter.impl.evalAll(expressions, env);
 }
 
 LambdaProcedure doLambdaForm(PairOrEmpty expressions, Frame env) {
-  return env.interpreter.implementation.doLambdaForm(expressions, env);
+  return env.interpreter.impl.doLambdaForm(expressions, env);
 }
 
 MuProcedure doMuForm(PairOrEmpty expressions, Frame env) {
-  return env.interpreter.implementation.doMuForm(expressions, env);
+  return env.interpreter.impl.doMuForm(expressions, env);
 }
 
 Expression doQuoteForm(PairOrEmpty expressions, Frame env) {
-  return env.interpreter.implementation.doQuoteForm(expressions, env);
+  return env.interpreter.impl.doQuoteForm(expressions, env);
 }
 
 Promise doDelayForm(PairOrEmpty expressions, Frame env) {
@@ -81,7 +81,7 @@ Pair<Expression, Promise> doConsStreamForm(PairOrEmpty expressions, Frame env) {
 }
 
 Expression doDefineMacroForm(PairOrEmpty expressions, Frame env) {
-  return env.interpreter.implementation.doDefineMacro(expressions, env);
+  return env.interpreter.impl.doDefineMacro(expressions, env);
 }
 
 Expression doSetForm(PairOrEmpty expressions, Frame env) {
@@ -103,7 +103,8 @@ Expression doQuasiquoteForm(PairOrEmpty expressions, Frame env) {
   return result.first;
 }
 
-Pair<Expression, Boolean> quasiquoteItem(Expression v, Frame env, [int level = 1]) {
+Pair<Expression, Boolean> quasiquoteItem(Expression v, Frame env,
+    [int level = 1]) {
   if (v is! Pair) return new Pair(v, schemeFalse);
   Pair val = v.pair;
   bool splice = val.first == const SchemeSymbol('unquote-splicing');

@@ -12,7 +12,9 @@ import 'ui.dart';
 import 'utils.dart' show schemeEval;
 
 class Interpreter {
-  final ProjectInterface implementation;
+  final ProjectInterface impl;
+  @deprecated
+  ProjectInterface get implementation => impl;
   Frame globalEnv;
   bool tailCallOptimized = true;
   Renderer renderer = (UIElement) => null;
@@ -47,7 +49,7 @@ class Interpreter {
     _eventListeners[id].clear();
   }
 
-  Interpreter(this.implementation) {
+  Interpreter(this.impl) {
     globalEnv = new Frame(null, this);
     logError = (error) {
       if (error is Expression) {
@@ -67,7 +69,7 @@ class Interpreter {
     _tokens.addAll(tokenizeLines(code.split("\n")));
     while (_tokens.isNotEmpty) {
       try {
-        Expression expr = schemeRead(_tokens, implementation);
+        Expression expr = schemeRead(_tokens, impl);
         Expression result = schemeEval(expr, globalEnv);
         if (!identical(result, undefined)) logger(result, true);
       } on SchemeException catch (e) {

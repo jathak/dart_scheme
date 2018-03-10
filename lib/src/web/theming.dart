@@ -66,11 +66,13 @@ class Theme extends SelfEvaluating implements Serializable<Theme> {
     Theme theme = new Theme();
     var colorMap = data['colors'];
     for (String key in colorMap.keys) {
-      theme.colors[new SchemeSymbol(key)] = Serialization.deserialize(colorMap[key]);
+      theme.colors[new SchemeSymbol(key)] =
+          Serialization.deserialize(colorMap[key]);
     }
     var cssMap = data['css'];
     for (String key in cssMap.keys) {
-      theme.cssProps[new SchemeSymbol(key)] = Serialization.deserialize(cssMap[key]);
+      theme.cssProps[new SchemeSymbol(key)] =
+          Serialization.deserialize(cssMap[key]);
     }
     return theme;
   }
@@ -153,7 +155,13 @@ class Color extends SelfEvaluating implements Serializable<Color> {
     }
   }
 
-  serialize() => {'type': 'Color', 'red': red, 'green': green, 'blue': blue, 'alpha': alpha};
+  serialize() => {
+        'type': 'Color',
+        'red': red,
+        'green': green,
+        'blue': blue,
+        'alpha': alpha
+      };
 
   deserialize(Map data) {
     return new Color(data['red'], data['green'], data['blue'], data['alpha']);

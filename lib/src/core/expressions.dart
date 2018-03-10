@@ -62,9 +62,9 @@ class Number extends SelfEvaluating implements Serializable<Number> {
     return new Number.fromDouble(value);
   }
 
-  static final ZERO = new Number.fromInt(0);
-  static final ONE = new Number.fromInt(1);
-  static final TWO = new Number.fromInt(2);
+  static final zero = new Number.fromInt(0);
+  static final one = new Number.fromInt(1);
+  static final two = new Number.fromInt(2);
 
   factory Number.fromString(String numString) {
     try {
@@ -107,9 +107,11 @@ class Number extends SelfEvaluating implements Serializable<Number> {
 
   operator +(Number other) => _operation(this, other, (a, b) => a + b);
   operator -(Number other) => _operation(this, other, (a, b) => a - b);
-  operator -() => isInteger ? new Number.fromBigInt(-bigInt) : new Number.fromDouble(-doubleValue);
+  operator -() => isInteger
+      ? new Number.fromBigInt(-bigInt)
+      : new Number.fromDouble(-doubleValue);
   operator /(Number other) {
-    if (other == Number.ZERO) throw new SchemeException("cannot divide by zero");
+    if (other == zero) throw new SchemeException("cannot divide by zero");
     if (!this.isInteger && !other.isInteger) {
       return new Number.fromDouble(this.doubleValue / other.doubleValue);
     } else if (this.isInteger && other.isInteger) {
@@ -121,7 +123,7 @@ class Number extends SelfEvaluating implements Serializable<Number> {
   }
 
   operator ~/(Number other) {
-    if (other == Number.ZERO) throw new SchemeException("cannot divide by zero");
+    if (other == zero) throw new SchemeException("cannot divide by zero");
     return _operation(this, other, (a, b) => a ~/ b);
   }
 
@@ -176,7 +178,8 @@ class SchemeSymbol extends Expression implements Serializable<SchemeSymbol> {
   SchemeSymbol deserialize(Map data) => new SchemeSymbol(data['value']);
 }
 
-class SchemeString extends SelfEvaluating implements Serializable<SchemeString> {
+class SchemeString extends SelfEvaluating
+    implements Serializable<SchemeString> {
   final inlineUI = true;
   final String value;
   const SchemeString(this.value);
@@ -234,6 +237,7 @@ class EmptyList extends SelfEvaluating implements PairOrEmpty {
   final inlineUI = true;
   const EmptyList._internal();
   bool get wellFormed => true;
+  @deprecated
   bool isWellFormedList() => true;
   bool get isNil => true;
   toString() => "()";
@@ -280,7 +284,9 @@ class Pair<A extends Expression, B extends Expression> extends Expression
   B second;
   Pair(this.first, this.second);
 
-  bool get wellFormed => second is PairOrEmpty && (second as PairOrEmpty).wellFormed;
+  bool get wellFormed =>
+      second is PairOrEmpty && (second as PairOrEmpty).wellFormed;
+  @deprecated
   bool isWellFormedList() => wellFormed;
 
   num get lengthOrCycle {
@@ -326,7 +332,7 @@ class Pair<A extends Expression, B extends Expression> extends Expression
 
   toString() => _internalString(false);
 
-  operator ==(other) => other is Pair && first == other.first && second == other.second;
+  operator ==(x) => x is Pair && first == x.first && second == x.second;
   int get hashCode => hash2(first, second);
 
   static Expression append(List<Expression> args) {
@@ -421,12 +427,12 @@ class Frame extends SelfEvaluating {
   Map<SchemeSymbol, bool> hidden = {};
   Frame(this.parent, this.interpreter) : id = interpreter.frameCounter++;
   void define(SchemeSymbol symbol, Expression value, [bool hide = false]) {
-    interpreter.implementation.defineInFrame(symbol, value, this);
+    interpreter.impl.defineInFrame(symbol, value, this);
     hidden[symbol] = hide;
   }
 
   Expression lookup(SchemeSymbol symbol) {
-    return interpreter.implementation.lookupInFrame(symbol, this);
+    return interpreter.impl.lookupInFrame(symbol, this);
   }
 
   void update(SchemeSymbol symbol, Expression value) {
@@ -439,7 +445,7 @@ class Frame extends SelfEvaluating {
   }
 
   Frame makeChildFrame(Expression formals, Expression vals) {
-    return interpreter.implementation.makeChildOf(formals, vals, this);
+    return interpreter.impl.makeChildOf(formals, vals, this);
   }
 
   toJS() => this;

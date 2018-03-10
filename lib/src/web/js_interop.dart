@@ -56,7 +56,8 @@ Expression jsToScheme(obj) {
 }
 
 Expression jsObjectToScheme(JsObject obj) {
-  var type = context['Object']['prototype']['toString'].callMethod('call', [obj]);
+  var type =
+      context['Object']['prototype']['toString'].callMethod('call', [obj]);
   if (type == '[object Promise]') {
     var completer = new Completer();
     obj.callMethod('then', [completer.complete, completer.completeError]);
@@ -83,8 +84,10 @@ class SchemeFunction {
   noSuchMethod(Invocation invocation) {
     if (invocation.memberName == new Symbol("call")) {
       var args = invocation.positionalArguments.map((arg) => jsToScheme(arg));
-      return schemeApply(procedure, new PairOrEmpty.fromIterable(args), env).toJS();
+      return schemeApply(procedure, new PairOrEmpty.fromIterable(args), env)
+          .toJS();
     }
-    throw new SchemeException("Something has gone horribly wrong with wrapped procedures");
+    throw new SchemeException(
+        "Something has gone horribly wrong with wrapped procedures");
   }
 }
