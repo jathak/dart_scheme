@@ -199,7 +199,7 @@
 }
 
 @mixin vector {
-  /*!COLOR|background|vector*/ background: rgba(234, 154, 86, 0.8); /*!END*/
+  /*!COLOR|background|vector*/ background: rgba(234, 154, 106, 0.8); /*!END*/
   /*!CSS|vector*/ border: 0.1em solid #181818; /*!END*/
   &:hover {
     /*!COLOR|background|vector-hover*/ /*!END*/
@@ -208,7 +208,7 @@
 }
 
 @mixin promise {
-  /*!COLOR|background|promise*/ background: rgba(234, 154, 86, 0.8); /*!END*/
+  /*!COLOR|background|promise*/ background: rgba(76, 175, 80, 0.8); /*!END*/
   /*!CSS|promise*/ border: 0.1em solid #181818; /*!END*/
   &:hover {
     /*!COLOR|background|promise-hover*/ /*!END*/

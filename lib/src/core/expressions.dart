@@ -321,7 +321,6 @@ class Pair<A extends Expression, B extends Expression> extends Expression
       rest = " . $second";
     }
     String core = '$first$rest';
-    print(inCdr);
     return inCdr ? core : '($core)';
   }
 
