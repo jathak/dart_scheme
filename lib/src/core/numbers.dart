@@ -8,7 +8,6 @@ import 'serialization.dart';
 
 abstract class Number extends SelfEvaluating {
   final inlineUI = true;
-  bool get isInteger;
   dynamic get value;
 
   Number();
@@ -67,8 +66,6 @@ abstract class Number extends SelfEvaluating {
 }
 
 class Integer extends Number implements Serializable<Integer> {
-  final bool isInteger = true;
-
   BigInt value;
 
   Integer.fromBigInt(this.value);
@@ -106,8 +103,6 @@ class Integer extends Number implements Serializable<Integer> {
 }
 
 class Double extends Number implements Serializable<Double> {
-  final bool isInteger = false;
-
   double value;
 
   Double(this.value);

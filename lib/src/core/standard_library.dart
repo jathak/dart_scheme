@@ -124,7 +124,7 @@ class StandardLibrary extends SchemeLibrary with _$StandardLibraryMixin {
   Number abs(Number arg) => arg < Number.zero ? -arg : arg;
 
   Number expt(Number base, Number power) {
-    if (power.isInteger) {
+    if (power is Integer) {
       Number total = Number.one;
       for (Number i = Number.zero; i < power; i += Number.one) {
         total *= base;
