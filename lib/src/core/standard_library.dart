@@ -111,7 +111,7 @@ class StandardLibrary extends SchemeLibrary with _$StandardLibraryMixin {
 
   @SchemeSymbol("*")
   Number mul(List<Expression> args) =>
-      allNumbers(args).fold(Number.one, (a, b) => a * b);;
+      allNumbers(args).fold(Number.one, (a, b) => a * b);
 
   @SchemeSymbol("/")
   @MinArgs(1)
