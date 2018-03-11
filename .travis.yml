@@ -13,4 +13,5 @@ before_script:
 - wget -O lib/impl.dart $PRIVATE_IMPL
 - pub get
 script:
+- pub run grinder check
 - dart ../scheme_impl_skeleton-master/test/scm.dart
