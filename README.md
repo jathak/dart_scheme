@@ -1,4 +1,4 @@
-# cs61a_scheme
+# cs61a_scheme [![Build Status](https://travis-ci.org/Cal-CS-61A-Staff/dart_scheme.svg?branch=master)](https://travis-ci.org/Cal-CS-61A-Staff/dart_scheme)
 
 An implementation of [61A Scheme][spec] in Dart, designed for use both in the
 Dart VM and on the web.
