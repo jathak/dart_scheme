@@ -59,7 +59,7 @@ class StandardLibrary extends SchemeLibrary with _$StandardLibraryMixin {
   }
 
   @SchemeSymbol("integer?")
-  bool isInteger(Expression val) => val is Number && val.isInteger;
+  bool isInteger(Expression val) => val is Integer;
 
   @SchemeSymbol("list?")
   bool isList(Expression val) => val is PairOrEmpty && val.wellFormed;

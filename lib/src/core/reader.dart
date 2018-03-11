@@ -18,7 +18,7 @@ Set _SYMBOL_CHARS = new Set.from(
     .union(_NUMERAL_STARTS);
 Set _STRING_DELIMS = new Set.from(['"']);
 Set _WHITESPACE = new Set.from([' ', '\t', '\n', '\r']);
-Set _SINGLE_CHAR_TOKENS = new Set.from(["()[]'`#".split("")]);
+Set _SINGLE_CHAR_TOKENS = new Set.from(['(', ')', '[', ']', "'", '`', '#']);
 Set _TOKEN_END = _WHITESPACE
     .union(_SINGLE_CHAR_TOKENS)
     .union(_STRING_DELIMS)

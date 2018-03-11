@@ -1,113 +1,122 @@
 library cs61a_scheme.core.numbers;
 
 import 'package:rational/bigint.dart';
-import 'package:quiver_hashcode/hashcode.dart';
 
 import 'expressions.dart';
 import 'logging.dart';
 import 'serialization.dart';
 
-class Number extends SelfEvaluating implements Serializable<Number> {
+abstract class Number extends SelfEvaluating {
   final inlineUI = true;
-  final bool isInteger;
-  final double doubleValue;
-  final BigInt bigInt;
-  const Number.fromDouble(this.doubleValue)
-      : isInteger = false,
-        bigInt = null;
-  const Number.fromBigInt(this.bigInt)
-      : isInteger = true,
-        doubleValue = null;
+  bool get isInteger;
+  dynamic get value;
 
-  factory Number.fromInt(int value) {
-    return new Number.fromBigInt(new BigInt.fromJsInt(value));
-  }
+  Number();
 
   factory Number.fromNum(num value) {
-    if (value is int) return new Number.fromInt(value);
-    return new Number.fromDouble(value);
+    if (value.floor() == value) return new Integer(value.floor());
+    return new Double(value);
   }
-
-  static final zero = new Number.fromInt(0);
-  static final one = new Number.fromInt(1);
-  static final two = new Number.fromInt(2);
 
   factory Number.fromString(String numString) {
     try {
-      return new Number.fromBigInt(BigInt.parse(numString));
+      return new Integer.fromBigInt(BigInt.parse(numString));
     } catch (e) {
-      return new Number.fromDouble(double.parse(numString));
+      return new Number.fromNum(num.parse(numString));
     }
   }
 
-  String toString() => isInteger ? "$bigInt" : "$doubleValue";
-
-  num toJS() => isInteger ? num.parse("$bigInt") : doubleValue;
-
-  Map serialize() => {'type': 'Number', 'data': toString()};
-
-  Number deserialize(Map data) => new Number.fromString(data['data']);
-
-  static Number _operation(Number a, Number b, Function fn) {
-    if (a.isInteger && b.isInteger) {
-      return new Number.fromBigInt(fn(a.bigInt, b.bigInt));
-    } else if (!a.isInteger && !b.isInteger) {
-      return new Number.fromDouble(fn(a.doubleValue, b.doubleValue));
-    }
-    num aNum = a.isInteger ? num.parse("$a") : a.doubleValue;
-    num bNum = b.isInteger ? num.parse("$b") : b.doubleValue;
-    num result = fn(aNum, bNum);
-    if (result is int) return new Number.fromInt(result);
-    return new Number.fromDouble(result);
+  Number _operation(Number other, Function fn) {
+    num myNum = this is Double ? this.value : num.parse("$this");
+    num otherNum = other is Double ? other.value : num.parse("$other");
+    return new Number.fromNum(fn(myNum, otherNum));
   }
 
   int compareTo(Number other) {
-    if (isInteger && other.isInteger) return bigInt.compareTo(other.bigInt);
-    if (!isInteger && !other.isInteger) {
-      return doubleValue.compareTo(other.doubleValue);
-    }
-    num a = this.isInteger ? num.parse("$this") : this.doubleValue;
-    num b = other.isInteger ? num.parse("$other") : other.doubleValue;
-    return a.compareTo(b);
+    num myNum = this is Double ? this.value : num.parse("$this");
+    num otherNum = other is Double ? other.value : num.parse("$other");
+    return myNum.compareTo(otherNum);
   }
 
-  operator +(Number other) => _operation(this, other, (a, b) => a + b);
-  operator -(Number other) => _operation(this, other, (a, b) => a - b);
-  operator -() => isInteger
-      ? new Number.fromBigInt(-bigInt)
-      : new Number.fromDouble(-doubleValue);
-  operator /(Number other) {
-    if (other == zero) throw new SchemeException("cannot divide by zero");
-    if (!this.isInteger && !other.isInteger) {
-      return new Number.fromDouble(this.doubleValue / other.doubleValue);
-    } else if (this.isInteger && other.isInteger) {
-      if ((this.bigInt % other.bigInt).is0) return this ~/ other;
-    }
-    num a = this.isInteger ? num.parse("$this") : this.doubleValue;
-    num b = other.isInteger ? num.parse("$other") : other.doubleValue;
-    return new Number.fromDouble(a / b);
-  }
-
+  operator +(Number other) => _operation(other, (a, b) => a + b);
+  operator -(Number other) => _operation(other, (a, b) => a - b);
+  operator -();
+  operator *(Number other) => _operation(other, (a, b) => a * b);
+  operator %(Number other) => _operation(other, (a, b) => a % b);
+  operator /(Number other) => _operation(other, (a, b) => a / b);
   operator ~/(Number other) {
     if (other == zero) throw new SchemeException("cannot divide by zero");
-    return _operation(this, other, (a, b) => a ~/ b);
+    return _operation(other, (a, b) => a ~/ b);
   }
 
-  operator *(Number other) => _operation(this, other, (a, b) => a * b);
-  operator %(Number other) => _operation(this, other, (a, b) => a % b);
   operator <(Number other) => compareTo(other) < 0;
   operator <=(Number other) => compareTo(other) <= 0;
   operator >(Number other) => compareTo(other) > 0;
   operator >=(Number other) => compareTo(other) >= 0;
   operator ==(dynamic other) {
-    if (other is int) return this == new Number.fromInt(other);
-    if (other is double) return this == new Number.fromDouble(other);
+    if (other is num) return this == new Number.fromNum(other);
     if (other is Number) return compareTo(other) == 0;
     return false;
   }
 
+  toString() => value.toString();
+
+  static final zero = new Integer(0);
+  static final one = new Integer(1);
+  static final two = new Integer(2);
+}
+
+class Integer extends Number implements Serializable<Integer> {
+  final bool isInteger = true;
+
+  BigInt value;
+
+  Integer.fromBigInt(this.value);
+
+  factory Integer(int value) =>
+      new Integer.fromBigInt(new BigInt.fromJsInt(value));
+
+  Integer deserialize(Map data) =>
+      new Integer.fromBigInt(BigInt.parse(data['value']));
+
+  Map serialize() => {'type': 'Integer', 'value': value.toString()};
+
+  operator -() => new Integer.fromBigInt(-value);
+
   @override
-  int get hashCode => hash3(isInteger, doubleValue, bigInt);
+  operator /(Number other) {
+    if (other == Number.zero) {
+      throw new SchemeException("cannot divide by zero");
+    }
+    if (other is Integer && (value % other.value).is0) return this ~/ other;
+    return super._operation(other, (a, b) => a / b);
+  }
+
+  @override
+  Number _operation(Number other, Function fn) {
+    if (other is Integer) return new Integer.fromBigInt(fn(value, other.value));
+    return super._operation(other, fn);
+  }
+
+  @override
+  int compareTo(Number other) {
+    if (other is Integer) return value.compareTo(other.value);
+    return super.compareTo(other);
+  }
+}
+
+class Double extends Number implements Serializable<Double> {
+  final bool isInteger = false;
+
+  double value;
+
+  Double(this.value);
+
+  Double deserialize(Map data) => new Double(data['value']);
+
+  Map serialize() => {'type': 'Double', 'value': value};
+
+  operator -() => new Double(-value);
 }
 
 Iterable<Number> allNumbers(List<Expression> expr) {
