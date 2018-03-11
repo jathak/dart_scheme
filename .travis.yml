@@ -12,6 +12,7 @@ before_script:
 - cd scheme_impl_skeleton-master
 - wget -O lib/impl.dart $PRIVATE_IMPL
 - pub get
+- cd $TRAVIS_BUILD_DIR
 script:
 - pub run grinder check
 - dart ../scheme_impl_skeleton-master/test/scm.dart
