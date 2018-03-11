@@ -1,0 +1,23 @@
+language: dart
+dart:
+- stable
+- dev
+before_script:
+- cd ..
+- wget https://github.com/jathak/scheme_impl_skeleton/archive/master.zip
+- unzip master.zip
+- cd scheme_impl_skeleton-master
+- wget -O lib/impl.dart $PRIVATE_IMPL
+- pub get
+- cd $TRAVIS_BUILD_DIR
+script:
+- pub run grinder check
+- dartfmt -n --set-exit-if-changed .
+- |
+  if [ "${TRAVIS_DART_VERSION}" = "dev" ]
+  then
+    echo "Skipping dartanalyzer on dev (since APIs have changed)"
+  else
+    dartanalyzer --fatal-warnings --strong .
+  fi
+- dart ../scheme_impl_skeleton-master/test/scm.dart
