@@ -12,6 +12,6 @@ before_script:
 - cd $TRAVIS_BUILD_DIR
 script:
 - pub run grinder check
-- dartfmt n --set-exit-if-changed .
+- dartfmt -n --set-exit-if-changed .
 - dartanalyzer --fatal-warnings .
 - dart ../scheme_impl_skeleton-master/test/scm.dart
