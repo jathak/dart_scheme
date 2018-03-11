@@ -13,5 +13,9 @@ before_script:
 script:
 - pub run grinder check
 - dartfmt -n --set-exit-if-changed .
-- dartanalyzer --fatal-warnings .
+- |
+  if [ "${TRAVIS_DART_VERSION}" = "dev" ]; then
+    echo "Skipping dartanalyzer on dev (since APIs have changed)"
+  else
+    dartanalyzer --fatal-warnings --strong .
 - dart ../scheme_impl_skeleton-master/test/scm.dart
