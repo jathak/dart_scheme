@@ -4,6 +4,7 @@
 /// Support for doing something awesome.
 ///
 /// More dartdocs go here.
+/// Test comment
 library cs61a_scheme.core;
 
 export 'src/core/expressions.dart';
