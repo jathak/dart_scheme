@@ -122,13 +122,11 @@ abstract class _$StandardLibraryMixin {
       return this.append(__exprs);
     }, 0, -1);
     addPrimitive(__env, const SchemeSymbol("car"), (__exprs, __env) {
-      if (__exprs[0] is! Pair)
-        throw new SchemeException('Argument of invalid type passed to car.');
+      if (__exprs[0] is! Pair) throw new SchemeException('Argument of invalid type passed to car.');
       return this.car(__exprs[0]);
     }, 1);
     addPrimitive(__env, const SchemeSymbol("cdr"), (__exprs, __env) {
-      if (__exprs[0] is! Pair)
-        throw new SchemeException('Argument of invalid type passed to cdr.');
+      if (__exprs[0] is! Pair) throw new SchemeException('Argument of invalid type passed to cdr.');
       return this.cdr(__exprs[0]);
     }, 1);
     addPrimitive(__env, const SchemeSymbol("cons"), (__exprs, __env) {
@@ -171,14 +169,12 @@ abstract class _$StandardLibraryMixin {
     }, 2);
     addPrimitive(__env, const SchemeSymbol("quotient"), (__exprs, __env) {
       if (__exprs[0] is! Number || __exprs[1] is! Number)
-        throw new SchemeException(
-            'Argument of invalid type passed to quotient.');
+        throw new SchemeException('Argument of invalid type passed to quotient.');
       return this.quotient(__exprs[0], __exprs[1]);
     }, 2);
     addPrimitive(__env, const SchemeSymbol("remainder"), (__exprs, __env) {
       if (__exprs[0] is! Number || __exprs[1] is! Number)
-        throw new SchemeException(
-            'Argument of invalid type passed to remainder.');
+        throw new SchemeException('Argument of invalid type passed to remainder.');
       return this.remainder(__exprs[0], __exprs[1]);
     }, 2);
     addPrimitive(__env, const SchemeSymbol("eq?"), (__exprs, __env) {
@@ -237,34 +233,28 @@ abstract class _$StandardLibraryMixin {
     }, 1);
     addPrimitive(__env, const SchemeSymbol("cdr-stream"), (__exprs, __env) {
       if (__exprs[0] is! Pair)
-        throw new SchemeException(
-            'Argument of invalid type passed to cdr-stream.');
+        throw new SchemeException('Argument of invalid type passed to cdr-stream.');
       return this.cdrStream(__exprs[0]);
     }, 1);
     addPrimitive(__env, const SchemeSymbol("set-car!"), (__exprs, __env) {
       if (__exprs[0] is! Pair || __exprs[1] is! Expression)
-        throw new SchemeException(
-            'Argument of invalid type passed to set-car!.');
+        throw new SchemeException('Argument of invalid type passed to set-car!.');
       var __value = undefined;
       this.setCar(__exprs[0], __exprs[1]);
-      __env.interpreter
-          .triggerEvent(const SchemeSymbol("pair-mutation"), [__value], __env);
+      __env.interpreter.triggerEvent(const SchemeSymbol("pair-mutation"), [__value], __env);
       return __value;
     }, 2);
     addPrimitive(__env, const SchemeSymbol("set-cdr!"), (__exprs, __env) {
       if (__exprs[0] is! Pair || __exprs[1] is! Expression)
-        throw new SchemeException(
-            'Argument of invalid type passed to set-cdr!.');
+        throw new SchemeException('Argument of invalid type passed to set-cdr!.');
       var __value = undefined;
       this.setCdr(__exprs[0], __exprs[1]);
-      __env.interpreter
-          .triggerEvent(const SchemeSymbol("pair-mutation"), [__value], __env);
+      __env.interpreter.triggerEvent(const SchemeSymbol("pair-mutation"), [__value], __env);
       return __value;
     }, 2);
     addPrimitive(__env, const SchemeSymbol("call/cc"), (__exprs, __env) {
       if (__exprs[0] is! Procedure)
-        throw new SchemeException(
-            'Argument of invalid type passed to call/cc.');
+        throw new SchemeException('Argument of invalid type passed to call/cc.');
       return this.callWithCurrentContinuation(__exprs[0], __env);
     }, 1);
     addPrimitive(__env, const SchemeSymbol("runtime-type"), (__exprs, __env) {

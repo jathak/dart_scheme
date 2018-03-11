@@ -35,11 +35,8 @@ abstract class _$WebLibraryMixin {
       return this.jsContext();
     }, 0);
     addPrimitive(__env, const SchemeSymbol("js-set!"), (__exprs, __env) {
-      if (__exprs[0] is! JsExpression ||
-          __exprs[1] is! Expression ||
-          __exprs[2] is! Expression)
-        throw new SchemeException(
-            'Argument of invalid type passed to js-set!.');
+      if (__exprs[0] is! JsExpression || __exprs[1] is! Expression || __exprs[2] is! Expression)
+        throw new SchemeException('Argument of invalid type passed to js-set!.');
       return this.jsSet(__exprs[0], __exprs[1], __exprs[2]);
     }, 3);
     addPrimitive(__env, const SchemeSymbol("js-ref"), (__exprs, __env) {
@@ -47,12 +44,10 @@ abstract class _$WebLibraryMixin {
         throw new SchemeException('Argument of invalid type passed to js-ref.');
       return this.jsRef(__exprs[0], __exprs[1]);
     }, 2);
-    addVariablePrimitive(__env, const SchemeSymbol("js-call"),
-        (__exprs, __env) {
+    addVariablePrimitive(__env, const SchemeSymbol("js-call"), (__exprs, __env) {
       return this.jsCall(__exprs);
     }, 2, -1);
-    addVariablePrimitive(__env, const SchemeSymbol("js-object"),
-        (__exprs, __env) {
+    addVariablePrimitive(__env, const SchemeSymbol("js-object"), (__exprs, __env) {
       return this.jsObject(__exprs);
     }, 0, -1);
     addPrimitive(__env, const SchemeSymbol("js-object?"), (__exprs, __env) {
@@ -62,17 +57,15 @@ abstract class _$WebLibraryMixin {
       return new Boolean(this.isJsProcedure(__exprs[0]));
     }, 1);
     addPrimitive(__env, const SchemeSymbol("rgb"), (__exprs, __env) {
-      if ((__exprs[0] is! Number || !(__exprs[0] as Number).isInteger) ||
-          (__exprs[1] is! Number || !(__exprs[1] as Number).isInteger) ||
-          (__exprs[2] is! Number || !(__exprs[2] as Number).isInteger))
+      if ((__exprs[0] is! Integer) || (__exprs[1] is! Integer) || (__exprs[2] is! Integer))
         throw new SchemeException('Argument of invalid type passed to rgb.');
-      return this.rgb(__exprs[0].toJS().toInt(), __exprs[1].toJS().toInt(),
-          __exprs[2].toJS().toInt());
+      return this
+          .rgb(__exprs[0].toJS().toInt(), __exprs[1].toJS().toInt(), __exprs[2].toJS().toInt());
     }, 3);
     addPrimitive(__env, const SchemeSymbol("rgba"), (__exprs, __env) {
-      if ((__exprs[0] is! Number || !(__exprs[0] as Number).isInteger) ||
-          (__exprs[1] is! Number || !(__exprs[1] as Number).isInteger) ||
-          (__exprs[2] is! Number || !(__exprs[2] as Number).isInteger) ||
+      if ((__exprs[0] is! Integer) ||
+          (__exprs[1] is! Integer) ||
+          (__exprs[2] is! Integer) ||
           __exprs[3] is! Number)
         throw new SchemeException('Argument of invalid type passed to rgba.');
       return this.rgba(__exprs[0].toJS().toInt(), __exprs[1].toJS().toInt(),
@@ -86,31 +79,23 @@ abstract class _$WebLibraryMixin {
     addPrimitive(__env, const SchemeSymbol("make-theme"), (__exprs, __env) {
       return this.makeTheme();
     }, 0);
-    addPrimitive(__env, const SchemeSymbol('theme-set-color!'),
-        (__exprs, __env) {
-      if (__exprs[0] is! Theme ||
-          __exprs[1] is! SchemeSymbol ||
-          __exprs[2] is! Expression)
-        throw new SchemeException(
-            'Argument of invalid type passed to theme-set-color!.');
+    addPrimitive(__env, const SchemeSymbol('theme-set-color!'), (__exprs, __env) {
+      if (__exprs[0] is! Theme || __exprs[1] is! SchemeSymbol || __exprs[2] is! Expression)
+        throw new SchemeException('Argument of invalid type passed to theme-set-color!.');
       var __value = undefined;
       this.themeSetColor(__exprs[0], __exprs[1], __exprs[2]);
       return __value;
     }, 3);
     addPrimitive(__env, const SchemeSymbol('theme-set-css!'), (__exprs, __env) {
-      if (__exprs[0] is! Theme ||
-          __exprs[1] is! SchemeSymbol ||
-          __exprs[2] is! SchemeString)
-        throw new SchemeException(
-            'Argument of invalid type passed to theme-set-css!.');
+      if (__exprs[0] is! Theme || __exprs[1] is! SchemeSymbol || __exprs[2] is! SchemeString)
+        throw new SchemeException('Argument of invalid type passed to theme-set-css!.');
       var __value = undefined;
       this.themeSetCss(__exprs[0], __exprs[1], __exprs[2]);
       return __value;
     }, 3);
     addPrimitive(__env, const SchemeSymbol('apply-theme'), (__exprs, __env) {
       if (__exprs[0] is! Theme)
-        throw new SchemeException(
-            'Argument of invalid type passed to apply-theme.');
+        throw new SchemeException('Argument of invalid type passed to apply-theme.');
       var __value = undefined;
       this.applyThemePrimitive(__exprs[0]);
       return __value;
@@ -123,8 +108,7 @@ abstract class _$WebLibraryMixin {
     }, 1);
     addPrimitive(__env, const SchemeSymbol('lib-ref'), (__exprs, __env) {
       if (__exprs[0] is! ImportedLibrary || __exprs[1] is! SchemeSymbol)
-        throw new SchemeException(
-            'Argument of invalid type passed to lib-ref.');
+        throw new SchemeException('Argument of invalid type passed to lib-ref.');
       return this.libraryReference(__exprs[0], __exprs[1]);
     }, 2);
     addPrimitive(__env, const SchemeSymbol("theme"), (__exprs, __env) {
@@ -134,8 +118,7 @@ abstract class _$WebLibraryMixin {
     }, 1);
     addPrimitive(__env, const SchemeSymbol("color->css"), (__exprs, __env) {
       if (__exprs[0] is! Color)
-        throw new SchemeException(
-            'Argument of invalid type passed to color->css.');
+        throw new SchemeException('Argument of invalid type passed to color->css.');
       return new SchemeString(this.colorToCss(__exprs[0]));
     }, 1);
   }

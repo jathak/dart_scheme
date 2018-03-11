@@ -3,6 +3,7 @@ library cs61a_scheme.core.serialization;
 import 'dart:convert' show JSON;
 
 import 'expressions.dart';
+import 'numbers.dart';
 import 'logging.dart';
 import 'ui.dart';
 

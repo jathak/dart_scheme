@@ -4,6 +4,7 @@ import 'dart:math' show pow;
 
 import 'expressions.dart';
 import 'logging.dart';
+import 'numbers.dart';
 import 'procedures.dart';
 import 'scheme_library.dart';
 import 'utils.dart';
@@ -58,7 +59,7 @@ class StandardLibrary extends SchemeLibrary with _$StandardLibraryMixin {
   }
 
   @SchemeSymbol("integer?")
-  bool isInteger(Expression val) => val is Number && val.isInteger;
+  bool isInteger(Expression val) => val is Integer;
 
   @SchemeSymbol("list?")
   bool isList(Expression val) => val is PairOrEmpty && val.wellFormed;
@@ -123,7 +124,7 @@ class StandardLibrary extends SchemeLibrary with _$StandardLibraryMixin {
   Number abs(Number arg) => arg < Number.zero ? -arg : arg;
 
   Number expt(Number base, Number power) {
-    if (power.isInteger) {
+    if (power is Integer) {
       Number total = Number.one;
       for (Number i = Number.zero; i < power; i += Number.one) {
         total *= base;

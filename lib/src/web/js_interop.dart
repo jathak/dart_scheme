@@ -43,8 +43,7 @@ class NativeExpression extends SelfEvaluating {
 
 Expression jsToScheme(obj) {
   if (obj is Expression) return obj;
-  if (obj is double) return new Number.fromDouble(obj);
-  if (obj is int) return new Number.fromInt(obj);
+  if (obj is num) return new Number.fromNum(obj);
   if (obj is bool) return obj ? schemeTrue : schemeFalse;
   if (obj is String) return new SchemeString(obj);
   if (obj is SchemeFunction) return obj.procedure;
