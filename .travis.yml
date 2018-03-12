@@ -20,5 +20,4 @@ script:
   else
     dartanalyzer --fatal-warnings --strong .
   fi
-- dart ../scheme_impl_skeleton-master/test/scm.dart
 - pub run test $NO_IMPL
