@@ -17,7 +17,7 @@ before_install:
 - unzip master.zip
 - mv scheme_impl_skeleton-master dart_scheme_impl
 - cd dart_scheme_impl
-- wget -O lib/impl.dart $PRIVATE_IMPL || export HASs_IMPL="-x impl"
+- wget -O lib/impl.dart $PRIVATE_IMPL || export NO_IMPL="-x impl"
 - cd $TRAVIS_BUILD_DIR
 
 script:
