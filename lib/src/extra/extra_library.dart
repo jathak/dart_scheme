@@ -10,7 +10,7 @@ import 'flag_trace.dart';
 import 'operand_procedures.dart';
 import 'visualization.dart';
 
-part '../../gen/extra/extra_library.gen.dart';
+part 'extra_library.g.dart';
 
 /// Note: When the signatures (including any annotations) of any of theses methods
 /// change, make sure to `pub run grinder` to rebuild the mixin (which registers

@@ -9,7 +9,7 @@ import 'procedures.dart';
 import 'scheme_library.dart';
 import 'utils.dart';
 
-part '../../gen/core/standard_library.gen.dart';
+part 'standard_library.g.dart';
 
 /// Note: When the signatures (including any annotations) of any of these methods
 /// change, make sure to `pub run grinder` to rebuild the mixin (which registers

@@ -34,7 +34,7 @@ check() async {
 
 buildLibrary(String name) async {
   String code = await generateCode(name);
-  var output = new File("lib/gen/$name.gen.dart");
+  var output = new File("lib/src/$name.g.dart");
   if (!await output.exists()) await output.create(recursive: true);
   await output.writeAsString(code);
 }
@@ -49,7 +49,7 @@ generateCode(String name) async {
 
 checkBuilt(String name) async {
   String code = await generateCode(name);
-  var output = new File("lib/gen/$name.gen.dart");
+  var output = new File("lib/src/$name.g.dart");
   String existing = await output.readAsString();
   if (code != existing) {
     print('Generated code for $name out of sync!');

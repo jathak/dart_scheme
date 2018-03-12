@@ -7,7 +7,7 @@ import 'package:cs61a_scheme/cs61a_scheme_extra.dart';
 import 'theming.dart';
 import 'turtle.dart';
 
-part '../../gen/web/turtle_library.gen.dart';
+part 'turtle_library.g.dart';
 
 /// Note: When the signatures (including any annotations) of any of this methods
 /// change, make sure to `pub run grinder` to rebuild the mixin (which registers
