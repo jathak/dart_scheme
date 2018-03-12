@@ -6,8 +6,9 @@ before_script:
 - cd ..
 - wget https://github.com/jathak/scheme_impl_skeleton/archive/master.zip
 - unzip master.zip
-- cd scheme_impl_skeleton-master
-- wget -O lib/impl.dart $PRIVATE_IMPL
+- mv scheme_impl_skeleton-master dart_scheme_impl
+- cd dart_scheme_impl
+- wget -O lib/impl.dart $PRIVATE_IMPL || export NO_IMPL="-x impl"
 - pub get
 - cd $TRAVIS_BUILD_DIR
 script:
@@ -21,4 +22,4 @@ script:
     dartanalyzer --fatal-warnings --strong .
   fi
 - dart ../scheme_impl_skeleton-master/test/scm.dart
-- pub run test test/*
+- pub run test $NO_IMPL

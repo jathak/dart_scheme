@@ -18,3 +18,5 @@ dependencies:
 
 dev_dependencies:
   test: ^0.12.0
+  cs61a_scheme_impl:
+    path: ../dart_scheme_impl
