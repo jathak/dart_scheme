@@ -9,14 +9,13 @@ environment:
 
 dependencies:
   analyzer: ^0.30.0+2
-  barback: ^0.15.2+11
-  code_builder: ^1.0.4
-  dart_style: ^1.0.7
-  grinder: ^0.8.0+3
   quiver_hashcode: ^1.0.0
   rational: ^0.1.11
 
 dev_dependencies:
+  dart_style: ^1.0.7
+  dependency_validator: ^1.1.1
+  grinder: ^0.8.0+3
   test: ^0.12.0
   cs61a_scheme_impl:
     path: ../dart_scheme_impl

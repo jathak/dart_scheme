@@ -31,3 +31,4 @@ script:
   else
     dartanalyzer --fatal-warnings --strong .
   fi
+- pub run dependency_validator
