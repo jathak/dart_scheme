@@ -190,7 +190,7 @@ class HtmlRenderer {
 
   Element convertBlock(Block block, [bool spaced = false]) {
     DivElement div = new DivElement();
-    div.classes = ['block', block.type.id];
+    div.classes = ['block', block.type];
     div.append(convert(block.inside, spaced || block.spacer));
     return div;
   }

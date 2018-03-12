@@ -8,11 +8,12 @@ import 'logging.dart';
 import 'ui.dart';
 
 final Map<String, Serializable> deserializers = {
-  'Number': Number.zero,
+  'Integer': Number.zero,
+  'Double': new Double(1.5),
   'Boolean': schemeTrue,
   'SchemeSymbol': const SchemeSymbol('x'),
   'SchemeString': const SchemeString('x'),
-  'Anchor': new Anchor(),
+  'Anchor': new Anchor.withId(-1),
   'TextElement': new TextElement(""),
   'Strike': new Strike(),
   'Block': new Block.pair(null),
