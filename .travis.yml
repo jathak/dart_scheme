@@ -1,16 +1,27 @@
 language: dart
+
 dart:
 - stable
 - dev
+
+branches:
+  only: [master]
+
+cache:
+  directories:
+  - $HOME/.pub-cache
+
 before_install:
 - cd ..
 - wget https://github.com/jathak/scheme_impl_skeleton/archive/master.zip
 - unzip master.zip
 - mv scheme_impl_skeleton-master dart_scheme_impl
 - cd dart_scheme_impl
-- wget -O lib/impl.dart $PRIVATE_IMPL || export NO_IMPL="-x impl"
+- wget -O lib/impl.dart $PRIVATE_IMPL || export HASs_IMPL="-x impl"
 - cd $TRAVIS_BUILD_DIR
+
 script:
+- pub run test $NO_IMPL
 - pub run grinder check
 - dartfmt -n --set-exit-if-changed .
 - |
@@ -20,4 +31,3 @@ script:
   else
     dartanalyzer --fatal-warnings --strong .
   fi
-- pub run test $NO_IMPL

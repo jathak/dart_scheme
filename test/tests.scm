@@ -3,9 +3,6 @@ List list ;/* ; (keeps this readable by both versions of the test runner)
 ;;; (Scheme is case insensitive, so we can capitalize it however we want)
 ;;;*/var tests_scm = r""" ;;;"
 
-10
-; expect 9
-
 ;;;; Preamble for dart_scheme:
 ;;;; This file consists of the following
 ;;;; - tests.scm from the Fall 2014 61A Scheme project
