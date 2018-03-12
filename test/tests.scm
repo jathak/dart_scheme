@@ -4,7 +4,7 @@ List list ;/* ; (keeps this readable by both versions of the test runner)
 ;;;*/var tests_scm = r""" ;;;"
 
 10
-; expect 10
+; expect 9
 
 ;;;; Preamble for dart_scheme:
 ;;;; This file consists of the following
