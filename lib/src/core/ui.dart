@@ -122,26 +122,20 @@ class Strike extends UIElement {
   }
 }
 
-class BlockType {
-  final String id;
-  const BlockType(this.id);
-  toString() => "#[BlockType:$id]";
-}
-
 class Block extends UIElement {
-  final BlockType type;
+  final String type;
   final UIElement inside;
   Block._(this.type, this.inside);
-  Block.pair(this.inside) : type = const BlockType('pair');
-  Block.vector(this.inside) : type = const BlockType('vector');
-  Block.promise(this.inside) : type = const BlockType('promise');
-  Block.async(this.inside) : type = const BlockType('async');
-  toString() => "#[Block:${type.id}:$inside]";
+  Block.pair(this.inside) : type = "pair";
+  Block.vector(this.inside) : type = "vector";
+  Block.promise(this.inside) : type = "promise";
+  Block.async(this.inside) : type = "async";
+  toString() => "#[Block:$type:$inside]";
   Map serialize() => finishSerialize(
-      {'type': 'Block', 'blockType': type.id, 'inside': inside.serialize()});
+      {'type': 'Block', 'blockType': type, 'inside': inside.serialize()});
   Block deserialize(Map data) {
-    return new Block._(new BlockType(data['blockType']),
-        Serialization.deserialize(data['inside']))
+    return new Block._(
+        data['blockType'], Serialization.deserialize(data['inside']))
       ..finishDeserialize(data);
   }
 }
