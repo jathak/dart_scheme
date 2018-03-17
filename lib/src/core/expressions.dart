@@ -11,57 +11,97 @@ import 'serialization.dart';
 import 'ui.dart';
 import 'utils.dart';
 
+/// Base class for all Scheme data types.
+///
+/// Everything that can be touched by Scheme code should inherit from this.
 abstract class Expression {
   const Expression();
+
+  /// Evaluates this expression in [env].
   Expression evaluate(Frame env);
+
+  /// All Scheme expressions are truthy except for the [Boolean] `#f`.
   bool get isTruthy => true;
 
+  /// Determines how this expression is represented in environment diagrams.
+  ///
   /// If true, this expression should be inlined in diagrams.
   /// If false, it should be added to the objects with an arrow to it.
   bool get inlineUI => false;
 
-  /// Constructs a UIElement for this expression, adding elements to the diagram
-  /// as necessary.
+  /// Constructs a [UIElement] for this expression.
+  ///
+  /// The default implementation returns the string representation of this
+  /// expression as a [TextElement]. Some expressions may need to add
+  /// additional objects to [diagram].
   UIElement draw(DiagramInterface diagram) => new TextElement(toString());
+
+  /// Shorthand for `expr is EmptyList`.
   bool get isNil => false;
+
+  /// Defines how this expression should be displayed.
+  ///
+  /// Used by the `(display <expr>)` built-in. Defaults to [toString].
   String get display => toString();
 
+  /// Returns a string representation of this expression.
+  ///
+  /// Displayed when this is the interactive output, and in several other cases.
   String toString() => '#[$runtimeType]';
 
-  /// Should return the version of this object that can be passed to JS
+  /// Should return a version of this object that can be passed to JS.
+  ///
+  /// The default implementation just returns the expression itself, so this
+  /// should be overridden if passing to JS is intended.
   dynamic toJS() => this;
 
   /// Convenience function since casting as a Pair is very common.
   Pair get pair => this as Pair;
 }
 
+/// An expression that evaluates to itself. Common for literals.
 abstract class SelfEvaluating extends Expression {
   const SelfEvaluating();
+
+  /// This expression evaluates to itself.
   Expression evaluate(Frame env) => this;
 }
 
+/// A Scheme boolean. There are only two: [schemeTrue] and [schemeFalse].
 class Boolean extends SelfEvaluating implements Serializable<Boolean> {
   final inlineUI = true;
   final bool value;
   const Boolean._internal(this.value);
   bool get isTruthy => value;
   toString() => value ? "#t" : "#f";
+
+  /// The underlying Dart bool is passed to JS.
   bool toJS() => value;
-  operator ==(other) => other is Boolean && value == other.value;
-  int get hashCode => value.hashCode;
+
+  /// Returns [schemeTrue] or [schemeFalse] depending on [value].
+  ///
+  /// Additional [Boolean] expressions will never be created.
   factory Boolean(bool value) => value ? schemeTrue : schemeFalse;
 
   Map serialize() => {'type': 'Boolean', 'value': isTruthy};
   Boolean deserialize(Map data) => new Boolean(data['value']);
 }
 
+/// `#t` in Scheme.
 const schemeTrue = const Boolean._internal(true);
+
+/// `#f` in Scheme. This is the only false-y expression.
 const schemeFalse = const Boolean._internal(false);
 
+/// A Scheme identifier.
+///
+/// These should be case insensitive. When calling the unnamed constructor to
+/// create a constant instance, a lowercase string should be passed to maintain
+/// this. Use the [runtime] constructor when passing in non-constant strings.
 class SchemeSymbol extends Expression implements Serializable<SchemeSymbol> {
   final inlineUI = true;
   final String value;
-  // Constant constructor must already use a lowercase String.
+
   const SchemeSymbol(this.value);
   SchemeSymbol.runtime(String value) : this.value = value.toLowerCase();
   Expression evaluate(Frame env) => env.lookup(this);
@@ -71,9 +111,10 @@ class SchemeSymbol extends Expression implements Serializable<SchemeSymbol> {
   toJS() => value;
 
   Map serialize() => {'type': 'SchemeSymbol', 'value': value};
-  SchemeSymbol deserialize(Map data) => new SchemeSymbol(data['value']);
+  SchemeSymbol deserialize(Map data) => new SchemeSymbol.runtime(data['value']);
 }
 
+/// A Scheme string.
 class SchemeString extends SelfEvaluating
     implements Serializable<SchemeString> {
   final inlineUI = true;
@@ -112,12 +153,22 @@ class _NilIterator extends Iterator<Expression> {
   moveNext() => false;
 }
 
-abstract class PairOrEmpty extends Expression with IterableMixin<Expression> {
+/// Implemented by both [Pair] and the empty list, [nil].
+///
+/// Since many pieces of the interpreter take in expressions that could either
+/// be a pair or the empty list, we need some way to define the type. Since Dart
+/// doesn't have union types, we instead use this interface.
+///
+/// Iterating over this class will fail if [wellFormed] is false.
+abstract class PairOrEmpty extends Expression implements Iterable<Expression> {
+  /// Returns true iff this is a well-formed Scheme list.
   bool get wellFormed;
 
+  /// See [wellFormed].
   @deprecated
   bool isWellFormedList() => wellFormed;
 
+  /// Creates a Scheme list from the given Dart iterable.
   factory PairOrEmpty.fromIterable(Iterable<Expression> iterable) {
     PairOrEmpty result = nil;
     for (Expression item in iterable.toList().reversed) {
@@ -125,13 +176,17 @@ abstract class PairOrEmpty extends Expression with IterableMixin<Expression> {
     }
     return result;
   }
-  int get length;
+
   num get lengthOrCycle;
 }
 
-class EmptyList extends SelfEvaluating implements PairOrEmpty {
+/// Singleton class for the empty Scheme list, [nil].
+///
+/// This can't use [IterableMixin] because we need it to have a constant
+/// constructor, so we have to implement all the [Iterable] methods ourselves.
+class _EmptyList extends SelfEvaluating implements PairOrEmpty {
   final inlineUI = true;
-  const EmptyList._internal();
+  const _EmptyList._internal();
   bool get wellFormed => true;
   @deprecated
   bool isWellFormedList() => true;
@@ -140,7 +195,6 @@ class EmptyList extends SelfEvaluating implements PairOrEmpty {
 
   num get lengthOrCycle => 0;
 
-  // Dummy properties to ensure this works as an iterator
   get first => throw new StateError("empty list");
   final isEmpty = true;
   final isNotEmpty = false;
@@ -171,20 +225,33 @@ class EmptyList extends SelfEvaluating implements PairOrEmpty {
   where(t) => this;
 }
 
-const nil = const EmptyList._internal();
+/// The empty Scheme list.
+const nil = const _EmptyList._internal();
 
+/// A Scheme pair.
+///
+/// A pair of two expressions. When [second] is either [nil] or another pair,
+/// this is a well-formed Scheme list and can be iterated over.
+///
+/// [first] is the `car`. [second] is the `cdr`.
 class Pair<A extends Expression, B extends Expression> extends Expression
     with IterableMixin<Expression>
     implements PairOrEmpty {
   A first;
   B second;
+
+  /// Creates a new [Pair] from [first] and [second].
   Pair(this.first, this.second);
 
+  /// This is a well-formed list if [second] is also a well-formed list.
   bool get wellFormed =>
       second is PairOrEmpty && (second as PairOrEmpty).wellFormed;
   @deprecated
   bool isWellFormedList() => wellFormed;
 
+  /// If the Scheme list contains a cycle, returns infinity.
+  ///
+  /// Returns [length] for well-formed lists and errors otherwise.
   num get lengthOrCycle {
     Expression slow = this;
     Expression fast = this;
@@ -226,11 +293,17 @@ class Pair<A extends Expression, B extends Expression> extends Expression
     return inCdr ? core : '($core)';
   }
 
+  /// When the pair structure contains a cycle, this will hit a recursion limit.
   toString() => _internalString(false);
 
   operator ==(x) => x is Pair && first == x.first && second == x.second;
   int get hashCode => hash2(first, second);
 
+  /// Typically takes in some number of Scheme lists and returns a new Scheme
+  /// list of all of them appended together.
+  ///
+  /// The last argument can be any expression. If it is not a Scheme list, the
+  /// resulting appended list will be dotted with it.
   static Expression append(List<Expression> args) {
     if (args.isEmpty) return nil;
     List<Expression> lst = [];
@@ -242,7 +315,7 @@ class Pair<A extends Expression, B extends Expression> extends Expression
         throw new SchemeException("Argument is not a well-formed list.");
       }
     }
-    Expression result = nil;
+    PairOrEmpty result = nil;
     Expression lastArg = args.last;
     if (lastArg is PairOrEmpty && lastArg.wellFormed) {
       lst.addAll(lastArg);
@@ -256,16 +329,26 @@ class Pair<A extends Expression, B extends Expression> extends Expression
   }
 }
 
+/// Singleton class for [undefined].
 class Undefined extends SelfEvaluating {
   const Undefined._internal();
-  bool get isNil => false;
   toString() => "undefined";
+
+  /// If the web library has been loaded, this returns the JS value `undefined`.
+  ///
+  /// Otherwise, it returns null.
   toJS() => Undefined.jsUndefined;
+
+  /// Initialized to the JS value `undefined` when the web library is loaded.
   static var jsUndefined = null;
 }
 
+/// Represents undefined values in Scheme, like `(if #f 1)`.
 const undefined = const Undefined._internal();
 
+/// An expression to be evaluated in an environment.
+///
+/// Used internally for tail-call optimization. Should not be output.
 class Thunk extends Expression {
   final Expression expr;
   final Frame env;
@@ -292,11 +375,28 @@ class Thunk extends Expression {
   toString() => 'Thunk($expr in f${env.id})';
 }
 
+/// A Scheme promise, used for Scheme streams.
+///
+/// A Scheme promise is a delayed expression that will be evaluated when forced.
+/// Once forced, the result is cached and returned directly when forced again.
+///
+/// Scheme promises are primarily used for created Scheme streams. A Scheme
+/// stream is the lazy equivalent of a Scheme list and is defined as a pair
+/// whose cdr is a promise that evaluates to another stream or the empty list.
+///
+/// It is semantically different from a JS Promise, which is equivalent to a
+/// Dart [Future]. The Scheme equivalent of [Future] is [AsyncExpression].
+///
+/// A Scheme stream is semantically different from a Dart Stream, which is an
+/// asynchronous sequence. A Scheme stream is analogous to a lazily-computed
+/// iterable built on a linked list.
 class Promise extends SelfEvaluating {
   Expression expr;
   final Frame env;
   bool _evaluated = false;
   Promise(this.expr, this.env);
+
+  /// Evaluates the promise, or returns the result if already evaluated.
   Expression force() {
     if (!_evaluated) {
       expr = schemeEval(expr, env);
@@ -305,32 +405,74 @@ class Promise extends SelfEvaluating {
     return expr;
   }
 
-  toJS() => this;
   toString() => "#[promise (${_evaluated ? '' : 'not '}forced)]";
   @override
+
+  /// Promises are represented in diagrams as a circle with ⋯ inside prior to
+  /// forcing, and the evaluated result afterwards.
   UIElement draw(DiagramInterface diagram) {
     var inside = _evaluated ? diagram.pointTo(expr) : new TextElement("⋯");
     return new Block.promise(inside);
   }
 }
 
+/// A Scheme environment.
+///
+/// This consists of a set of [bindings] between [SchemeSymbol] identifiers and
+/// [Expression] values, as well as a [parent]. When looking up a symbol, the
+/// current bindings map is checked first, before recursively checking the
+/// parent frame.
+///
+/// This also maintains a reference to the [Interpreter] it is part of, which
+/// allows any function that takes in a [Frame] to access core interpreter
+/// functionality (like logging and the project implementation).
+///
+/// Within an interpreter, there is a single global frame with [id] equal to 0
+/// and [parent] equal to null. All frames should inherit from the global frame
+/// either directly or through a chain of parent frames.
 class Frame extends SelfEvaluating {
+  /// The parent of this frame. This is null for the global frame.
   Frame parent;
+
+  /// The interpreter this frame is part of.
   Interpreter interpreter;
+
+  /// Optional human-readable name for this frame.
+  ///
+  /// Set to the intrinsic name of the called function when this frame was
+  /// created through a procedure call.
   String tag;
+
+  /// Unique identifier for this frame in the interpreter.
+  ///
+  /// The global frame has id 0. All other frame are numbered sequentially.
   int id;
+
+  /// Mapping of symbols to values.
   Map<SchemeSymbol, Expression> bindings = {};
+
+  /// Stores whether a given symbol should be hidden from environment diagrams.
   Map<SchemeSymbol, bool> hidden = {};
+
+  /// Creates a new frame with the next sequential id.
   Frame(this.parent, this.interpreter) : id = interpreter.frameCounter++;
+
+  /// Creates a new binding between [symbol] and [value] in this frame.
+  ///
+  /// If hide is true, this binding will be hidden from environment diagrams.
   void define(SchemeSymbol symbol, Expression value, [bool hide = false]) {
     interpreter.impl.defineInFrame(symbol, value, this);
     hidden[symbol] = hide;
   }
 
+  /// Looks up the given symbol in this or a parent frame.
   Expression lookup(SchemeSymbol symbol) {
     return interpreter.impl.lookupInFrame(symbol, this);
   }
 
+  /// Changes an existing binding to a new value in this or a parent frame.
+  ///
+  /// If the symbol is not bound, throws a [SchemeException].
   void update(SchemeSymbol symbol, Expression value) {
     if (bindings.containsKey(symbol)) {
       bindings[symbol] = value;
@@ -340,9 +482,8 @@ class Frame extends SelfEvaluating {
     parent.update(symbol, value);
   }
 
+  /// Creates a frame with this as its parent and all [formals] bound to [vals].
   Frame makeChildFrame(Expression formals, Expression vals) {
     return interpreter.impl.makeChildOf(formals, vals, this);
   }
-
-  toJS() => this;
 }

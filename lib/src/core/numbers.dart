@@ -6,17 +6,32 @@ import 'expressions.dart';
 import 'logging.dart';
 import 'serialization.dart';
 
+/// Base class for both Scheme number types.
+///
+/// Supports most arithmetic operations. For arithmetic operations that include
+/// a [Double] the result will typically be another [Double] unless the value
+/// can be represented as an integer (like `1.0`).
+///
+/// With the exception of true division, all arithmetic operations between two
+/// [Integer] expressions should return another [Integer].
 abstract class Number extends SelfEvaluating {
   final inlineUI = true;
   dynamic get value;
 
   Number();
 
+  /// Create a new [Number] from a Dart [num].
+  ///
+  /// Note that whole number [double] values like `1.0` will yield an [Integer],
+  /// not a [Double].
   factory Number.fromNum(num value) {
     if (value.floor() == value) return new Integer(value.floor());
     return new Double(value);
   }
 
+  /// Attempts to create a new [Number] from a string.
+  ///
+  /// Note that strings like `"1.0"` will yield an [Integer], not a [Double].
   factory Number.fromString(String numString) {
     try {
       return new Integer.fromBigInt(BigInt.parse(numString));
@@ -65,6 +80,13 @@ abstract class Number extends SelfEvaluating {
   static final two = new Integer(2);
 }
 
+/// A Scheme integer.
+///
+/// Scheme [Integer] values are built-in on the [BigInt] class, allowing for
+/// arbitrary-length integers even in the browser.
+///
+/// Once updated for Dart 2, the [BigInt] class from the rational library should
+/// be replaced with the built-in class.
 class Integer extends Number implements Serializable<Integer> {
   BigInt value;
 
@@ -102,6 +124,9 @@ class Integer extends Number implements Serializable<Integer> {
   }
 }
 
+/// A Scheme double-precision floating point number.
+///
+/// Simple wrapper around a Dart [double].
 class Double extends Number implements Serializable<Double> {
   double value;
 
@@ -114,7 +139,9 @@ class Double extends Number implements Serializable<Double> {
   operator -() => new Double(-value);
 }
 
-Iterable<Number> allNumbers(List<Expression> expr) {
+/// Given an iterable of [Expression] objects, checks that they are all numbers
+/// and returns a new iterable will all of them casted as such.
+Iterable<Number> allNumbers(Iterable<Expression> expr) {
   return expr.map((ex) =>
       ex is Number ? ex : throw new SchemeException("$ex is not a number."));
 }

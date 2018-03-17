@@ -7,29 +7,32 @@ import 'expressions.dart';
 import 'numbers.dart';
 import 'project_interface.dart';
 
+/// Reads the first complete Scheme expression from [tokens].
+///
+/// This function mutates [tokens].
 Expression schemeRead(List<Expression> tokens, ProjectInterface impl) {
   return impl.read(tokens);
 }
 
-Set _NUMERAL_STARTS = new Set.from("0123456789+-.".split(""));
-Set _SYMBOL_CHARS = new Set.from(
+Set _numeralStarts = new Set.from("0123456789+-.".split(""));
+Set _symbolChars = new Set.from(
         r"!$%&*/:<=>?@^_~abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
             .split(""))
-    .union(_NUMERAL_STARTS);
-Set _STRING_DELIMS = new Set.from(['"']);
-Set _WHITESPACE = new Set.from([' ', '\t', '\n', '\r']);
-Set _SINGLE_CHAR_TOKENS = new Set.from(['(', ')', '[', ']', "'", '`', '#']);
-Set _TOKEN_END = _WHITESPACE
-    .union(_SINGLE_CHAR_TOKENS)
-    .union(_STRING_DELIMS)
+    .union(_numeralStarts);
+Set _stringDelims = new Set.from(['"']);
+Set _whitespace = new Set.from([' ', '\t', '\n', '\r']);
+Set _singleCharTokens = new Set.from(['(', ')', '[', ']', "'", '`', '#']);
+Set _tokenEnd = _whitespace
+    .union(_singleCharTokens)
+    .union(_stringDelims)
     .union(new Set.from([',', ',@']));
-Set DELIMITERS = _SINGLE_CHAR_TOKENS.union(new Set.from(['.', ',', ',@']));
+Set _delimiters = _singleCharTokens.union(new Set.from(['.', ',', ',@']));
 
 /// Returns whether [s] is a well-formed symbol.
 bool validSymbol(String s) {
   if (s.length == 0) return false;
   for (String c in s.split('')) {
-    if (!_SYMBOL_CHARS.contains(c)) return false;
+    if (!_symbolChars.contains(c)) return false;
   }
   return true;
 }
@@ -43,7 +46,7 @@ List nextCandidateToken(String line, int k) {
     String c = line[k];
     if (c == ';') {
       return [null, line.length];
-    } else if (_WHITESPACE.contains(c)) {
+    } else if (_whitespace.contains(c)) {
       k++;
     } else if (c == '#') {
       // bool values #t and #f
@@ -51,7 +54,7 @@ List nextCandidateToken(String line, int k) {
         return [line.substring(k, k + 2), min(k + 2, line.length)];
       }
       return [c, k + 1];
-    } else if (_SINGLE_CHAR_TOKENS.contains(c)) {
+    } else if (_singleCharTokens.contains(c)) {
       if (c == ']') c = ')';
       if (c == '[') c = '(';
       return [c, k + 1];
@@ -61,7 +64,7 @@ List nextCandidateToken(String line, int k) {
         return [',@', k + 2];
       }
       return [c, k + 1];
-    } else if (_STRING_DELIMS.contains(c)) {
+    } else if (_stringDelims.contains(c)) {
       String str = c;
       k++;
       try {
@@ -79,7 +82,7 @@ List nextCandidateToken(String line, int k) {
       return [str + '"', k + 1];
     } else {
       int j = k;
-      while (j < line.length && !_TOKEN_END.contains(line[j])) j++;
+      while (j < line.length && !_tokenEnd.contains(line[j])) j++;
       return [line.substring(k, j), min(j, line.length)];
     }
   }
@@ -91,7 +94,7 @@ Iterable<Expression> tokenizeLine(String line) sync* {
   String text = candidate[0];
   int i = candidate[1];
   while (text != null) {
-    if (DELIMITERS.contains(text)) {
+    if (_delimiters.contains(text)) {
       yield new SchemeSymbol(text);
     } else if (text == '#t' || text.toLowerCase() == 'true') {
       yield schemeTrue;
@@ -99,9 +102,9 @@ Iterable<Expression> tokenizeLine(String line) sync* {
       yield schemeFalse;
     } else if (text == 'nil') {
       yield nil;
-    } else if (_SYMBOL_CHARS.contains(text[0])) {
+    } else if (_symbolChars.contains(text[0])) {
       bool number = false;
-      if (_NUMERAL_STARTS.contains(text[0])) {
+      if (_numeralStarts.contains(text[0])) {
         try {
           yield new Number.fromString(text);
           number = true;
@@ -114,7 +117,7 @@ Iterable<Expression> tokenizeLine(String line) sync* {
           throw new FormatException("invalid numeral or symbol: $text");
         }
       }
-    } else if (_STRING_DELIMS.contains(text[0])) {
+    } else if (_stringDelims.contains(text[0])) {
       yield new SchemeString(JSON.decode(text));
     } else {
       throw new FormatException("warning: invalid token: $text in $line");

@@ -6,11 +6,25 @@ import 'expressions.dart';
 import 'procedures.dart';
 
 /// Interface for the Scheme project implementation.
+///
 /// This code is not publicly released, as it is ported from the solutions to
 /// the Scheme project. An object implementing this interface must be passed to
 /// the Interpreter constructor for it to work.
-/// This interface is currently designed to
-/// follow the Summer 2016 course offering.
+///
+/// 61A staff members should be able to use the private dart_scheme_impl on our
+/// GitHub org. Non-staff members can implement their own based on the
+/// [skeleton][] (if you're not likely to take 61A now or in the future, you
+/// can also ask Jen for a copy of the code).
+///
+/// Reminder for Berkeley students: **publicly distributing an implementation of
+/// this class constitutes academic dishonesty as described in our
+/// [course policies]**, as the implementation is close enough to the Scheme
+/// project's to be considered distribution of solutions, despite the change of
+/// language from Python to Dart. This applies even if you are not currently
+/// taking 61A.
+///
+/// [skeleton]: https://github.com/jathak/scheme_impl_skeleton
+/// [course policies]: https://cs61a.org/articles/about.html#academic-honesty
 abstract class ProjectInterface {
   /// Analagous to scheme_read ans read_tail in Problems 1, 2, and 7
   Expression read(List<Expression> tokens);

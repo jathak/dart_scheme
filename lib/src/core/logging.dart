@@ -2,15 +2,20 @@ library cs61a_scheme.core.logging;
 
 import 'expressions.dart';
 
-typedef void Logger(Expression expr, bool newline);
+/// Logs [expr] somewhere with a new line if [addNewLine] is true.
+typedef void Logger(Expression expr, bool addNewLine);
 
+/// Given two loggers, returns a new one that calls both.
 Logger combineLoggers(Logger a, Logger b) {
-  return (Expression e, bool newline) {
-    a(e, newline);
-    b(e, newline);
+  return (Expression e, bool addNewLine) {
+    a(e, addNewLine);
+    b(e, addNewLine);
   };
 }
 
+/// Scheme expression representing an expression to be displayed.
+///
+/// Used by the built-in `display` Scheme procedure.
 class DisplayOutput extends SelfEvaluating {
   final Expression expression;
   const DisplayOutput(this.expression);
@@ -18,6 +23,9 @@ class DisplayOutput extends SelfEvaluating {
   toJS() => expression.toJS();
 }
 
+/// Scheme expression representing text to be outputted.
+///
+/// Used for logging.
 class TextMessage extends SelfEvaluating {
   final String message;
   const TextMessage(this.message);
@@ -25,6 +33,12 @@ class TextMessage extends SelfEvaluating {
   toJS() => message;
 }
 
+/// An exception within Scheme code.
+///
+/// This exception can be thrown to keep track of a stack trace through Scheme
+/// code. While other Dart errors will still be caught by the outer interpreter
+/// loop, throwing a [SchemeException] ensures that the logged stack trace is
+/// for Scheme, not Dart/JS.
 class SchemeException extends SelfEvaluating {
   final String message;
   final bool showTrace;
@@ -41,17 +55,18 @@ class SchemeException extends SelfEvaluating {
     return str + 'Error: $message';
   }
 
+  // Adds [expr] to the stack trace of this exception.
   addCall(Expression expr) {
     callStack.insert(0, expr);
   }
-
-  toJS() => this;
 }
 
+/// Logs [msg] to the interpreter's logger through a [TextMessage].
 logMessage(String msg, Frame env) {
   return env.interpreter.logger(new TextMessage(msg), true);
 }
 
+/// Thrown by the built-in `exit` Scheme procedure.
 class ExitException {
   const ExitException();
 }

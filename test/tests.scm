@@ -1,8 +1,8 @@
 List list ;/* ; (keeps this readable by both versions of the test runner)
 ;;; The above works because List is both a Scheme built-in and a Dart type
 ;;; (Scheme is case insensitive, so we can capitalize it however we want)
-;;;*/var tests_scm = r""" ;;;"
-
+;;;*/var tests_scm = r""";;;
+;;;
 ;;;; Preamble for dart_scheme:
 ;;;; This file consists of the following
 ;;;; - tests.scm from the Fall 2014 61A Scheme project
@@ -10,17 +10,9 @@ List list ;/* ; (keeps this readable by both versions of the test runner)
 ;;;; - additional tests added specific to this interpreter.
 ;;;; It is designed to be run with scm_test.dart.
 
-;;; Test cases for Scheme.
-;;;
-;;; In order to run only a prefix of these examples, add the line
-;;;
-;;; ; (exit)
-;;;
-;;; after the last test you wish to run.
-
-;;; **********************************
-;;; *** Add more of your own here! ***
-;;; **********************************
+;;; ****************************************************************************
+;;; DO NOT MODIFY ANYTHING ABOVE THIS LINE
+;;; ****************************************************************************
 
 ;;; These are examples from several sections of "The Structure
 ;;; and Interpretation of Computer Programs" by Abelson and Sussman.
@@ -934,5 +926,8 @@ b
 ;       (dog (name ?gray-dog) (color gray)))
 ;; expect Success!; a: fillmore	gray-dog: herbert; a: eisenhower	gray-dog: fillmore; a: eisenhower	gray-dog: herbert
 
+;;; ***************************************************************************
+;;; DO NOT ADD ANY TESTS AFTER THIS LINE!
+;;; ***************************************************************************
 ;;; end tests.scm. Below keeps this importable in Dart.
 ;;;""";

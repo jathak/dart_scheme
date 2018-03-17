@@ -1,9 +1,9 @@
-// Copyright (c) 2017, . All rights reserved. Use of this source code
-// is governed by a BSD-style license that can be found in the LICENSE file.
-
-/// Support for doing something awesome.
+/// The core Scheme interpreter.
 ///
-/// More dartdocs go here.
+/// This library contains only what is necessary to match the behavior of the
+/// Python implementation of 61A Scheme, as well as some additional
+/// functionality that classes here depend on (notably, some pieces of the UI
+/// framework used for diagramming).
 library cs61a_scheme.core;
 
 export 'src/core/expressions.dart';
@@ -15,5 +15,6 @@ export 'src/core/project_interface.dart';
 export 'src/core/reader.dart';
 export 'src/core/scheme_library.dart';
 export 'src/core/serialization.dart';
+export 'src/core/standard_library.dart';
 export 'src/core/ui.dart';
 export 'src/core/utils.dart';

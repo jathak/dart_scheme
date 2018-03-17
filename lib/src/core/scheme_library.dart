@@ -2,17 +2,22 @@ library cs61a_scheme.core.scheme_library;
 
 import 'expressions.dart';
 
-/// A SchemeLibrary is an interface for loading Dart functions (or other values
-/// originating from Dart code) into a Scheme environment. importAll should bind
-/// all of the library's names in the provided environment.
+/// An interface for defining a collection of built-in Scheme procedures.
+///
+/// Used loading Dart functions (and other values originating from Dart code)
+/// into a Scheme environment. [importAll] should bind all of the library's
+/// names in the provided environment.
+///
 /// The other import functions load one or more of the bindings by first
 /// importing all bindings into a child of the provided environment and then
 /// copying the selected names over.
 ///
-/// For easy use with libraries of simple Dart functions, see the
-/// @register annotation.
+/// This should almost always be used with the @library annotation to easily
+/// add primitive procedures.
 abstract class SchemeLibrary {
-  /// Loads all bindings. Either use @register override manually.
+  /// Loads all bindings.
+  ///
+  /// If you override and use @library, you should make sure to call super.
   void importAll(Frame env) {
     throw new UnimplementedError();
   }
@@ -34,15 +39,18 @@ abstract class SchemeLibrary {
   }
 }
 
-/// Annotation on a SchemeLibrary to generate importAll.
-/// importAll should not be overriden in user code.
+/// Annotation on a SchemeLibrary to generate [importAll].
+///
+/// When present, all methods within the class that do not start with "import"
+/// or an underscore will be added as built-in procedures.
 const _Library library = const _Library();
 
 class _Library {
   const _Library();
 }
 
-/// Annotation to make a SpecialFormPrimitiveProcedure
+/// Annotation to make an OperandPrimitiveProcedure.
+///
 /// This procedure is defined in the extra library, so don't use this inside
 /// the core library.
 const _NoEval noeval = const _NoEval();
@@ -51,7 +59,8 @@ class _NoEval {
   const _NoEval();
 }
 
-/// Annotation to call turtle.show()
+/// Annotation to call turtle.show().
+///
 /// This may only be used inside of TurtleLibrary.
 const _Turtle turtlestart = const _Turtle();
 
