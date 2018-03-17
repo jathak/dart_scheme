@@ -11,7 +11,7 @@ for now, you should use Dart 1.24.
 You should then clone this repo and  the implementation skeleton into the same
 parent directory:
 
-```
+```shell
 mkdir scheme && cd scheme
 git clone git@github.com:Cal-CS-61A-Staff/dart_scheme.git
 git clone git@github.com:jathak/scheme_impl_skeleton.git dart_scheme_impl
@@ -19,13 +19,13 @@ git clone git@github.com:jathak/scheme_impl_skeleton.git dart_scheme_impl
 
 Replace that last line with the following if you are part of 61A Staff:
 
-```
+```shell
 git clone git@github.com:Cal-CS-61A-Staff/dart_scheme_impl.git
 ```
 
 If you also wish to work on / test with the [web frontend], clone it as well:
 
-```
+```shell
 git clone git@github.com:Cal-CS-61A-Staff/scheme_web_interpreter.git
 ```
 
@@ -76,8 +76,6 @@ mixins.
 
 Tests are contained in the `test` directory.
 
-`tool/grind.dart` defines 
-
 ## Creating a `SchemeLibrary`
 
 The most common way to add a collection of new built-in Scheme procedures is by
@@ -96,7 +94,7 @@ in `tool/grind.dart`.
 Once you've created your library, you can add a new built-in by simply defining
 a method. The simplest possible structure would be as follows:
 
-```
+```dart
 Expression example(List<Expression> expression, Frame env) {...}
 ```
 
@@ -114,7 +112,7 @@ But what about built-ins like `-` (subtraction)? Its name is not a valid Dart
 identifier, and it requires a minimum of 1 argument. We can specify this with
 annotations:
 
-```
+```dart
 // from lib/src/core/standard_library.dart
 @SchemeSymbol("-")
 @MinArgs(1)
@@ -136,7 +134,7 @@ If your procedure takes in a fixed number of arguments, you can specify them
 directly as parameters and the generated code will unpack and type check them
 for you.
 
-```
+```dart
 Expression example(Number a, Number b) {...}
 ```
 
@@ -149,7 +147,7 @@ A lot of Scheme expression types are just wrappers around native Dart types.
 The Dart types are easier to work with, so sometimes we want our arguments or
 return value to use them instead of the Scheme wrapper.
 
-```
+```dart
 int increment(int x) => x + 1;
 ```
 
@@ -158,13 +156,13 @@ This will create a Scheme built-in `increment` that takes in and returns an
 
 The following conversions are currently supported:
 
-| Scheme Type  | Dart Type |
-| ------------ | --------- |
-| Boolean      | bool      |
-| Integer      | int       |
-| Double       | double    |
-| Number       | num       |
-| SchemeString | String    |
+| Scheme Type    | Dart Type |
+| -------------- | --------- |
+| `Boolean`      | `bool`    |
+| `Integer`      | `int`     |
+| `Double`       | `double`  |
+| `Number`       | `num`     |
+| `SchemeString` | `String`  |
 
 Note that the Dart `int` type is of limited size when running on the web (64-bit
 floating point), or on all platforms starting in Dart 2 (64-bit integer). The
@@ -175,7 +173,7 @@ conversion from `Integer` to `int` is unspecified for large values.
 Only the `StandardLibrary` is included automatically in a new `Interpreter`.
 Other libraries need to be imported like so:
 
-```
+```dart
 interpreter.importLibrary(new YourLibrary());
 ```
 

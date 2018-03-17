@@ -59,4 +59,4 @@ See [CONTRIBUTING.md][] for instructions.
 [spec]: https://cs61a.org/articles/scheme-spec.html
 [web]: https://scheme.cs61a.org
 [skeleton]: https://github.com/jathak/scheme_impl_skeleton
-[CONTRIBUTING.md]: https://github.com/Cal-CS-61A-Staff/dart_scheme/blob/master/LICENSE
+[CONTRIBUTING.md]: https://github.com/Cal-CS-61A-Staff/dart_scheme/blob/master/CONTRIBUTING.md
