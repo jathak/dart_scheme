@@ -148,8 +148,8 @@
 }
 
 @mixin arrow {
-  /*!COLOR|fill|arrow*/ color: #fff; /*!END*/
-  /*!COLOR|stroke|arrow*/ color: #fff; /*!END*/
+  /*!COLOR|fill|arrow*/ fill: #fff; /*!END*/
+  /*!COLOR|stroke|arrow*/ stroke: #fff; /*!END*/
   /*!CSS|arrow*/ /*!END*/
   &:hover {
     /*!COLOR|fill|arrow-hover*/ /*!END*/
