@@ -30,15 +30,17 @@ script:
     dartanalyzer --fatal-warnings --strong .
   fi
 - pub run dependency_validator
+before_deploy:
+- eval "$(ssh-agent -s)"
+- chmod 600 .travis/deploy.key
+- ssh-add .travis/deploy.key
+- ssh-keyscan scheme.cs61a.org >> ~/.ssh/known_hosts
+- git remote add dokku dokku@scheme.cs61a.org:scheme
+- git config --global push.default simple
 deploy:
   provider: script
-  script:
-  - eval "$(ssh-agent -s)"
-  - chmod 600 .travis/deploy.key
-  - ssh-add .travis/deploy.key
-  - ssh-keyscan scheme.cs61a.org >> ~/.ssh/known_hosts
-  - git remote add dokku dokku@scheme.cs61a.org:scheme
-  - git config --global push.default simple
-  - make deploy
+  script: make deploy
+  skip_cleanup: true
   on:
     branch: master
+    condition: $TRAVIS_DART_VERSION = "stable"
