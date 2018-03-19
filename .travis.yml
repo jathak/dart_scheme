@@ -1,17 +1,16 @@
 language: dart
-
 dart:
 - stable
 - dev
-
 branches:
-  only: [master]
-
+  only:
+  - master
 cache:
   directories:
-  - $HOME/.pub-cache
-
+  - "$HOME/.pub-cache"
 before_install:
+- openssl aes-256-cbc -K $encrypted_2195c966699e_key -iv $encrypted_2195c966699e_iv
+  -in .travis/deploy.key.enc -out .travis/deploy.key -d
 - cd ..
 - wget https://github.com/jathak/scheme_impl_skeleton/archive/master.zip
 - unzip master.zip
@@ -19,7 +18,6 @@ before_install:
 - cd dart_scheme_impl
 - wget -O lib/impl.dart $PRIVATE_IMPL || export NO_IMPL="-x impl"
 - cd $TRAVIS_BUILD_DIR
-
 script:
 - pub run test $NO_IMPL
 - pub run grinder check
@@ -32,3 +30,15 @@ script:
     dartanalyzer --fatal-warnings --strong .
   fi
 - pub run dependency_validator
+deploy:
+  provider: script
+  script:
+  - eval "$(ssh-agent -s)"
+  - chmod 600 .travis/deploy.key
+  - ssh-add .travis/deploy.key
+  - ssh-keyscan scheme.cs61a.org >> ~/.ssh/known_hosts
+  - git remote add dokku dokku@scheme.cs61a.org:scheme
+  - git config --global push.default simple
+  - make deploy
+  on:
+    branch: master

@@ -1,4 +1,4 @@
-library repl;
+library web_repl;
 
 import 'dart:async';
 import 'dart:convert' show JSON;

@@ -105,8 +105,8 @@ parse_args() {
 	deploy_remote_branch=${GIT_DEPLOY_REMOTE_BRANCH:-master}
 
 	#if no user identity is already set in the current git environment, use this:
-	default_username=${GIT_DEPLOY_USERNAME:-deploy.sh}
-	default_email=${GIT_DEPLOY_EMAIL:-}
+	default_username=${GIT_DEPLOY_USERNAME:-travis}
+	default_email=${GIT_DEPLOY_EMAIL:-cs61a@berkeley.edu}
 
 	#repository to deploy to. must be readable and writable.
 	repo=${GIT_DEPLOY_REPO:-dokku}
@@ -200,7 +200,7 @@ commit+push() {
 
 	disable_expanded_output
 	#--quiet is important here to avoid outputting the repo URL, which may contain a secret token
-	git push --quiet $repo $deploy_local_branch:$deploy_remote_branch
+	git push --quiet -f $repo $deploy_local_branch:$deploy_remote_branch
 	enable_expanded_output
 }
 

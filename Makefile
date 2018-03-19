@@ -4,8 +4,8 @@ deploy:
 	pub get
 	pub build
 	touch build/web/.static
-	rm -r build/web/packages
-	bash deploy.sh
+	-rm -r build/web/packages
+	bash tool/deploy.sh
 
 checks:
 	pub run test
