@@ -23,20 +23,14 @@ Replace that last line with the following if you are part of 61A Staff:
 git clone git@github.com:Cal-CS-61A-Staff/dart_scheme_impl.git
 ```
 
-If you also wish to work on / test with the [web frontend], clone it as well:
-
-```shell
-git clone git@github.com:Cal-CS-61A-Staff/scheme_web_interpreter.git
-```
-
 ### Fetching Dependencies
 
 Dart uses `pub` to manage project dependencies. You can run `pub get` from
-inside one of the repo directories to fetch them. If you get errors about
+inside the `dart_scheme` directory to fetch them. If you get errors about
 `cs61a_scheme` or `cs61a_scheme_impl`, your directory structure is probably the
-issue. Make sure that you have this repo cloned to `dart_scheme`, the
+issue. Make sure that you have this repo cloned to `dart_scheme` and the
 implementation cloned to `dart_scheme_impl` (even if you cloned from the
-skeleton), and the web interpreter cloned to `scheme_web_interpreter`.
+skeleton).
 
 ### Running and Writing Tests
 
@@ -54,7 +48,6 @@ working `dart_scheme_impl` to run. You can skip these tests with
 
 [Dart]: https://dartlang.org
 [Dart SDK]: https://www.dartlang.org/install
-[web frontend]: https://github.com/Cal-CS-61A-Staff/scheme_web_interpreter
 
 ## Repo Organization
 
@@ -66,6 +59,8 @@ of this directory can be imported outside the project.
 - `cs61a_scheme_web.dart` defines the web interpreter library.
 - `builder.dart` defines the code generator, which is used to build helpers for
   libraries of Scheme built-ins.
+- `highlight.dart` defines helpers for highlighting code (using highlight.js)
+- `web_repl.dart` defines the REPL used by the web app
 
 The actual implementation of each of the first three libraries is in
 `lib/src/core`, `lib/src/extra`, and `lib/src/web` respectively. Any files that
@@ -75,6 +70,13 @@ The `styles` directory contains the Sass files for diagramming and the theming
 mixins.
 
 Tests are contained in the `test` directory.
+
+The web frontend is contained in the `web` directory (though it depends heavily
+on the libraries).
+
+A simple CLI repl is contained in `tool/repl.dart`. Dart package layout
+conventions would usually include this in `bin`, but since it depends on the
+implementation dev dependency, it can't be.
 
 ## Creating a `SchemeLibrary`
 
