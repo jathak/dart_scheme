@@ -6,6 +6,8 @@ import 'dart:js';
 
 import 'package:cs61a_scheme/cs61a_scheme_extra.dart';
 
+import 'theming.dart';
+
 class HtmlRenderer {
   Element container;
   JsObject jsPlumb;
@@ -35,6 +37,9 @@ class HtmlRenderer {
     refreshConnections();
     subs.add(element.onUpdate.listen(([_]) {
       render(element);
+    }));
+    subs.add(onThemeChange.listen(([_]) {
+      refreshConnections();
     }));
   }
 

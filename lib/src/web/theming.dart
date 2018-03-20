@@ -12,7 +12,7 @@ applyTheme(Theme theme, String css, Element style, [bool notify = true]) {
   if (notify) _controller.add(theme);
 }
 
-Stream<Theme> get onThemeChange => _controller.stream.asBroadcastStream();
+final Stream<Theme> onThemeChange = _controller.stream.asBroadcastStream();
 
 class Theme extends SelfEvaluating implements Serializable<Theme> {
   Map<SchemeSymbol, Color> colors = {};
