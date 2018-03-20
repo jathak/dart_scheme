@@ -57,13 +57,6 @@ List list ;/* ; (keeps this readable by both versions of the test runner)
       6))
 ; expect 57
 
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; Move the following ; (exit) line to run additional tests. ;;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-; (exit)
-
-
 ;;; 1.1.2
 
 (define size 2)
@@ -99,6 +92,17 @@ circumference
 
 (square (square 3))
 ; expect 81
+
+;; Built-in map, filter, reduce
+
+(map square '(1 2 3))
+; expect (1 4 9)
+
+(filter even? '(1 2 3 4 5))
+; expect (2 4)
+
+(reduce + '(1 2 3 4 5))
+; expect 15
 
 (define (sum-of-squares x y)
   (+ (square x) (square y)))

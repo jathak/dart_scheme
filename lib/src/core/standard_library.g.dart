@@ -26,6 +26,9 @@ abstract class _$StandardLibraryMixin {
   Pair cons(Expression car, Expression cdr);
   num length(PairOrEmpty lst);
   PairOrEmpty list(List<Expression> args);
+  PairOrEmpty map(Procedure fn, PairOrEmpty lst, Frame env);
+  PairOrEmpty filter(Procedure pred, PairOrEmpty lst, Frame env);
+  Expression reduce(Procedure combiner, PairOrEmpty lst, Frame env);
   Number add(List<Expression> args);
   Number sub(List<Expression> args);
   Number mul(List<Expression> args);
@@ -142,6 +145,21 @@ abstract class _$StandardLibraryMixin {
     addVariablePrimitive(__env, const SchemeSymbol("list"), (__exprs, __env) {
       return this.list(__exprs);
     }, 0, -1);
+    addPrimitive(__env, const SchemeSymbol("map"), (__exprs, __env) {
+      if (__exprs[0] is! Procedure || __exprs[1] is! PairOrEmpty)
+        throw new SchemeException('Argument of invalid type passed to map.');
+      return this.map(__exprs[0], __exprs[1], __env);
+    }, 2);
+    addPrimitive(__env, const SchemeSymbol("filter"), (__exprs, __env) {
+      if (__exprs[0] is! Procedure || __exprs[1] is! PairOrEmpty)
+        throw new SchemeException('Argument of invalid type passed to filter.');
+      return this.filter(__exprs[0], __exprs[1], __env);
+    }, 2);
+    addPrimitive(__env, const SchemeSymbol("reduce"), (__exprs, __env) {
+      if (__exprs[0] is! Procedure || __exprs[1] is! PairOrEmpty)
+        throw new SchemeException('Argument of invalid type passed to reduce.');
+      return this.reduce(__exprs[0], __exprs[1], __env);
+    }, 2);
     addVariablePrimitive(__env, const SchemeSymbol("+"), (__exprs, __env) {
       return this.add(__exprs);
     }, 0, -1);

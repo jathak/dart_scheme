@@ -97,6 +97,22 @@ class StandardLibrary extends SchemeLibrary with _$StandardLibraryMixin {
 
   PairOrEmpty list(List<Expression> args) => new PairOrEmpty.fromIterable(args);
 
+  PairOrEmpty map(Procedure fn, PairOrEmpty lst, Frame env) {
+    return new PairOrEmpty.fromIterable(lst.map((item) {
+      return completeEval(fn.apply(new Pair(item, nil), env));
+    }));
+  }
+
+  PairOrEmpty filter(Procedure pred, PairOrEmpty lst, Frame env) {
+    return new PairOrEmpty.fromIterable(lst.where((item) {
+      return completeEval(pred.apply(new Pair(item, nil), env)).isTruthy;
+    }));
+  }
+
+  Expression reduce(Procedure combiner, PairOrEmpty lst, Frame env) {
+    return lst.reduce((a, b) => combiner.apply(list([a, b]), env));
+  }
+
   @SchemeSymbol("+")
   Number add(List<Expression> args) =>
       allNumbers(args).fold(Number.zero, (a, b) => a + b);
