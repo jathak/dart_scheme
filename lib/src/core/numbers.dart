@@ -122,6 +122,9 @@ class Integer extends Number implements Serializable<Integer> {
     if (other is Integer) return value.compareTo(other.value);
     return super.compareTo(other);
   }
+
+  @override
+  int toJS() => value.toValidJsInt();
 }
 
 /// A Scheme double-precision floating point number.
@@ -137,6 +140,9 @@ class Double extends Number implements Serializable<Double> {
   Map serialize() => {'type': 'Double', 'value': value};
 
   operator -() => new Double(-value);
+
+  @override
+  double toJS() => value;
 }
 
 /// Given an iterable of [Expression] objects, checks that they are all numbers
