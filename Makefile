@@ -9,6 +9,8 @@ deploy:
 	# instead of 404-ing. This custom config should fix that.
 	cp tool/app-nginx.conf.sigil build/web/app-nginx.conf.sigil
 	echo "404 Not Found" > build/web/404.txt
+	# Because application cache is horrible even when you remove it
+	printf "CACHE MANIFEST\nNETWORK:\n*" > build/web/app.appcache 
 	bash tool/deploy.sh
 
 checks:
