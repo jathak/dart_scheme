@@ -38,7 +38,7 @@ main() async {
   inter.importLibrary(new ExtraLibrary());
   var diagramBox = querySelector('#diagram');
   String css = await HttpRequest.getString('assets/style.css');
-  var style = querySelector('style');
+  var style = querySelector('#theme');
   var web = new WebLibrary(diagramBox, context['jsPlumb'], css, style);
   inter.importLibrary(web);
   var specials = inter.globalEnv.bindings.keys.toSet().difference(normals);
