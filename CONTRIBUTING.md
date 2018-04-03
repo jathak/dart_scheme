@@ -49,6 +49,24 @@ working `dart_scheme_impl` to run. You can skip these tests with
 [Dart]: https://dartlang.org
 [Dart SDK]: https://www.dartlang.org/install
 
+### Running the Web App
+
+You can run the web app with one of the following commands:
+
+#### `pub serve --web-compiler=dartdevc`
+
+This hosts a local server at `localhost:8080` using an incremental build that's
+faster, but may have some behavior differences from the deployed build. The app
+will be rebuilt whenever you make changes to the code and refresh.
+
+#### `pub serve`
+
+This also hosts a local server at `localhost:8080`, but using a build that's
+nearly identical to the deployed one (but without minification). Use this if
+you're testing something that acts weird in the dev compiler or when debugging
+performance. It takes longer to build, and requires rebuilding the whole app
+when any code is changed.
+
 ## Repo Organization
 
 Most interpreter code is in the `lib` directory. The four libraries at the root
