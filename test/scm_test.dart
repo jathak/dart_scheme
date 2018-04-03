@@ -28,6 +28,7 @@ String runSchemeTests() {
   bool foundError = false;
   var inter = new Interpreter(new StaffProjectImplementation());
   inter.importLibrary(new ExtraLibrary());
+  inter.importLibrary(new LogicLibrary());
   bool awaitingInput = false;
   inter.logger = (Expression logging, [bool newline = true]) {
     if (logging is SchemeException) foundError = true;

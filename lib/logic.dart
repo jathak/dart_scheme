@@ -41,8 +41,8 @@ class Variable extends SchemeSymbol {
 
   /// Converts so all symbols starting with '?' are converted to variables, and
   /// multiple references refer to the same variable instance.
-  static Expression convert(Expression expr, [List<Variable> found]) {
-    if (found == null) found = [];
+  static Expression convert(Expression expr, [Set<Variable> found]) {
+    if (found == null) found = new Set<Variable>();
     if (expr is Pair) {
       return new Pair(convert(expr.first, found), convert(expr.second, found));
     }
@@ -70,29 +70,31 @@ const not = const _Negation();
 
 class Fact extends SelfEvaluating {
   final Pair conclusion;
-  final List<Pair> hypotheses;
+  final Iterable<Pair> hypotheses;
   Fact._(this.conclusion, this.hypotheses);
 
-  factory Fact(Pair conclusion, [List<Pair> hypotheses]) {
-    List<Variable> found = [];
-    if (conclusion.first == not) throw new LogicException('Invalid negation');
-    return new Fact._(Variable.convert(conclusion, found),
-        (hypotheses ?? []).map((h) => Variable.convert(h, found)).toList());
+  factory Fact(Expression conclusion, [Iterable<Expression> hypotheses]) {
+    var found = new Set<Variable>();
+    return new Fact._(Variable.convert(conclusion, found) as Pair,
+        (hypotheses ?? []).map((h) => Variable.convert(h, found) as Pair));
   }
 }
 
 class Query extends SelfEvaluating {
-  final List<Pair> clauses;
+  final Iterable<Pair> clauses;
   Query._(this.clauses);
 
-  factory Query(List<Pair> clauses) {
-    List<Variable> found = [];
-    return new Query._(clauses.map((h) => Variable.convert(h, found)).toList());
+  factory Query(Iterable<Expression> clauses) {
+    var found = new Set<Variable>();
+    return new Query._(clauses.map((h) => Variable.convert(h, found) as Pair));
   }
 }
 
 class Solution extends SelfEvaluating {
   final Map<Variable, Expression> assignments = {};
+
+  toString() =>
+      assignments.keys.map((v) => '${v.value}: ${assignments[v]}').join('\t');
 }
 
 class LogicEnv extends SelfEvaluating {

@@ -83,6 +83,8 @@ class Interpreter {
 
   void addLogger(Logger logger) => _logger = combineLoggers(_logger, logger);
 
+  void logText(String text) => logger(new TextMessage(text), true);
+
   Map<SchemeSymbol, SpecialForm> specialForms = {
     const SchemeSymbol('define'): doDefineForm,
     const SchemeSymbol('if'): doIfForm,

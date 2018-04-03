@@ -874,61 +874,58 @@ b
 ; expect (2 3 5 7 11 13 17 19 23 29)
 
 ;;;;;;;;;;;;;;
-;;;; Logic ;;; (disabled for now since new interpreter doesn't support it)
+;;;; Logic ;;;
 ;;;;;;;;;;;;;;
-;
-;(logic-query '(((likes john dogs)) ((likes jack cats))) '((likes ?who ?what)))
-;; expect ((("?who" "john") ("?what" "dogs")) (("?who" "jack") ("?what" "cats")))
-;
-;(logic)
-;
-;(fact (likes john dogs))
-;(query (likes john dogs))
-;; expect Success!
-;
-;(query (likes ?who dogs))
-;; expect Success!; who: john
-;
-;; Dogs
-;
-;(fact (parent abraham barack))
-;(fact (parent abraham clinton))
-;(fact (parent delano herbert))
-;(fact (parent fillmore abraham))
-;(fact (parent fillmore delano))
-;(fact (parent fillmore grover))
-;(fact (parent eisenhower fillmore))
-;
-;; Recursive facts
-;
-;(fact (ancestor ?a ?y) (parent ?a ?y))
-;(fact (ancestor ?a ?y) (parent ?a ?z) (ancestor ?z ?y))
-;
-;; Hierarchical facts
-;
-;(fact (dog (name abraham) (color white)))
-;(fact (dog (name barack) (color tan)))
-;(fact (dog (name clinton) (color white)))
-;(fact (dog (name delano) (color white)))
-;(fact (dog (name eisenhower) (color tan)))
-;(fact (dog (name fillmore) (color gray)))
-;(fact (dog (name grover) (color tan)))
-;(fact (dog (name herbert) (color gray)))
-;
-;; Building relations
-;
-;(fact (ancestry ?name) (dog (name ?name) . ?details))
-;(fact (ancestry ?child ?parent . ?rest)
-;      (parent ?parent ?child)
-;      (ancestry ?parent . ?rest))
-;
-;(query (ancestry barack . ?lineage))
-;; expect Success!; lineage: (); lineage: (abraham); lineage: (abraham fillmore); lineage: (abraham fillmore eisenhower)
-;
-;(query (ancestor ?a clinton)
-;       (ancestor ?a ?gray-dog)
-;       (dog (name ?gray-dog) (color gray)))
-;; expect Success!; a: fillmore	gray-dog: herbert; a: eisenhower	gray-dog: fillmore; a: eisenhower	gray-dog: herbert
+
+(logic)
+
+(fact (likes john dogs))
+(query (likes john dogs))
+; expect Success!
+
+(query (likes ?who dogs))
+; expect Success!; who: john
+
+; Dogs
+
+(fact (parent abraham barack))
+(fact (parent abraham clinton))
+(fact (parent delano herbert))
+(fact (parent fillmore abraham))
+(fact (parent fillmore delano))
+(fact (parent fillmore grover))
+(fact (parent eisenhower fillmore))
+
+; Recursive facts
+
+(fact (ancestor ?a ?y) (parent ?a ?y))
+(fact (ancestor ?a ?y) (parent ?a ?z) (ancestor ?z ?y))
+
+; Hierarchical facts
+
+(fact (dog (name abraham) (color white)))
+(fact (dog (name barack) (color tan)))
+(fact (dog (name clinton) (color white)))
+(fact (dog (name delano) (color white)))
+(fact (dog (name eisenhower) (color tan)))
+(fact (dog (name fillmore) (color gray)))
+(fact (dog (name grover) (color tan)))
+(fact (dog (name herbert) (color gray)))
+
+; Building relations
+
+(fact (ancestry ?name) (dog (name ?name) . ?details))
+(fact (ancestry ?child ?parent . ?rest)
+     (parent ?parent ?child)
+     (ancestry ?parent . ?rest))
+
+(query (ancestry barack . ?lineage))
+; expect Success!; lineage: (); lineage: (abraham); lineage: (abraham fillmore); lineage: (abraham fillmore eisenhower)
+
+(query (ancestor ?a clinton)
+      (ancestor ?a ?gray-dog)
+      (dog (name ?gray-dog) (color gray)))
+; expect Success!; a: fillmore	gray-dog: herbert; a: eisenhower	gray-dog: fillmore; a: eisenhower	gray-dog: herbert
 
 ;;; ***************************************************************************
 ;;; DO NOT ADD ANY TESTS AFTER THIS LINE!
