@@ -10,8 +10,8 @@ abstract class _$ExtraLibraryMixin {
   Visualization visualize(Expression code, Frame env);
   PairOrEmpty bindings(Frame env);
   void triggerEvent(List<Expression> exprs, Frame env);
-  EventListener listenFor(SchemeSymbol id, Procedure onEvent, Frame env);
-  void cancelListener(EventListener listener, Frame env);
+  SchemeEventListener listenFor(SchemeSymbol id, Procedure onEvent, Frame env);
+  void cancelListener(SchemeEventListener listener, Frame env);
   void cancelAll(SchemeSymbol id, Frame env);
   String stringAppend(List<Expression> exprs);
   FlagTrace trace(Expression code, Frame env);
@@ -71,7 +71,7 @@ abstract class _$ExtraLibraryMixin {
     }, 2);
     addPrimitive(__env, const SchemeSymbol('cancel-listener'),
         (__exprs, __env) {
-      if (__exprs[0] is! EventListener)
+      if (__exprs[0] is! SchemeEventListener)
         throw new SchemeException(
             'Argument of invalid type passed to cancel-listener.');
       var __value = undefined;

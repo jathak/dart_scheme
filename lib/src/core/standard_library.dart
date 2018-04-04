@@ -14,7 +14,7 @@ part 'standard_library.g.dart';
 /// Note: When the signatures (including any annotations) of any of these methods
 /// change, make sure to `pub run grinder` to rebuild the mixin (which registers
 /// the primitives and performs type checking on arguments).
-@library
+@schemelib
 class StandardLibrary extends SchemeLibrary with _$StandardLibraryMixin {
   Expression apply(Procedure procedure, PairOrEmpty args, Frame env) {
     return schemeApply(procedure, args, env);

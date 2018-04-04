@@ -107,7 +107,7 @@ for examples.
 Each `SchemeLibrary` is supported by a generated mixin that is responsible for
 loading all built-ins and doing various type checks and conversions. Whenever
 you create a new `SchemeLibrary`, make sure to add it to the list of libraries
-in `tool/grind.dart`.
+in `tool/grind.dart`. You also need to annotate the class with `@schemelib`.
 
 ### Adding Built-Ins
 

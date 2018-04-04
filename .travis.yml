@@ -22,13 +22,7 @@ script:
 - pub run test $NO_IMPL
 - pub run grinder check
 - dartfmt -n --set-exit-if-changed .
-- |
-  if [ "${TRAVIS_DART_VERSION}" = "dev" ]
-  then
-    echo "Skipping dartanalyzer on dev (since APIs have changed)"
-  else
-    dartanalyzer --fatal-warnings --strong .
-  fi
+- dartanalyzer --fatal-warnings --strong .
 - pub run dependency_validator
 before_deploy:
 - eval "$(ssh-agent -s)"
