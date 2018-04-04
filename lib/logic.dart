@@ -3,6 +3,8 @@
 /// This library does not depend on the implementation library.
 library logic;
 
+import 'package:quiver_hashcode/hashcode.dart' show hash2;
+
 import 'package:cs61a_scheme/cs61a_scheme.dart';
 export 'package:cs61a_scheme/cs61a_scheme.dart'
     show Pair, PairOrEmpty, SchemeSymbol, nil;
@@ -11,8 +13,13 @@ class LogicException extends SchemeException {
   LogicException([msg, showTrace, context]) : super(msg, showTrace, context);
 }
 
-class Variable extends SchemeSymbol {
-  const Variable(String value) : super(value);
+int _globalCounter = 0;
+
+class Variable extends SelfEvaluating {
+  final String value;
+  int tag;
+  Variable(this.value);
+
   factory Variable.fromSymbol(SchemeSymbol sym) {
     if (!sym.value.startsWith('?')) {
       throw new LogicException('Invalid variable $sym');
@@ -39,25 +46,25 @@ class Variable extends SchemeSymbol {
     }
   }
 
-  /// Converts so all symbols starting with '?' are converted to variables, and
-  /// multiple references refer to the same variable instance.
-  static Expression convert(Expression expr, [Set<Variable> found]) {
-    if (found == null) found = new Set<Variable>();
+  operator ==(v) => v is Variable && value == v.value && tag == v.tag;
+
+  int get hashCode => hash2(value, tag);
+
+  /// Converts so all symbols starting with '?' are converted to variables
+  static Expression convert(Expression expr, [int tag]) {
     if (expr is Pair) {
-      return new Pair(convert(expr.first, found), convert(expr.second, found));
-    }
-    if (expr is SchemeSymbol && expr.value.startsWith('?')) {
-      for (var variable in found) {
-        if (expr.value == '$variable') return variable;
-      }
-      var variable = new Variable.fromSymbol(expr);
-      found.add(variable);
-      return variable;
+      return new Pair(convert(expr.first, tag), convert(expr.second, tag));
+    } else if (expr is SchemeSymbol && expr.value.startsWith('?')) {
+      return new Variable.fromSymbol(expr)..tag = tag;
+    } else if (expr is SchemeSymbol && expr.value == 'not') {
+      return not;
+    } else if (expr is Variable) {
+      return new Variable(expr.value)..tag = tag;
     }
     return expr;
   }
 
-  toString() => '?$value';
+  toString() => '?$value${tag ?? ""}';
 }
 
 class _Negation extends SelfEvaluating {
@@ -73,10 +80,10 @@ class Fact extends SelfEvaluating {
   final Iterable<Pair> hypotheses;
   Fact._(this.conclusion, this.hypotheses);
 
-  factory Fact(Expression conclusion, [Iterable<Expression> hypotheses]) {
-    var found = new Set<Variable>();
-    return new Fact._(Variable.convert(conclusion, found) as Pair,
-        (hypotheses ?? []).map((h) => Variable.convert(h, found) as Pair));
+  factory Fact(Expression conclusion,
+      [Iterable<Expression> hypotheses, int tag]) {
+    return new Fact._(Variable.convert(conclusion, tag) as Pair,
+        (hypotheses ?? []).map((h) => Variable.convert(h, tag) as Pair));
   }
 }
 
@@ -85,8 +92,7 @@ class Query extends SelfEvaluating {
   Query._(this.clauses);
 
   factory Query(Iterable<Expression> clauses) {
-    var found = new Set<Variable>();
-    return new Query._(clauses.map((h) => Variable.convert(h, found) as Pair));
+    return new Query._(clauses.map((h) => Variable.convert(h) as Pair));
   }
 }
 
@@ -104,10 +110,7 @@ class LogicEnv extends SelfEvaluating {
   LogicEnv(this.parent);
 
   Expression lookup(Variable variable) {
-    if (partial.assignments.containsKey(variable)) {
-      return partial.assignments[variable];
-    }
-    return parent?.lookup(variable);
+    return partial.assignments[variable] ?? parent?.lookup(variable);
   }
 
   Expression completeLookup(Expression expr) {
@@ -139,6 +142,7 @@ class _LogicRun {
   _LogicRun(this.facts, this.depthLimit);
 
   Iterable<LogicEnv> searchQuery(Query query) sync* {
+    _globalCounter = 0;
     yield* search(query.clauses, new LogicEnv(null), 0);
   }
 
@@ -157,6 +161,7 @@ class _LogicRun {
       }
     } else {
       for (var fact in facts) {
+        fact = new Fact(fact.conclusion, fact.hypotheses, _globalCounter++);
         var envHead = new LogicEnv(env);
         if (unify(fact.conclusion, clause, envHead)) {
           for (var envRule in search(fact.hypotheses, envHead, depth + 1)) {
@@ -180,8 +185,9 @@ class _LogicRun {
   unify(Expression a, Expression b, LogicEnv env) {
     a = env.completeLookup(a);
     b = env.completeLookup(b);
-    if (a == b) return true;
-    if (a is Variable) {
+    if (a == b) {
+      return true;
+    } else if (a is Variable) {
       env.partial.assignments[a] = b;
       return true;
     } else if (b is Variable) {
