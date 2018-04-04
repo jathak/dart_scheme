@@ -27,6 +27,7 @@ class LogicLibrary extends SchemeLibrary with _$LogicLibraryMixin {
 
   @SchemeSymbol('logic')
   void logicStart(Frame env) {
+    facts = new Map.identity();
     super.importAll(env);
   }
 

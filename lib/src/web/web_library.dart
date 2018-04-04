@@ -23,6 +23,8 @@ class WebLibrary extends SchemeLibrary with _$WebLibraryMixin {
   final String css;
   final html.Element styleElement;
 
+  Expression logicFactProcedure, logicQueryProcedure;
+
   WebLibrary(this.renderContainer, this.jsPlumb, this.css, this.styleElement) {
     Undefined.jsUndefined = context['undefined'];
     AsyncExpression.makePromise = (expr) {
@@ -45,6 +47,10 @@ class WebLibrary extends SchemeLibrary with _$WebLibraryMixin {
     Procedure.jsProcedure = (procedure) {
       return new SchemeFunction(procedure, env);
     };
+    logicFactProcedure = env.lookup(const SchemeSymbol('fact'));
+    env.bindings.remove(const SchemeSymbol('fact'));
+    logicQueryProcedure = env.lookup(const SchemeSymbol('query'));
+    env.bindings.remove(const SchemeSymbol('query'));
   }
 
   @SchemeSymbol("close-diagram")
@@ -170,4 +176,30 @@ class WebLibrary extends SchemeLibrary with _$WebLibraryMixin {
 
   @SchemeSymbol("color->css")
   String colorToCss(Color color) => color.toCSS();
+
+  html.Worker logicWorker;
+
+  void logic(Frame env) {
+    env.define(const SchemeSymbol('fact'), logicFactProcedure);
+    env.define(const SchemeSymbol('!'), logicFactProcedure);
+    env.define(const SchemeSymbol('query'), logicQueryProcedure);
+    env.define(const SchemeSymbol('?'), logicQueryProcedure);
+    logicWorker?.terminate();
+    logicWorker = new html.Worker('worker.dart.js');
+    logicWorker.onMessage.listen((html.MessageEvent e) {
+      if (e.data[0] == 'output') {
+        env.interpreter.logText(e.data[1]);
+      }
+    });
+  }
+
+  @noeval
+  void fact(List<Expression> exprs, Frame env) {
+    logicWorker.postMessage(['run', '(fact ' + exprs.join(' ') + ')']);
+  }
+
+  @noeval
+  void query(List<Expression> exprs, Frame env) {
+    logicWorker.postMessage(['run', '(query ' + exprs.join(' ') + ')']);
+  }
 }

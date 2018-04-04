@@ -22,6 +22,9 @@ abstract class _$WebLibraryMixin {
   Expression libraryReference(ImportedLibrary imported, SchemeSymbol id);
   Future<Expression> theme(SchemeSymbol theme, Frame env);
   String colorToCss(Color color);
+  void logic(Frame env);
+  void fact(List<Expression> exprs, Frame env);
+  void query(List<Expression> exprs, Frame env);
   void importAll(Frame __env) {
     addPrimitive(__env, const SchemeSymbol("close-diagram"), (__exprs, __env) {
       var __value = undefined;
@@ -138,5 +141,22 @@ abstract class _$WebLibraryMixin {
             'Argument of invalid type passed to color->css.');
       return new SchemeString(this.colorToCss(__exprs[0]));
     }, 1);
+    addPrimitive(__env, const SchemeSymbol("logic"), (__exprs, __env) {
+      var __value = undefined;
+      this.logic(__env);
+      return __value;
+    }, 0);
+    addVariableOperandPrimitive(__env, const SchemeSymbol("fact"),
+        (__exprs, __env) {
+      var __value = undefined;
+      this.fact(__exprs, __env);
+      return __value;
+    }, 0, -1);
+    addVariableOperandPrimitive(__env, const SchemeSymbol("query"),
+        (__exprs, __env) {
+      var __value = undefined;
+      this.query(__exprs, __env);
+      return __value;
+    }, 0, -1);
   }
 }
