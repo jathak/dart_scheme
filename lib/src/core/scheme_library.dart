@@ -43,7 +43,7 @@ abstract class SchemeLibrary {
 ///
 /// When present, all methods within the class that do not start with "import"
 /// or an underscore will be added as built-in procedures.
-const _Library library = const _Library();
+const _Library schemelib = const _Library();
 
 class _Library {
   const _Library();

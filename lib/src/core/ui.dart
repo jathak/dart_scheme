@@ -210,4 +210,4 @@ abstract class DiagramInterface extends UIElement {
   UIElement pointTo(Expression expression, [int parentRow]);
 }
 
-typedef void Renderer(UIElement);
+typedef void Renderer(UIElement element);
