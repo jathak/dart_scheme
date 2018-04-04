@@ -10,6 +10,7 @@ main() async {
   interpreter.logger = (e, newline) => newline ? print(e) : stdout.write(e);
   interpreter.onExit = () => exit(0);
   interpreter.importLibrary(new ExtraLibrary());
+  interpreter.importLibrary(new LogicLibrary());
   addPrimitive(interpreter.globalEnv, const SchemeSymbol("tco"), (e, env) {
     interpreter.tailCallOptimized = e.first.isTruthy;
     return undefined;

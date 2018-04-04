@@ -36,6 +36,7 @@ main() async {
   var inter = new Interpreter(new StaffProjectImplementation());
   var normals = inter.globalEnv.bindings.keys.toSet();
   inter.importLibrary(new ExtraLibrary());
+  inter.importLibrary(new LogicLibrary());
   var diagramBox = querySelector('#diagram');
   String css = await HttpRequest.getString('assets/style.css');
   var style = querySelector('#theme');

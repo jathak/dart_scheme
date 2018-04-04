@@ -7,6 +7,7 @@ import 'package:dart_style/dart_style.dart';
 const libraries = const [
   'core/standard_library',
   'extra/extra_library',
+  'extra/logic_library',
   'web/web_library',
   'web/turtle_library'
 ];
