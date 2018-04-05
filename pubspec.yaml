@@ -23,6 +23,9 @@ dev_dependencies:
   grinder: ^0.8.0+3
   test: ^0.12.0
 
+  # CLI REPL
+  cli_repl: ^0.0.1
+
   # Web app building
   dart_to_js_script_rewriter: ^1.0.3
   transform_sass: ^0.3.1
