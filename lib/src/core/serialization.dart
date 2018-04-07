@@ -1,6 +1,6 @@
 library cs61a_scheme.core.serialization;
 
-import 'dart:convert' show JSON;
+import 'package:dart2_constant/convert.dart' show json;
 
 import 'expressions.dart';
 import 'numbers.dart';
@@ -27,7 +27,7 @@ abstract class Serializable<T extends Expression> extends Expression {
 
 class Serialization {
   static String serializeToJson(Serializable expr) {
-    return JSON.encode(expr.serialize());
+    return json.encode(expr.serialize());
   }
 
   static Expression deserialize(Map data) {
@@ -39,7 +39,7 @@ class Serialization {
     return deserializers[data['type']].deserialize(data);
   }
 
-  static Expression deserializeFromJson(String json) {
-    return deserialize(JSON.decode(json));
+  static Expression deserializeFromJson(String data) {
+    return deserialize(json.decode(data));
   }
 }

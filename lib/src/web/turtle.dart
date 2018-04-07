@@ -1,7 +1,8 @@
 library cs61a_scheme.web_turtle;
 
 import 'dart:html';
-import 'dart:math' as Math;
+import 'dart:math' show cos, sin;
+import 'package:dart2_constant/math.dart' show pi;
 
 import 'package:cs61a_scheme/cs61a_scheme.dart';
 
@@ -109,7 +110,7 @@ class Turtle {
     context.setStrokeColorRgb(0, 0, 0, 0);
   }
 
-  num get realHeading => (heading - 90) / 180 * Math.PI;
+  num get realHeading => (heading - 90) / 180 * pi;
   num get realX => x + (gridWidth / 2);
   num get realY => (gridHeight / 2) - y;
   void set realX(num realX) => x = realX - (gridWidth / 2);
@@ -167,14 +168,14 @@ class Turtle {
   }
 
   static List<num> getPointTo(num ang, num forward, num x, num y) {
-    return [x + forward * Math.cos(ang), y + forward * Math.sin(ang)];
+    return [x + forward * cos(ang), y + forward * sin(ang)];
   }
 
   point(n) => getPointTo(realHeading, n, realX, realY);
 
   circle(num radius, [num arc = 360]) {
     num rad = radius.abs();
-    var cpoint = getPointTo(realHeading - Math.PI / 2, radius, realX, realY);
+    var cpoint = getPointTo(realHeading - pi / 2, radius, realX, realY);
     num cx = cpoint[0];
     num cy = cpoint[1];
     num initX = realX;
@@ -184,9 +185,9 @@ class Turtle {
     bool reverse = arc < 0;
     arc = arc.abs();
 
-    num circleStart = realHeading + Math.PI / 2;
+    num circleStart = realHeading + pi / 2;
     for (num i = 0; i <= arc; i += 60 / rad) {
-      num radians = Math.PI * i / 180;
+      num radians = pi * i / 180;
       if (reverse) radians = -radians;
       var point = getPointTo(circleStart - radians, radius, cx, cy);
       drawLine(point, true);

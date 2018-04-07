@@ -1,6 +1,6 @@
 library cs61a_scheme.reader;
 
-import 'dart:convert' show JSON;
+import 'package:dart2_constant/convert.dart' show json;
 import 'dart:math' show min;
 
 import 'expressions.dart';
@@ -118,7 +118,7 @@ Iterable<Expression> tokenizeLine(String line) sync* {
         }
       }
     } else if (_stringDelims.contains(text[0])) {
-      yield new SchemeString(JSON.decode(text));
+      yield new SchemeString(json.decode(text));
     } else {
       throw new FormatException("warning: invalid token: $text in $line");
     }
