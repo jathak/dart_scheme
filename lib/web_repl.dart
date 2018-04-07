@@ -1,7 +1,7 @@
 library web_repl;
 
 import 'dart:async';
-import 'dart:convert' show JSON;
+import 'package:dart2_constant/convert.dart' show json;
 import 'dart:html';
 import 'dart:js';
 
@@ -22,7 +22,7 @@ class Repl {
 
   Repl(this.interpreter, Element parent) {
     if (window.localStorage.containsKey('#repl-history')) {
-      var decoded = JSON.decode(window.localStorage['#repl-history']);
+      var decoded = json.decode(window.localStorage['#repl-history']);
       if (decoded is List) history = decoded.map((item) => '$item').toList();
     }
     addPrimitives();
@@ -166,7 +166,7 @@ class Repl {
     if (history.isNotEmpty && code == history[0]) return;
     history.insert(0, code);
     var subset = history.take(100).toList();
-    window.localStorage['#repl-history'] = JSON.encode(subset);
+    window.localStorage['#repl-history'] = json.encode(subset);
   }
 
   historyUp() {

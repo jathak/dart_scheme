@@ -1,6 +1,6 @@
 library builder;
 
-import 'dart:convert' show JSON;
+import 'package:dart2_constant/convert.dart' show json;
 
 import 'package:analyzer/analyzer.dart';
 
@@ -55,7 +55,7 @@ String _buildAbstract(MethodDeclaration method) {
 bool needsTurtle = false;
 
 String _buildPrimitive(MethodDeclaration method) {
-  String name = JSON.encode(method.name.toSource().toLowerCase());
+  String name = json.encode(method.name.toSource().toLowerCase());
   bool setName = false;
   List<String> extraNames = [];
   bool variable = false;
