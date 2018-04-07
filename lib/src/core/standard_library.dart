@@ -156,9 +156,8 @@ class StandardLibrary extends SchemeLibrary with _$StandardLibraryMixin {
 
   Number remainder(Number a, Number b) {
     Number mod = modulo(a, b);
-    while ((mod < Number.zero && a > Number.zero) ||
-        (mod > Number.zero && a < Number.zero)) {
-      mod -= a;
+    while (mod > Number.zero && a < Number.zero) {
+      mod -= abs(b);
     }
     return mod;
   }
