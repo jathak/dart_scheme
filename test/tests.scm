@@ -569,6 +569,14 @@ one-through-four
 (add2xy 3 7)
 ; expect 13
 
+(remainder -5 4)
+; expect -1
+
+(remainder 5 -4)
+; expect 1 
+
+(remainder -5 -4)
+; expect -1
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Scheme Implementations ;;;
