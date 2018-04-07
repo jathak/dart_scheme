@@ -22,7 +22,8 @@ class Repl {
 
   Repl(this.interpreter, Element parent) {
     if (window.localStorage.containsKey('#repl-history')) {
-      history = JSON.decode(window.localStorage['#repl-history']);
+      var decoded = JSON.decode(window.localStorage['#repl-history']);
+      if (decoded is List) history = decoded.map((item) => '$item').toList();
     }
     addPrimitives();
     container = new PreElement()..classes = ['repl'];
