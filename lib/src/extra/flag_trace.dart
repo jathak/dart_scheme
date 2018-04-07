@@ -27,6 +27,8 @@ class FlagTrace extends SelfEvaluating implements Serializable<FlagTrace> {
   String language;
   FlagTrace(this.code, [this.language = 'scheme']);
 
+  toString() => "#[FlagTrace]";
+
   Map serialize() => {
         'type': 'FlagTrace',
         'code': code,
@@ -46,6 +48,8 @@ class FlagStep extends SelfEvaluating implements Serializable<FlagStep> {
   List<Flag> flags;
   FlagStep(this.diagram, this.flags);
 
+  toString() => "#[FlagStep]";
+
   Map serialize() => {
         'type': 'FlagStep',
         'diagram': diagram.serialize(),
@@ -63,6 +67,8 @@ class Flag extends SelfEvaluating implements Serializable<Flag> {
   int frameId;
   List<Flag> body = [];
   Flag(this.callExpression, this.frameId);
+
+  toString() => "#[Flag]";
 
   Map serialize() => {
         'type': 'Flag',
@@ -88,7 +94,7 @@ class FlagTraceBuilder {
   FlagTrace trace;
   Map<Frame, Expression> _frameReturnValues = new Map.identity();
   List<Flag> _sourceFlags = [];
-  // Boolean should true if adding operands, false if adding to body.
+  // Boolean should be true if adding operands, false if adding to body.
   List<Pair<Flag, Boolean>> _flagStack = [];
   String _potentialCallExpr = null;
 

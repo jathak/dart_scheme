@@ -45,11 +45,6 @@ abstract class Expression {
   /// Used by the `(display <expr>)` built-in. Defaults to [toString].
   String get display => toString();
 
-  /// Returns a string representation of this expression.
-  ///
-  /// Displayed when this is the interactive output, and in several other cases.
-  String toString() => '#[$runtimeType]';
-
   /// Should return a version of this object that can be passed to JS.
   ///
   /// The default implementation just returns the expression itself, so this
