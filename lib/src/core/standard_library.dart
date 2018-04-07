@@ -14,7 +14,7 @@ part 'standard_library.g.dart';
 /// Note: When the signatures (including any annotations) of any of these methods
 /// change, make sure to `pub run grinder` to rebuild the mixin (which registers
 /// the primitives and performs type checking on arguments).
-@library
+@schemelib
 class StandardLibrary extends SchemeLibrary with _$StandardLibraryMixin {
   Expression apply(Procedure procedure, PairOrEmpty args, Frame env) {
     return schemeApply(procedure, args, env);
@@ -156,9 +156,8 @@ class StandardLibrary extends SchemeLibrary with _$StandardLibraryMixin {
 
   Number remainder(Number a, Number b) {
     Number mod = modulo(a, b);
-    while ((mod < Number.zero && a > Number.zero) ||
-        (mod > Number.zero && a < Number.zero)) {
-      mod -= a;
+    while (mod > Number.zero && a < Number.zero) {
+      mod -= abs(b);
     }
     return mod;
   }

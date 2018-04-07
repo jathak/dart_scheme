@@ -15,7 +15,7 @@ part 'extra_library.g.dart';
 /// Note: When the signatures (including any annotations) of any of theses methods
 /// change, make sure to `pub run grinder` to rebuild the mixin (which registers
 /// the primitives and performs type checking on arguments).
-@library
+@schemelib
 class ExtraLibrary extends SchemeLibrary with _$ExtraLibraryMixin {
   ExtraLibrary() {
     initTraceDeserializers();
@@ -92,7 +92,7 @@ class ExtraLibrary extends SchemeLibrary with _$ExtraLibraryMixin {
   }
 
   @SchemeSymbol('listen-for')
-  EventListener listenFor(SchemeSymbol id, Procedure onEvent, Frame env) {
+  SchemeEventListener listenFor(SchemeSymbol id, Procedure onEvent, Frame env) {
     var callback = (List<Expression> exprs, Frame env) {
       try {
         schemeApply(onEvent, new PairOrEmpty.fromIterable(exprs), env);
@@ -106,11 +106,11 @@ class ExtraLibrary extends SchemeLibrary with _$ExtraLibraryMixin {
       }
     };
     env.interpreter.listenFor(id, callback);
-    return new EventListener(id, callback);
+    return new SchemeEventListener(id, callback);
   }
 
   @SchemeSymbol('cancel-listener')
-  void cancelListener(EventListener listener, Frame env) {
+  void cancelListener(SchemeEventListener listener, Frame env) {
     env.interpreter.stopListening(listener.id, listener.callback);
   }
 

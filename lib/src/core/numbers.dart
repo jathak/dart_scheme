@@ -1,6 +1,7 @@
 library cs61a_scheme.core.numbers;
 
-import 'package:rational/bigint.dart';
+/// Prefixed to avoid shadowing BigInt in Dart 2 until switch.
+import 'package:rational/bigint.dart' as lib;
 
 import 'expressions.dart';
 import 'logging.dart';
@@ -34,7 +35,7 @@ abstract class Number extends SelfEvaluating {
   /// Note that strings like `"1.0"` will yield an [Integer], not a [Double].
   factory Number.fromString(String numString) {
     try {
-      return new Integer.fromBigInt(BigInt.parse(numString));
+      return new Integer.fromBigInt(lib.BigInt.parse(numString));
     } catch (e) {
       return new Number.fromNum(num.parse(numString));
     }
@@ -88,15 +89,15 @@ abstract class Number extends SelfEvaluating {
 /// Once updated for Dart 2, the [BigInt] class from the rational library should
 /// be replaced with the built-in class.
 class Integer extends Number implements Serializable<Integer> {
-  BigInt value;
+  lib.BigInt value;
 
   Integer.fromBigInt(this.value);
 
   factory Integer(int value) =>
-      new Integer.fromBigInt(new BigInt.fromJsInt(value));
+      new Integer.fromBigInt(new lib.BigInt.fromJsInt(value));
 
   Integer deserialize(Map data) =>
-      new Integer.fromBigInt(BigInt.parse(data['value']));
+      new Integer.fromBigInt(lib.BigInt.parse(data['value']));
 
   Map serialize() => {'type': 'Integer', 'value': value.toString()};
 

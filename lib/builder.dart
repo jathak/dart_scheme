@@ -11,7 +11,7 @@ String generateImportMixin(String sourceCode) {
   for (CompilationUnitMember decl in ast.declarations) {
     if (decl is ClassDeclaration) {
       for (Annotation annotation in decl.metadata) {
-        if (annotation.name.toSource() == "library") {
+        if (annotation.name.toSource() == "schemelib") {
           return _buildMixin(decl);
         }
       }

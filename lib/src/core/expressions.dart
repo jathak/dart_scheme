@@ -1,6 +1,6 @@
 library cs61a_scheme.core.expressions;
 
-import 'dart:collection' show IterableMixin;
+import 'dart:collection' show IterableMixin, IterableBase;
 import 'dart:convert' show JSON;
 
 import 'package:quiver_hashcode/hashcode.dart';
@@ -184,49 +184,29 @@ abstract class PairOrEmpty extends Expression implements Iterable<Expression> {
 ///
 /// This can't use [IterableMixin] because we need it to have a constant
 /// constructor, so we have to implement all the [Iterable] methods ourselves.
-class _EmptyList extends SelfEvaluating implements PairOrEmpty {
+class _EmptyList extends IterableBase<Expression>
+    implements SelfEvaluating, PairOrEmpty {
   final inlineUI = true;
-  const _EmptyList._internal();
+  const _EmptyList();
   bool get wellFormed => true;
   @deprecated
   bool isWellFormedList() => true;
   bool get isNil => true;
   toString() => "()";
+  get iterator => new _NilIterator();
 
   num get lengthOrCycle => 0;
 
-  get first => throw new StateError("empty list");
-  final isEmpty = true;
-  final isNotEmpty = false;
-  get iterator => new _NilIterator();
-  get last => throw new StateError("empty list");
-  final int length = 0;
-  get single => throw new StateError("empty list");
-  any(f) => false;
-  contains(e) => false;
-  every(f) => true;
-  elementAt(f) => throw new StateError("empty list");
-  expand<T>(f) => <T>[];
-  firstWhere(test, {orElse = null}) =>
-      orElse == null ? throw new StateError("empty list") : orElse();
-  fold<T>(init, combine) => init;
-  forEach(f) => null;
-  join([sep]) => "";
-  lastWhere(test, {orElse = null}) => firstWhere(test, orElse: orElse);
-  List<T> map<T>(Function fn) => [];
-  reduce(comb) => throw new StateError("empty list");
-  singleWhere(test) => throw new StateError("empty list");
-  skip(c) => this;
-  skipWhile(test) => this;
-  take(c) => this;
-  takeWhile(c) => this;
-  toList({bool growable: false}) => growable ? [] : new List(0);
-  toSet() => new Set();
-  where(t) => this;
+  get display => toString();
+  draw(DiagramInterface diagram) => new TextElement('()');
+  evaluate(Frame env) => this;
+  get isTruthy => true;
+  get pair => this as Pair;
+  toJS() => this;
 }
 
 /// The empty Scheme list.
-const nil = const _EmptyList._internal();
+const nil = const _EmptyList();
 
 /// A Scheme pair.
 ///

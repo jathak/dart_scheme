@@ -12,7 +12,7 @@ part 'turtle_library.g.dart';
 /// Note: When the signatures (including any annotations) of any of this methods
 /// change, make sure to `pub run grinder` to rebuild the mixin (which registers
 /// the primitives and performs type checking on arguments).
-@library
+@schemelib
 class TurtleLibrary extends SchemeLibrary with _$TurtleLibraryMixin {
   Turtle turtle;
 

@@ -16,7 +16,7 @@ part 'web_library.g.dart';
 /// Note: When the signatures (including any annotations) of any of this methods
 /// change, make sure to `pub run grinder` to rebuild the mixin (which registers
 /// the primitives and performs type checking on arguments).
-@library
+@schemelib
 class WebLibrary extends SchemeLibrary with _$WebLibraryMixin {
   final html.Element renderContainer;
   final JsObject jsPlumb;
