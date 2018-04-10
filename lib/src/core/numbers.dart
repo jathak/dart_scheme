@@ -1,8 +1,5 @@
 library cs61a_scheme.core.numbers;
 
-/// Prefixed to avoid shadowing BigInt in Dart 2 until switch.
-import 'package:rational/bigint.dart' as lib;
-
 import 'expressions.dart';
 import 'logging.dart';
 import 'serialization.dart';
@@ -35,7 +32,7 @@ abstract class Number extends SelfEvaluating {
   /// Note that strings like `"1.0"` will yield an [Integer], not a [Double].
   factory Number.fromString(String numString) {
     try {
-      return new Integer.fromBigInt(lib.BigInt.parse(numString));
+      return new Integer.fromBigInt(BigInt.parse(numString));
     } catch (e) {
       return new Number.fromNum(num.parse(numString));
     }
@@ -89,15 +86,14 @@ abstract class Number extends SelfEvaluating {
 /// Once updated for Dart 2, the [BigInt] class from the rational library should
 /// be replaced with the built-in class.
 class Integer extends Number implements Serializable<Integer> {
-  lib.BigInt value;
+  BigInt value;
 
   Integer.fromBigInt(this.value);
 
-  factory Integer(int value) =>
-      new Integer.fromBigInt(new lib.BigInt.fromJsInt(value));
+  factory Integer(int value) => new Integer.fromBigInt(new BigInt.from(value));
 
   Integer deserialize(Map data) =>
-      new Integer.fromBigInt(lib.BigInt.parse(data['value']));
+      new Integer.fromBigInt(BigInt.parse(data['value']));
 
   Map serialize() => {'type': 'Integer', 'value': value.toString()};
 
@@ -108,7 +104,9 @@ class Integer extends Number implements Serializable<Integer> {
     if (other == Number.zero) {
       throw new SchemeException("cannot divide by zero");
     }
-    if (other is Integer && (value % other.value).is0) return this ~/ other;
+    if (other is Integer && (value % other.value) == BigInt.zero) {
+      return this ~/ other;
+    }
     return super._operation(other, (a, b) => a / b);
   }
 
@@ -125,7 +123,7 @@ class Integer extends Number implements Serializable<Integer> {
   }
 
   @override
-  int toJS() => value.toValidJsInt();
+  num toJS() => value.isValidInt ? value.toInt() : value.toDouble();
 }
 
 /// A Scheme double-precision floating point number.
