@@ -79,7 +79,10 @@ main() async {
   addDemo(demos, 'try-monochrome', "(theme 'monochrome)");
   addDemo(demos, 'try-monochrome-dark', "(theme 'monochrome-dark)");
   addDemo(demos, 'try-go-bears', "(theme 'go-bears)");
-  addDemo(demos, 'try-viz', """(define (fact n)
+  addDemo(
+      demos,
+      'try-viz',
+      """(define (fact n)
        (if (= n 0)
            1
            (* n (fact (- n 1)))))
