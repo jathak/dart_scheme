@@ -141,4 +141,9 @@ class ExtraLibrary extends SchemeLibrary with _$ExtraLibraryMixin {
   Expression deserialize(String json) {
     return Serialization.deserializeFromJson(json);
   }
+
+  MarkdownElement formatted(List<Expression> expressions, Frame env) {
+    String text = expressions.map((expr) => expr.display).join('');
+    return new MarkdownElement(text, inline: true, env: env);
+  }
 }

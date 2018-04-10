@@ -6,7 +6,9 @@ import 'dart:async';
 
 import 'expressions.dart';
 import 'logging.dart';
+import 'procedures.dart' show Procedure;
 import 'serialization.dart';
+import 'utils.dart' show schemeApply;
 
 class Direction extends SelfEvaluating {
   final String _id;
@@ -103,7 +105,7 @@ class Anchor extends UIElement {
 class TextElement extends UIElement {
   final String text;
   TextElement(this.text);
-  toString() => "#[TextElement:$text]";
+  toString() => text;
 
   Map serialize() => finishSerialize({
         'type': 'TextElement',
@@ -111,6 +113,28 @@ class TextElement extends UIElement {
       });
   TextElement deserialize(Map data) {
     return new TextElement(data['text'])..finishDeserialize(data);
+  }
+}
+
+class MarkdownElement extends TextElement {
+  bool inline;
+
+  Frame env;
+
+  MarkdownElement(String text, {this.inline: true, this.env}) : super(text);
+
+  void runLink(String name) {
+    if (env == null) return;
+    var proc = env.lookup(new SchemeSymbol.runtime(name));
+    if (proc is Procedure) {
+      schemeApply(proc, nil, env);
+    }
+  }
+
+  Map serialize() => {'type': 'MarkdownElement', 'text': text};
+
+  MarkdownElement deserialize(Map data) {
+    return new MarkdownElement(data['text']);
   }
 }
 

@@ -4,7 +4,10 @@ import 'dart:async';
 import 'dart:html';
 import 'dart:js';
 
+import 'package:markdown/markdown.dart' as md;
+
 import 'package:cs61a_scheme/cs61a_scheme_extra.dart';
+import 'package:cs61a_scheme/highlight.dart';
 
 import 'theming.dart';
 
@@ -34,13 +37,15 @@ class HtmlRenderer {
       sub.cancel();
     }
     container.append(el);
-    refreshConnections();
     subs.add(element.onUpdate.listen(([_]) {
       render(element);
     }));
-    subs.add(onThemeChange.listen(([_]) {
+    if (connections != null) {
       refreshConnections();
-    }));
+      subs.add(onThemeChange.listen(([_]) {
+        refreshConnections();
+      }));
+    }
   }
 
   void refreshConnections() {
@@ -101,6 +106,7 @@ class HtmlRenderer {
   }
 
   Element _convertRaw(UIElement element, [bool spaced = false]) {
+    if (element is MarkdownElement) return convertMarkdown(element, spaced);
     if (element is Visualization) return convertVisualization(element, spaced);
     if (element is Button) return convertButton(element, spaced);
     if (element is Diagram) return convertDiagram(element, spaced);
@@ -113,6 +119,31 @@ class HtmlRenderer {
     if (element is Binding) return convertBinding(element, spaced);
     if (element is Strike) return convertStrike(element, spaced);
     throw new SchemeException("Cannot render $element");
+  }
+
+  Element convertMarkdown(MarkdownElement mark, [bool spaced = false]) {
+    String html = md.markdownToHtml(mark.text,
+        extensionSet: md.ExtensionSet.gitHubFlavored, inlineOnly: mark.inline);
+    Element element = new Element.span();
+    element.appendHtml(html,
+        validator: new NodeValidatorBuilder.common()
+          ..allowNavigation(new _AnyUriPolicy()));
+    for (var link in element.querySelectorAll('a')) {
+      String href = link.attributes['href'];
+      if (href?.startsWith(':') ?? false) {
+        link.attributes.remove('href');
+        link.classes.add('button');
+        link.onClick.listen((e) => mark.runLink(href.substring(1)));
+      } else {
+        link.attributes['target'] = '_blank';
+      }
+    }
+    for (var code in element.querySelectorAll('code')) {
+      var styled = highlight(code.innerHtml);
+      code.setInnerHtml(styled, validator: new NodeValidatorBuilder.common());
+    }
+    element.classes.add('markdown');
+    return element;
   }
 
   Element convertVisualization(Visualization viz, [bool spaced = false]) {
@@ -262,4 +293,9 @@ class HtmlRenderer {
     };
     return connection;
   }
+}
+
+class _AnyUriPolicy implements UriPolicy {
+  @override
+  bool allowsUri(String uri) => true;
 }

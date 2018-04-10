@@ -15,6 +15,7 @@ final Map<String, Serializable> deserializers = {
   'SchemeString': const SchemeString('x'),
   'Anchor': new Anchor.withId(-1),
   'TextElement': new TextElement(""),
+  'MarkdownElement': new MarkdownElement(null),
   'Strike': new Strike(),
   'Block': new Block.pair(null),
   'BlockGrid': new BlockGrid([[]])
