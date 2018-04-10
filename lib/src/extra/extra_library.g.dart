@@ -18,6 +18,7 @@ abstract class _$ExtraLibraryMixin {
   Visualization traceToVisualization(FlagTrace trace);
   String serialize(Serializable expr);
   Expression deserialize(String json);
+  MarkdownElement formatted(List<Expression> expressions, Frame env);
   void importAll(Frame __env) {
     addPrimitive(__env, const SchemeSymbol("run-async"), (__exprs, __env) {
       if (__exprs[0] is! Procedure)
@@ -112,5 +113,9 @@ abstract class _$ExtraLibraryMixin {
             'Argument of invalid type passed to deserialize.');
       return this.deserialize((__exprs[0] as SchemeString).value);
     }, 1);
+    addVariablePrimitive(__env, const SchemeSymbol("formatted"),
+        (__exprs, __env) {
+      return this.formatted(__exprs, __env);
+    }, 0, -1);
   }
 }
