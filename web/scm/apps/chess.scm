@@ -301,7 +301,4 @@
         (move (car cur-high) (cdr cur-high) (car new-high) (cdr new-high))
         (announce-move (car cur-high) (cdr cur-high) (car new-high) (cdr new-high))))))
 
-(display "Use (move f1 r1 f2 r2) or click on the board to move")(newline)
-(display "Files are columns a-h left to right")(newline)
-(display "Ranks are rows 1-8 bottom to top")(newline)
-(display "Game announces check but does not determine checkmate")(newline)
+(print (formatted "Click on the board to move. [Reset Game](:reset)"))
