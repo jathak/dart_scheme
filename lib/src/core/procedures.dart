@@ -105,6 +105,9 @@ abstract class UserDefinedProcedure extends Procedure {
   Expression apply(PairOrEmpty arguments, Frame env) {
     Frame frame = makeCallFrame(arguments, env);
     if (name != null) frame.tag = name.toString();
+    if (this is MacroProcedure) {
+      frame.fromMacro = true;
+    }
     env.interpreter.triggerEvent(const SchemeSymbol('new-frame'), [], frame);
     var result = env.interpreter.impl.evalAll(body, frame);
     env.interpreter.triggerEvent(const SchemeSymbol('return'), [result], frame);
