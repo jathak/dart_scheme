@@ -70,7 +70,7 @@ class Repl {
     addPrimitive(env, const SchemeSymbol('clear'), (_a, _b) {
       for (Element child in container.children.toList()) {
         if (child == activePrompt) break;
-        container.children.remove(child);
+        if (child != status) container.children.remove(child);
       }
       return undefined;
     }, 0);
