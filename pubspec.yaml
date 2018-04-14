@@ -26,7 +26,7 @@ dev_dependencies:
   test: ^0.12.0
 
   # CLI REPL
-  cli_repl: ^0.0.1
+  cli_repl: ^0.1.1
 
   # Web app building
   dart_to_js_script_rewriter: ^1.0.3

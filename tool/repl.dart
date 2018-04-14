@@ -5,7 +5,7 @@ import 'package:cli_repl/cli_repl.dart';
 import 'package:cs61a_scheme/cs61a_scheme_extra.dart';
 import 'package:cs61a_scheme_impl/impl.dart' show StaffProjectImplementation;
 
-main() async {
+main() {
   Interpreter interpreter = new Interpreter(new StaffProjectImplementation());
   interpreter.importLibrary(new ExtraLibrary());
   interpreter.importLibrary(new LogicLibrary());
@@ -16,7 +16,7 @@ main() async {
     return undefined;
   }, 1);
   var repl = new Repl(prompt: 'scm> ', validator: matchingParens);
-  await for (var expr in repl.run()) {
+  for (var expr in repl.run()) {
     interpreter.run(expr);
   }
 }
