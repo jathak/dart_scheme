@@ -212,7 +212,10 @@ class Repl {
       runActiveCode();
       await delay(100);
       input.innerHtml = highlight(input.text);
-    } else {
+    } else if ((missingParens ?? 0) > 0 && event.keyCode == KeyCode.ENTER) {
+      event.preventDefault();
+      input.text = input.text + "\n" + " " * spaceCount(input.text);
+    }else {
       await delay(5);
       highlightSaveCursor(input);
     }
@@ -306,5 +309,21 @@ class Repl {
 
   Future delay(int milliseconds) {
     return new Future.delayed(new Duration(milliseconds: milliseconds));
+  }
+
+  int spaceCount(String inputText) {
+    List<String> splitLines = inputText.split("\n");
+    //this is assuming the outermost parens is missing its match
+    String findStartParen(Iterable lines) {
+      int skipParens = '('.allMatches(inputText).length - countParens(inputText);
+      for (String line in lines) {
+        int numParens = '('.allMatches(line).length;
+        if (numParens > skipParens) return line;
+        skipParens -= numParens;
+      }
+    }
+    //TODO: So far, assumes that ( is at the beginning of the line
+    String refLine = findStartParen(splitLines.reversed);
+    return refLine.length - refLine.trimLeft().length;
   }
 }
