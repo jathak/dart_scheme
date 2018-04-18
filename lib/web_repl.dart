@@ -327,8 +327,11 @@ class Repl {
     while (strIndex < refLine.length) {
       int nextClose = refLine.indexOf(")", strIndex + 1);
       int nextOpen = refLine.indexOf("(", strIndex + 1);
-      if (nextOpen == -1 || nextClose == -1 || (nextOpen < nextClose)) break;
-      if (totalMissingCount > 1) totalMissingCount -= 1;
+      if (totalMissingCount > 1) {
+        totalMissingCount -= 1;
+      } else if (nextOpen == -1 || nextClose == -1 || (nextOpen < nextClose)) {
+        break;
+      }
       strIndex = nextOpen;
     }
     return strIndex;
