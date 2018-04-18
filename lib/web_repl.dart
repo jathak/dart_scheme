@@ -90,7 +90,10 @@ class Repl {
 
   buildNewInput() {
     activeLoggingArea = new SpanElement();
-    if (activeInput != null) container.appendText('\n');
+    if (activeInput != null) {
+      activeInput.contentEditable = 'false';
+      container.append(new SpanElement()..text = '\n');
+    }
     container.append(activeLoggingArea);
     activePrompt = new SpanElement()
       ..text = 'scm> '
