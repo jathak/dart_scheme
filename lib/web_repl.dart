@@ -214,8 +214,9 @@ class Repl {
       input.innerHtml = highlight(input.text);
     } else if ((missingParens ?? 0) > 0 && event.keyCode == KeyCode.ENTER) {
       event.preventDefault();
-      input.text = input.text + "\n" + " " * spaceCount(input.text);
-    }else {
+      input.text = input.text + "\n" + " " * (spaceCount(input.text) + 1);
+      highlightAtEnd(input, input.text);
+    } else {
       await delay(5);
       highlightSaveCursor(input);
     }
@@ -313,17 +314,23 @@ class Repl {
 
   int spaceCount(String inputText) {
     List<String> splitLines = inputText.split("\n");
-    //this is assuming the outermost parens is missing its match
-    String findStartParen(Iterable lines) {
-      int skipParens = '('.allMatches(inputText).length - countParens(inputText);
-      for (String line in lines) {
-        int numParens = '('.allMatches(line).length;
-        if (numParens > skipParens) return line;
-        skipParens -= numParens;
+    String refLine;
+    int totalMissingCount = 0;
+    for (String line in splitLines.reversed) {
+      totalMissingCount += countParens(line);
+      if (totalMissingCount >= 1) {
+        refLine = line;
+        break;
       }
     }
-    //TODO: So far, assumes that ( is at the beginning of the line
-    String refLine = findStartParen(splitLines.reversed);
-    return refLine.length - refLine.trimLeft().length;
+    int strIndex = refLine.indexOf("(");
+    while (strIndex < refLine.length) {
+      int nextClose = refLine.indexOf(")", strIndex + 1);
+      int nextOpen = refLine.indexOf("(", strIndex + 1);
+      if (nextOpen == -1 || nextClose == -1 || (nextOpen < nextClose)) break;
+      if (totalMissingCount > 1) totalMissingCount -= 1;
+      strIndex = nextOpen;
+    }
+    return strIndex;
   }
 }
