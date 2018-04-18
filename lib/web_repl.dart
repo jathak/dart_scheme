@@ -216,8 +216,16 @@ class Repl {
       await delay(100);
       input.innerHtml = highlight(input.text);
     } else if ((missingParens ?? 0) > 0 && event.keyCode == KeyCode.ENTER) {
+      //TODO: Add check to see if at the end of the line
+      //TODO: Replace highlightAtEnd 
+      //TODO: Maybe add a primitive to turn autoindent off?
       event.preventDefault();
-      input.text = input.text + "\n" + " " * (spaceCount(input.text) + 1);
+      String newInput = input.text;
+      if (newInput.lastIndexOf("\n") == newInput.length - 1) {
+        newInput = newInput.substring(0, newInput.length - 1);
+      }
+      input.text = newInput + "\n" + " " * (spaceCount(newInput) + 1);
+      //unnecessary to highlight but useful to move the cursor in the correct place
       highlightAtEnd(input, input.text);
     } else {
       await delay(5);
