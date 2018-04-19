@@ -215,17 +215,17 @@ class Repl {
       runActiveCode();
       await delay(100);
       input.innerHtml = highlight(input.text);
-    } else if ((missingParens ?? 0) > 0 && event.keyCode == KeyCode.ENTER) {
-      //TODO: Add check to see if at the end of the line
-      //TODO: Replace highlightAtEnd 
+    } else if ((missingParens ?? 0) > 0 &&
+        event.keyCode == KeyCode.ENTER &&
+        endOfLine()) {
+      //TODO: Replace highlightAtEnd
       //TODO: Maybe add a primitive to turn autoindent off?
       event.preventDefault();
       String newInput = input.text;
-      if (newInput.lastIndexOf("\n") == newInput.length - 1) {
+      if (newInput[newInput.length - 1] == "\n") {
         newInput = newInput.substring(0, newInput.length - 1);
       }
       input.text = newInput + "\n" + " " * (spaceCount(newInput) + 1);
-      //unnecessary to highlight but useful to move the cursor in the correct place
       highlightAtEnd(input, input.text);
     } else {
       await delay(5);
@@ -346,5 +346,13 @@ class Repl {
       strIndex = nextOpen;
     }
     return strIndex;
+  }
+
+  bool endOfLine() {
+    Range curr = window.getSelection().getRangeAt(0);
+    Node lastNode = activeInput.childNodes.last;
+    while (lastNode.nodeType != 3) lastNode = lastNode.firstChild;
+    Range range = new Range()..selectNodeContents(lastNode);
+    return (curr.compareBoundaryPoints(Range.END_TO_END, range) == 0);
   }
 }
