@@ -19,7 +19,7 @@ before_install:
 script:
 - pub run test $NO_IMPL
 - pub run grinder check
-- dartfmt -n --set-exit-if-changed .
+- pub run dart_style:format -n --set-exit-if-changed .
 - dartanalyzer --fatal-warnings --strong .
 - pub run dependency_validator
 before_deploy:

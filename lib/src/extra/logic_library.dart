@@ -23,6 +23,7 @@ class LogicLibrary extends SchemeLibrary with _$LogicLibraryMixin {
 
     // Only import the loader to start. Calling logic imports the rest.
     env.define(sym, child.bindings[sym]);
+    env.hidden[sym] = true;
   }
 
   @SchemeSymbol('logic')

@@ -1,8 +1,9 @@
 library cs61a_scheme.core.expressions;
 
 import 'dart:collection' show IterableMixin, IterableBase;
-import 'dart:convert' show JSON;
 
+import 'package:dart2_constant/convert.dart' show json;
+import 'package:dart2_constant/core.dart' as core;
 import 'package:quiver_hashcode/hashcode.dart';
 
 import 'interpreter.dart';
@@ -43,11 +44,6 @@ abstract class Expression {
   ///
   /// Used by the `(display <expr>)` built-in. Defaults to [toString].
   String get display => toString();
-
-  /// Returns a string representation of this expression.
-  ///
-  /// Displayed when this is the interactive output, and in several other cases.
-  String toString() => '#[$runtimeType]';
 
   /// Should return a version of this object that can be passed to JS.
   ///
@@ -120,7 +116,7 @@ class SchemeString extends SelfEvaluating
   final inlineUI = true;
   final String value;
   const SchemeString(this.value);
-  toString() => JSON.encode(value);
+  toString() => json.encode(value);
   get display => value;
   operator ==(other) => other is SchemeString && value == other.value;
   int get hashCode => hash2("SchemeString", value);
@@ -240,7 +236,7 @@ class Pair<A extends Expression, B extends Expression> extends Expression
       slow = slow.pair.second;
       fast = fast.pair.second.pair.second;
       length += 2;
-      if (identical(slow, fast)) return double.INFINITY;
+      if (identical(slow, fast)) return core.double.infinity;
     }
     if (!wellFormed) throw new SchemeException("Malformed list");
     return length + (fast is Pair ? 1 : 0);

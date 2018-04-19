@@ -1,7 +1,7 @@
 library web_repl;
 
 import 'dart:async';
-import 'dart:convert' show JSON;
+import 'package:dart2_constant/convert.dart' show json;
 import 'dart:html';
 import 'dart:js';
 
@@ -22,7 +22,8 @@ class Repl {
 
   Repl(this.interpreter, Element parent) {
     if (window.localStorage.containsKey('#repl-history')) {
-      history = JSON.decode(window.localStorage['#repl-history']);
+      var decoded = json.decode(window.localStorage['#repl-history']);
+      if (decoded is List) history = decoded.map((item) => '$item').toList();
     }
     addPrimitives();
     container = new PreElement()..classes = ['repl'];
@@ -46,14 +47,9 @@ class Repl {
     container.append(status);
     buildNewInput();
     interpreter.logger = (Expression logging, [bool newline = true]) {
-      if (logging is UIElement) {
-        var renderBox = new DivElement()..classes = ['render'];
-        activeLoggingArea.append(renderBox);
-        var renderer = new HtmlRenderer(renderBox, context['jsPlumb']);
-        renderer.render(logging);
-      } else {
-        logText(logging.toString() + (newline ? '\n' : ''));
-      }
+      var box = new SpanElement();
+      activeLoggingArea.append(box);
+      logInto(box, logging, newline);
     };
     interpreter.logError = (e) {
       var errorElement = new SpanElement()
@@ -122,18 +118,10 @@ class Repl {
       try {
         Expression expr = schemeRead(tokens, interpreter.impl);
         result = schemeEval(expr, interpreter.globalEnv);
-        if (result is AsyncExpression) {
-          var box = new SpanElement()
-            ..text = '$result\n'
-            ..classes = ['repl-async'];
-          loggingArea.append(box);
-          var awaited = await result.future;
-          box.classes = ['repl-log'];
-          logInto(box, awaited is Undefined ? null : result);
-        } else if (result is! Undefined) {
+        if (result is! Undefined) {
           var box = new SpanElement();
           loggingArea.append(box);
-          logInto(box, result, true);
+          await logInto(box, result, true);
         }
       } on SchemeException catch (e) {
         loggingArea.append(new SpanElement()
@@ -165,7 +153,7 @@ class Repl {
     if (history.isNotEmpty && code == history[0]) return;
     history.insert(0, code);
     var subset = history.take(100).toList();
-    window.localStorage['#repl-history'] = JSON.encode(subset);
+    window.localStorage['#repl-history'] = json.encode(subset);
   }
 
   historyUp() {
@@ -271,7 +259,17 @@ class Repl {
   }
 
   logInto(Element element, Expression logging, [bool newline = true]) {
-    if (logging == null) {
+    if (logging is AsyncExpression) {
+      var box = new SpanElement()
+        ..text = '$logging\n'
+        ..classes = ['repl-async'];
+      element.append(box);
+      return logging.future.then((Expression expr) {
+        box.classes = ['repl-log'];
+        logInto(box, expr is Undefined ? null : expr);
+        return null;
+      });
+    } else if (logging == null) {
       element.text = '';
     } else if (logging is UIElement) {
       element.classes.add('render');
@@ -292,6 +290,7 @@ class Repl {
       element.text = logging.toString() + (newline ? '\n' : '');
     }
     container.scrollTop = container.scrollHeight;
+    return null;
   }
 
   logElement(Element element) {

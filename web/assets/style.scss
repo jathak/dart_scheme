@@ -33,7 +33,6 @@ body {
   z-index:200;
   font-size: 0.92em;
   font-family:$font-stack;
-  pointer-events: none;
   @include text;
 }
 
@@ -89,7 +88,7 @@ body {
   @include background;
   @include text;
 
-  a {
+  a:not(.button){
     @include link;
   }
 

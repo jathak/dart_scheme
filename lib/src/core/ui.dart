@@ -6,7 +6,9 @@ import 'dart:async';
 
 import 'expressions.dart';
 import 'logging.dart';
+import 'procedures.dart' show Procedure;
 import 'serialization.dart';
+import 'utils.dart' show schemeApply;
 
 class Direction extends SelfEvaluating {
   final String _id;
@@ -52,6 +54,7 @@ abstract class UIElement extends SelfEvaluating implements Serializable {
   Map<Direction, Anchor> _anchors = {};
   Anchor anchor(Direction dir) => _anchors.putIfAbsent(dir, () => new Anchor());
   Iterable<Direction> get anchoredDirections => _anchors.keys;
+  toString() => '#[UIElement]';
   // If true, element should be invisible but take up the same amount of space.
   bool spacer = false;
   // Elements should call this when their contents update and they need to be
@@ -102,7 +105,7 @@ class Anchor extends UIElement {
 class TextElement extends UIElement {
   final String text;
   TextElement(this.text);
-  toString() => "#[TextElement:$text]";
+  toString() => text;
 
   Map serialize() => finishSerialize({
         'type': 'TextElement',
@@ -113,8 +116,32 @@ class TextElement extends UIElement {
   }
 }
 
+class MarkdownElement extends TextElement {
+  bool inline;
+
+  Frame env;
+
+  MarkdownElement(String text, {this.inline: true, this.env}) : super(text);
+
+  void runLink(String name) {
+    if (env == null) return;
+    var proc = env.lookup(new SchemeSymbol.runtime(name));
+    if (proc is Procedure) {
+      schemeApply(proc, nil, env);
+    }
+  }
+
+  Map serialize() => {'type': 'MarkdownElement', 'text': text};
+
+  MarkdownElement deserialize(Map data) {
+    return new MarkdownElement(data['text']);
+  }
+}
+
 class Strike extends UIElement {
   Strike();
+
+  toString() => "#[Strike]";
 
   Map serialize() => finishSerialize({'type': 'Strike'});
   Strike deserialize(Map data) {
