@@ -216,9 +216,8 @@ class Repl {
       await delay(100);
       input.innerHtml = highlight(input.text);
     } else if ((missingParens ?? 0) > 0 &&
-        event.keyCode == KeyCode.ENTER &&
+        KeyCode.ENTER == event.keyCode &&
         endOfLine()) {
-      //TODO: Replace highlightAtEnd
       //TODO: Maybe add a primitive to turn autoindent off?
       event.preventDefault();
       String newInput = input.text;
@@ -350,9 +349,17 @@ class Repl {
 
   bool endOfLine() {
     Range curr = window.getSelection().getRangeAt(0);
-    Node lastNode = activeInput.childNodes.last;
-    while (lastNode.nodeType != 3) lastNode = lastNode.firstChild;
+    Node lastNode;
+    for (lastNode in activeInput.childNodes.reversed) {
+      if (!lastNode.text.contains(new RegExp(r"^[\n]+$"))) {
+        break;
+      }
+    }
+    while (lastNode.nodeType != Node.TEXT_NODE) lastNode = lastNode.lastChild;
     Range range = new Range()..selectNodeContents(lastNode);
-    return (curr.compareBoundaryPoints(Range.END_TO_END, range) == 0);
+    int index = lastNode.text.length - 1;
+    while (index >= 0 && lastNode.text[index] == "\n") index -= 1;
+    return curr.endContainer == range.endContainer &&
+        curr.endOffset == (index + 1);
   }
 }
