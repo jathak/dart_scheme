@@ -20,6 +20,12 @@ class Repl {
   List<String> history = [];
   int historyIndex = -1;
 
+  List<SchemeSymbol> noIndent = [
+    new SchemeSymbol("let"),
+    new SchemeSymbol("("),
+    new SchemeSymbol("define")
+  ];
+
   Repl(this.interpreter, Element parent) {
     if (window.localStorage.containsKey('#repl-history')) {
       var decoded = json.decode(window.localStorage['#repl-history']);
@@ -64,6 +70,7 @@ class Repl {
   }
 
   bool autodraw = false;
+  bool autoindent = true;
 
   addPrimitives() {
     var env = interpreter.globalEnv;
@@ -84,6 +91,18 @@ class Repl {
     addPrimitive(env, const SchemeSymbol('disable-autodraw'), (_a, _b) {
       logText('Autodraw disabled');
       autodraw = false;
+      return undefined;
+    }, 0);
+    addPrimitive(env, const SchemeSymbol('autoindent'), (_a, _b) {
+      logText(
+          'When enter is pressed at the end of a line, the next line will be indented to line up with the parentheses\n'
+          '(disable-autoindent) to disable\n');
+      autoindent = true;
+      return undefined;
+    }, 0);
+    addPrimitive(env, const SchemeSymbol('disable-autoindent'), (_a, _b) {
+      logText('Autoindent disabled');
+      autoindent = false;
       return undefined;
     }, 0);
   }
@@ -215,16 +234,16 @@ class Repl {
       runActiveCode();
       await delay(100);
       input.innerHtml = highlight(input.text);
-    } else if ((missingParens ?? 0) > 0 &&
+    } else if (autoindent &&
+        (missingParens ?? 0) > 0 &&
         KeyCode.ENTER == event.keyCode &&
         endOfLine()) {
-      //TODO: Maybe add a primitive to turn autoindent off?
       event.preventDefault();
       String newInput = input.text;
       if (newInput[newInput.length - 1] == "\n") {
         newInput = newInput.substring(0, newInput.length - 1);
       }
-      input.text = newInput + "\n" + " " * (spaceCount(newInput) + 1);
+      input.text = newInput + "\n" + " " * countSpace(newInput);
       highlightAtEnd(input, input.text);
     } else {
       await delay(5);
@@ -322,14 +341,13 @@ class Repl {
     return new Future.delayed(new Duration(milliseconds: milliseconds));
   }
 
-  int spaceCount(String inputText) {
+  int countSpace(String inputText) {
     List<String> splitLines = inputText.split("\n");
     String refLine;
     int totalMissingCount = 0;
-    for (String line in splitLines.reversed) {
-      totalMissingCount += countParens(line);
+    for (refLine in splitLines.reversed) {
+      totalMissingCount += countParens(refLine);
       if (totalMissingCount >= 1) {
-        refLine = line;
         break;
       }
     }
@@ -339,12 +357,23 @@ class Repl {
       int nextOpen = refLine.indexOf("(", strIndex + 1);
       if (totalMissingCount > 1) {
         totalMissingCount -= 1;
-      } else if (nextOpen == -1 || nextClose == -1 || (nextOpen < nextClose)) {
-        break;
+      } else if (nextOpen == -1 || nextOpen < nextClose) {
+        Iterable<Expression> tokens = tokenizeLine(refLine.substring(strIndex));
+        Expression symbol = tokens.elementAt(1);
+        if (noIndent.contains(symbol)) {
+          return strIndex + 1;
+        } else if (nextOpen == -1 && tokens.length > 2) {
+          return refLine.indexOf(tokens.elementAt(2).toString(), strIndex);
+        } else if (nextOpen == -1) {
+          return strIndex + 1;
+        } else {
+          return nextOpen;
+        }
+      } else if (nextClose == -1) {
+        return strIndex + 1;
       }
       strIndex = nextOpen;
     }
-    return strIndex;
   }
 
   bool endOfLine() {
