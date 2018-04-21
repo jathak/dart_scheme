@@ -23,7 +23,8 @@ class Repl {
   List<SchemeSymbol> noIndent = [
     new SchemeSymbol("let"),
     new SchemeSymbol("("),
-    new SchemeSymbol("define")
+    new SchemeSymbol("define"),
+    new SchemeSymbol("lambda")
   ];
 
   Repl(this.interpreter, Element parent) {
@@ -70,7 +71,7 @@ class Repl {
   }
 
   bool autodraw = false;
-  bool autoindent = true;
+  bool autoindent = false;
 
   addPrimitives() {
     var env = interpreter.globalEnv;
@@ -89,7 +90,7 @@ class Repl {
       return undefined;
     }, 0);
     addPrimitive(env, const SchemeSymbol('disable-autodraw'), (_a, _b) {
-      logText('Autodraw disabled');
+      logText('Autodraw disabled\n');
       autodraw = false;
       return undefined;
     }, 0);
@@ -101,7 +102,7 @@ class Repl {
       return undefined;
     }, 0);
     addPrimitive(env, const SchemeSymbol('disable-autoindent'), (_a, _b) {
-      logText('Autoindent disabled');
+      logText('Autoindent disabled\n');
       autoindent = false;
       return undefined;
     }, 0);
@@ -359,15 +360,16 @@ class Repl {
         totalMissingCount -= 1;
       } else if (nextOpen == -1 || nextOpen < nextClose) {
         Iterable<Expression> tokens = tokenizeLine(refLine.substring(strIndex));
+        if (tokens.length == 1) {
+          return strIndex + 1;
+        }
         Expression symbol = tokens.elementAt(1);
         if (noIndent.contains(symbol)) {
           return strIndex + 1;
-        } else if (nextOpen == -1 && tokens.length > 2) {
-          return refLine.indexOf(tokens.elementAt(2).toString(), strIndex);
+        } else if (tokens.length > 2) {
+          return refLine.indexOf(tokens.elementAt(2).toString(), strIndex + 1);
         } else if (nextOpen == -1) {
           return strIndex + 1;
-        } else {
-          return nextOpen;
         }
       } else if (nextClose == -1) {
         return strIndex + 1;
