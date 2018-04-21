@@ -1,3 +1,6 @@
+; CalDay 2018 Demo
+; Go to scheme.cs61a.org to run this code on your own computer
+
 (define (hax-mod d k lst)
     (color (car lst))
     (begin_fill)
