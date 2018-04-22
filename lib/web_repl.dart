@@ -353,16 +353,13 @@ class Repl {
       }
     }
     int strIndex = refLine.indexOf("(");
-    while (strIndex < refLine.length) {
+    while (strIndex < (refLine.length - 1)) {
       int nextClose = refLine.indexOf(")", strIndex + 1);
       int nextOpen = refLine.indexOf("(", strIndex + 1);
       if (totalMissingCount > 1) {
         totalMissingCount -= 1;
       } else if (nextOpen == -1 || nextOpen < nextClose) {
         Iterable<Expression> tokens = tokenizeLine(refLine.substring(strIndex));
-        if (tokens.length == 1) {
-          return strIndex + 1;
-        }
         Expression symbol = tokens.elementAt(1);
         if (noIndent.contains(symbol)) {
           return strIndex + 1;
@@ -376,6 +373,7 @@ class Repl {
       }
       strIndex = nextOpen;
     }
+    return strIndex += 1;
   }
 
   bool endOfLine() {
