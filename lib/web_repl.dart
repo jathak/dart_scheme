@@ -21,10 +21,10 @@ class Repl {
   int historyIndex = -1;
 
   List<SchemeSymbol> noIndent = [
-    new SchemeSymbol("let"),
-    new SchemeSymbol("("),
-    new SchemeSymbol("define"),
-    new SchemeSymbol("lambda")
+    const SchemeSymbol("let"),
+    const SchemeSymbol("("),
+    const SchemeSymbol("define"),
+    const SchemeSymbol("lambda")
   ];
 
   Repl(this.interpreter, Element parent) {
@@ -71,7 +71,6 @@ class Repl {
   }
 
   bool autodraw = false;
-  bool autoindent = false;
 
   addPrimitives() {
     var env = interpreter.globalEnv;
@@ -92,18 +91,6 @@ class Repl {
     addPrimitive(env, const SchemeSymbol('disable-autodraw'), (_a, _b) {
       logText('Autodraw disabled\n');
       autodraw = false;
-      return undefined;
-    }, 0);
-    addPrimitive(env, const SchemeSymbol('autoindent'), (_a, _b) {
-      logText(
-          'When enter is pressed at the end of a line, the next line will be indented to line up with the parentheses\n'
-          '(disable-autoindent) to disable\n');
-      autoindent = true;
-      return undefined;
-    }, 0);
-    addPrimitive(env, const SchemeSymbol('disable-autoindent'), (_a, _b) {
-      logText('Autoindent disabled\n');
-      autoindent = false;
       return undefined;
     }, 0);
   }
@@ -209,8 +196,12 @@ class Repl {
 
   keyListener(KeyboardEvent event) async {
     int code = event.keyCode;
-    if (code == KeyCode.BACKSPACE ||
-        (event.ctrlKey && (code == KeyCode.V || code == KeyCode.X))) {
+    if (code == KeyCode.BACKSPACE) {
+      //this should be changed to call highlightSaveCursor
+      //once the bug with newlines is fixed
+      await delay(0);
+      updateInputStatus();
+    } else if (event.ctrlKey && (code == KeyCode.V || code == KeyCode.X)) {
       await delay(0);
       updateInputStatus();
       highlightSaveCursor(activeInput);
@@ -235,13 +226,12 @@ class Repl {
       runActiveCode();
       await delay(100);
       input.innerHtml = highlight(input.text);
-    } else if (autoindent &&
-        (missingParens ?? 0) > 0 &&
+    } else if ((missingParens ?? 0) > 0 &&
         KeyCode.ENTER == event.keyCode &&
         endOfLine()) {
       event.preventDefault();
       String newInput = input.text;
-      if (newInput[newInput.length - 1] == "\n") {
+      if (newInput.endsWith("\n")) {
         newInput = newInput.substring(0, newInput.length - 1);
       }
       input.text = newInput + "\n" + " " * countSpace(newInput);
@@ -342,53 +332,61 @@ class Repl {
     return new Future.delayed(new Duration(milliseconds: milliseconds));
   }
 
+  ///Returns how many spaces the next line must be indented based
+  ///on the line with the last open parentheses
   int countSpace(String inputText) {
     List<String> splitLines = inputText.split("\n");
     String refLine;
     int totalMissingCount = 0;
     for (refLine in splitLines.reversed) {
       totalMissingCount += countParens(refLine);
-      if (totalMissingCount >= 1) {
-        break;
-      }
+      //find the first line where there exists an open parens
+      //with no closed parens
+      if (totalMissingCount >= 1) break;
     }
     int strIndex = refLine.indexOf("(");
     while (strIndex < (refLine.length - 1)) {
       int nextClose = refLine.indexOf(")", strIndex + 1);
       int nextOpen = refLine.indexOf("(", strIndex + 1);
+      //find the location of the open parens that
+      //corresponds to the missing closed parnes
       if (totalMissingCount > 1) {
         totalMissingCount -= 1;
       } else if (nextOpen == -1 || nextOpen < nextClose) {
         Iterable<Expression> tokens = tokenizeLine(refLine.substring(strIndex));
         Expression symbol = tokens.elementAt(1);
+        //decide whether to align with subexpressions if they exist
+        //otherwise indent by two spaces
         if (noIndent.contains(symbol)) {
-          return strIndex + 1;
+          return strIndex + 2;
         } else if (tokens.length > 2) {
           return refLine.indexOf(tokens.elementAt(2).toString(), strIndex + 1);
         } else if (nextOpen == -1) {
-          return strIndex + 1;
+          return strIndex + 2;
         }
       } else if (nextClose == -1) {
-        return strIndex + 1;
+        return strIndex + 2;
       }
       strIndex = nextOpen;
     }
-    return strIndex += 1;
+    return strIndex + 2;
   }
 
+  ///determines whether the cursor is at the end of the input
   bool endOfLine() {
-    Range curr = window.getSelection().getRangeAt(0);
     Node lastNode;
+    //find the last node that contains text and ignore any newline characters
     for (lastNode in activeInput.childNodes.reversed) {
-      if (!lastNode.text.contains(new RegExp(r"^[\n]+$"))) {
-        break;
-      }
+      if (!lastNode.text.contains(new RegExp(r"^[\n]+$"))) break;
     }
-    while (lastNode.nodeType != Node.TEXT_NODE) lastNode = lastNode.lastChild;
-    Range range = new Range()..selectNodeContents(lastNode);
+    while (lastNode.nodeType != Node.TEXT_NODE) {
+      lastNode = lastNode.lastChild;
+    }
     int index = lastNode.text.length - 1;
-    while (index >= 0 && lastNode.text[index] == "\n") index -= 1;
-    return curr.endContainer == range.endContainer &&
-        curr.endOffset == (index + 1);
+    while (index >= 0 && lastNode.text[index] == "\n") {
+      index -= 1;
+    }
+    Range curr = window.getSelection().getRangeAt(0);
+    return curr.endContainer == lastNode && curr.endOffset == (index + 1);
   }
 }
