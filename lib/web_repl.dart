@@ -22,7 +22,6 @@ class Repl {
 
   List<SchemeSymbol> noIndent = [
     const SchemeSymbol("let"),
-    const SchemeSymbol("("),
     const SchemeSymbol("define"),
     const SchemeSymbol("lambda")
   ];
@@ -357,7 +356,9 @@ class Repl {
         Expression symbol = tokens.elementAt(1);
         //decide whether to align with subexpressions if they exist
         //otherwise indent by two spaces
-        if (noIndent.contains(symbol)) {
+        if (symbol == const SchemeSymbol("(")) {
+          return strIndex + 1;
+        } else if (noIndent.contains(symbol)) {
           return strIndex + 2;
         } else if (tokens.length > 2) {
           return refLine.indexOf(tokens.elementAt(2).toString(), strIndex + 1);
@@ -377,7 +378,8 @@ class Repl {
     Node lastNode;
     //find the last node that contains text and ignore any newline characters
     for (lastNode in activeInput.childNodes.reversed) {
-      if (!lastNode.text.contains(new RegExp(r"^[\n]+$"))) break;
+      if (!lastNode.text.isEmpty &&
+          !lastNode.text.contains(new RegExp(r"^[\n]+$"))) break;
     }
     while (lastNode.nodeType != Node.TEXT_NODE) {
       lastNode = lastNode.lastChild;
