@@ -375,20 +375,31 @@ class Repl {
 
   ///determines whether the cursor is at the end of the input
   bool endOfLine() {
-    Node lastNode;
+    Node lastNode = activeInput.lastChild;
     //find the last node that contains text and ignore any newline characters
     for (lastNode in activeInput.childNodes.reversed) {
       if (!lastNode.text.isEmpty &&
           !lastNode.text.contains(new RegExp(r"^[\n]+$"))) break;
     }
-    while (lastNode.nodeType != Node.TEXT_NODE) {
+    Range range = window.getSelection().getRangeAt(0);
+    Node curr = range.startContainer;
+    int currOffset = range.startOffset;
+
+    //this is needed due to how break elements work in google chrome
+    while (lastNode.hasChildNodes()) {
       lastNode = lastNode.lastChild;
     }
-    int index = lastNode.text.length - 1;
-    while (index >= 0 && lastNode.text[index] == "\n") {
+
+    while (curr.hasChildNodes()) {
+      curr = curr.lastChild;
+      currOffset = curr.text.length;
+    }
+
+    int index = lastNode.text.length;
+    while (index > 0 && lastNode.text[index - 1] == "\n") {
       index -= 1;
     }
-    Range curr = window.getSelection().getRangeAt(0);
-    return curr.endContainer == lastNode && curr.endOffset == (index + 1);
+
+    return curr == lastNode && currOffset == index;
   }
 }
