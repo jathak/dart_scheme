@@ -393,22 +393,18 @@ class Repl {
     Range range = window.getSelection().getRangeAt(0);
     Node curr = range.startContainer;
     int currOffset = range.startOffset;
-    //breakElement is needed because range.startOffset does not count the new line
+    //usingLength is needed because range.startOffset does not count the new line
     //characters while curr.text.length does
-    bool breakElement = false;
+    bool usingLength = false;
     //Ensure the curr is not the break element
     for (curr in range.startContainer.childNodes.reversed) {
-      breakElement = true;
+      usingLength = true;
       if (!curr.text.isEmpty && !curr.text.contains(new RegExp(r"^[\n]+$"))) {
         currOffset = curr.text.length;
         break;
       }
     }
-    while (curr.hasChildNodes()) {
-      curr = curr.lastChild;
-    }
-    while (
-        breakElement && currOffset > 0 && curr.text[currOffset - 1] == "\n") {
+    while (usingLength && currOffset > 0 && curr.text[currOffset - 1] == "\n") {
       currOffset -= 1;
     }
     return curr == lastNode && currOffset == index;
