@@ -375,44 +375,21 @@ class Repl {
 
   ///determines whether the cursor is at the end of the input
   bool endOfLine() {
-<<<<<<< HEAD
     Node lastNode;
     //find the last node that contains text(not a break element) and ignore any newline characters
-=======
-    Node lastNode = activeInput.lastChild;
-    //find the last node that contains text and ignore any newline characters
->>>>>>> d5dec4abc8563f34381329ad101c61bb9a4c7472
     for (lastNode in activeInput.childNodes.reversed) {
       if (!lastNode.text.isEmpty &&
           !lastNode.text.contains(new RegExp(r"^[\n]+$"))) break;
     }
-<<<<<<< HEAD
     //if lastNode is a span element, find the last text element
     while (lastNode.hasChildNodes()) {
       lastNode = lastNode.lastChild;
     }
-=======
-    Range range = window.getSelection().getRangeAt(0);
-    Node curr = range.startContainer;
-    int currOffset = range.startOffset;
-
-    //this is needed due to how break elements work in google chrome
-    while (lastNode.hasChildNodes()) {
-      lastNode = lastNode.lastChild;
-    }
-
-    while (curr.hasChildNodes()) {
-      curr = curr.lastChild;
-      currOffset = curr.text.length;
-    }
-
->>>>>>> d5dec4abc8563f34381329ad101c61bb9a4c7472
     int index = lastNode.text.length;
     while (index > 0 && lastNode.text[index - 1] == "\n") {
       index -= 1;
     }
 
-<<<<<<< HEAD
     Range range = window.getSelection().getRangeAt(0);
     Node curr = range.startContainer;
     int currOffset = range.startOffset;
@@ -434,8 +411,6 @@ class Repl {
         breakElement && currOffset > 0 && curr.text[currOffset - 1] == "\n") {
       currOffset -= 1;
     }
-=======
->>>>>>> d5dec4abc8563f34381329ad101c61bb9a4c7472
     return curr == lastNode && currOffset == index;
   }
 }
