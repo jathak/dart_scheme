@@ -376,19 +376,37 @@ class Repl {
   ///determines whether the cursor is at the end of the input
   bool endOfLine() {
     Node lastNode;
-    //find the last node that contains text and ignore any newline characters
+    //find the last node that contains text(not a break element) and ignore any newline characters
     for (lastNode in activeInput.childNodes.reversed) {
       if (!lastNode.text.isEmpty &&
           !lastNode.text.contains(new RegExp(r"^[\n]+$"))) break;
     }
-    while (lastNode.nodeType != Node.TEXT_NODE) {
+    //if lastNode is a span element, find the last text element
+    while (lastNode.hasChildNodes()) {
       lastNode = lastNode.lastChild;
     }
-    int index = lastNode.text.length - 1;
-    while (index >= 0 && lastNode.text[index] == "\n") {
+    int index = lastNode.text.length;
+    while (index > 0 && lastNode.text[index - 1] == "\n") {
       index -= 1;
     }
-    Range curr = window.getSelection().getRangeAt(0);
-    return curr.endContainer == lastNode && curr.endOffset == (index + 1);
+
+    Range range = window.getSelection().getRangeAt(0);
+    Node curr = range.startContainer;
+    int currOffset = range.startOffset;
+    //usingLength is needed because range.startOffset does not count the new line
+    //characters while curr.text.length does
+    bool usingLength = false;
+    //Ensure the curr is not the break element
+    for (curr in range.startContainer.childNodes.reversed) {
+      usingLength = true;
+      if (!curr.text.isEmpty && !curr.text.contains(new RegExp(r"^[\n]+$"))) {
+        currOffset = curr.text.length;
+        break;
+      }
+    }
+    while (usingLength && currOffset > 0 && curr.text[currOffset - 1] == "\n") {
+      currOffset -= 1;
+    }
+    return curr == lastNode && currOffset == index;
   }
 }
