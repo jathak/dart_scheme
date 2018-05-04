@@ -236,7 +236,7 @@ class Repl {
       if (cursor != newInput.length) {
         second = newInput.substring(cursor);
       }
-      int spaces = countSpace(newInput);
+      int spaces = countSpace(newInput, cursor);
       input.text = first + " " * spaces + second;
       highlightCustomCursor(input, cursor + spaces + 1);
     } else {
@@ -337,15 +337,23 @@ class Repl {
 
   ///Returns how many spaces the next line must be indented based
   ///on the line with the last open parentheses
-  int countSpace(String inputText) {
+  int countSpace(String inputText, int position) {
     List<String> splitLines = inputText.split("\n");
+    //if the cursor is at the end of a line but not at the end of the whole input
+    //must find that line and start counting parens from there on
+    int firstLine = inputText.length - position;
     String refLine;
     int totalMissingCount = 0;
     for (refLine in splitLines.reversed) {
-      totalMissingCount += countParens(refLine);
-      //find the first line where there exists an open parens
-      //with no closed parens
-      if (totalMissingCount >= 1) break;
+      if (firstLine > refLine.length) {
+        firstLine -= refLine.length;
+      } else {
+        firstLine = -1;
+        totalMissingCount += countParens(refLine);
+        //find the first line where there exists an open parens
+        //with no closed parens
+        if (totalMissingCount >= 1) break;
+      }
     }
     int strIndex = refLine.indexOf("(");
     while (strIndex < (refLine.length - 1)) {
