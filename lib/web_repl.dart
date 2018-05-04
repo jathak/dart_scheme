@@ -229,11 +229,14 @@ class Repl {
         KeyCode.ENTER == event.keyCode &&
         endOfLine()) {
       event.preventDefault();
+      int cursor = currPosition();
       String newInput = input.text;
-      if (newInput.endsWith("\n")) {
-        newInput = newInput.substring(0, newInput.length - 1);
+      String first = newInput.substring(0, cursor) + "\n";
+      String second = "";
+      if (cursor != newInput.length) {
+        second = newInput.substring(cursor);
       }
-      input.text = newInput + "\n" + " " * countSpace(newInput);
+      input.text = first + " " * countSpace(newInput) + second;
       highlightAtEnd(input, input.text);
     } else {
       await delay(5);
@@ -375,6 +378,7 @@ class Repl {
 
   ///determines whether the cursor is at the end of the input
   bool endOfLine() {
+    /*
     Node lastNode;
     //find the last node that contains text(not a break element) and ignore any newline characters
     for (lastNode in activeInput.childNodes.reversed) {
@@ -408,5 +412,13 @@ class Repl {
       currOffset -= 1;
     }
     return curr == lastNode && currOffset == index;
+    */
+    String input = activeInput.text;
+    int cursor = currPosition();
+    return cursor == input.length || input[cursor] == "\n";
+  }
+
+  int currPosition() {
+    return findPosition(activeInput, window.getSelection().getRangeAt(0));
   }
 }

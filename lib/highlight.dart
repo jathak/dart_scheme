@@ -25,7 +25,7 @@ Future highlightSaveCursor(Element input) async {
   String text = input.text;
   Selection selection = window.getSelection();
   Range last = selection.getRangeAt(0);
-  int position = _findPosition(input, last);
+  int position = findPosition(input, last);
   String styled = highlight(text);
   input.innerHtml = styled;
   Range range = _makeRange(input, position);
@@ -33,9 +33,13 @@ Future highlightSaveCursor(Element input) async {
   selection.addRange(range);
 }
 
-int _findPosition(Element input, Range range) {
+int findPosition(Element input, Range range) {
   int offset = range.startOffset;
   Node needle = range.startContainer;
+  while (needle.hasChildNodes()) {
+    needle = needle.lastChild;
+    offset = needle.text.length;
+  }
   bool found = false;
   int countUntil(Node current) {
     if (current == needle) {
