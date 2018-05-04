@@ -236,8 +236,9 @@ class Repl {
       if (cursor != newInput.length) {
         second = newInput.substring(cursor);
       }
-      input.text = first + " " * countSpace(newInput) + second;
-      highlightAtEnd(input, input.text);
+      int spaces = countSpace(newInput);
+      input.text = first + " " * spaces + second;
+      highlightCustomCursor(input, cursor + spaces + 1);
     } else {
       await delay(5);
       highlightSaveCursor(input);
