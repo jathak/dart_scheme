@@ -33,6 +33,16 @@ Future highlightSaveCursor(Element input) async {
   selection.addRange(range);
 }
 
+Future highlightCustomCursor(Element input, int position) async {
+  String text = input.text;
+  Selection selection = window.getSelection();
+  String styled = highlight(text);
+  input.innerHtml = styled;
+  Range range = _makeRange(input, position);
+  selection.removeAllRanges();
+  selection.addRange(range);
+}
+
 int findPosition(Element input, Range range) {
   int offset = range.startOffset;
   Node needle = range.startContainer;
