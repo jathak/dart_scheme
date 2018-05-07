@@ -229,12 +229,16 @@ class Repl {
         KeyCode.ENTER == event.keyCode &&
         endOfLine()) {
       event.preventDefault();
+      int cursor = currPosition();
       String newInput = input.text;
-      if (newInput.endsWith("\n")) {
-        newInput = newInput.substring(0, newInput.length - 1);
+      String first = newInput.substring(0, cursor) + "\n";
+      String second = "";
+      if (cursor != newInput.length) {
+        second = newInput.substring(cursor);
       }
-      input.text = newInput + "\n" + " " * countSpace(newInput);
-      highlightAtEnd(input, input.text);
+      int spaces = countSpace(newInput, cursor);
+      input.text = first + " " * spaces + second;
+      highlightCustomCursor(input, cursor + spaces + 1);
     } else {
       await delay(5);
       highlightSaveCursor(input);
@@ -333,15 +337,23 @@ class Repl {
 
   ///Returns how many spaces the next line must be indented based
   ///on the line with the last open parentheses
-  int countSpace(String inputText) {
+  int countSpace(String inputText, int position) {
     List<String> splitLines = inputText.split("\n");
+    //if the cursor is at the end of a line but not at the end of the whole input
+    //must find that line and start counting parens from there on
+    int firstLine = inputText.length - position;
     String refLine;
     int totalMissingCount = 0;
     for (refLine in splitLines.reversed) {
-      totalMissingCount += countParens(refLine);
-      //find the first line where there exists an open parens
-      //with no closed parens
-      if (totalMissingCount >= 1) break;
+      if (firstLine > refLine.length) {
+        firstLine -= refLine.length;
+      } else {
+        firstLine = -1;
+        totalMissingCount += countParens(refLine);
+        //find the first line where there exists an open parens
+        //with no closed parens
+        if (totalMissingCount >= 1) break;
+      }
     }
     int strIndex = refLine.indexOf("(");
     while (strIndex < (refLine.length - 1)) {
@@ -373,40 +385,15 @@ class Repl {
     return strIndex + 2;
   }
 
-  ///determines whether the cursor is at the end of the input
+  ///determines whether the cursor is at the end of a line in the inp
   bool endOfLine() {
-    Node lastNode;
-    //find the last node that contains text(not a break element) and ignore any newline characters
-    for (lastNode in activeInput.childNodes.reversed) {
-      if (!lastNode.text.isEmpty &&
-          !lastNode.text.contains(new RegExp(r"^[\n]+$"))) break;
-    }
-    //if lastNode is a span element, find the last text element
-    while (lastNode.hasChildNodes()) {
-      lastNode = lastNode.lastChild;
-    }
-    int index = lastNode.text.length;
-    while (index > 0 && lastNode.text[index - 1] == "\n") {
-      index -= 1;
-    }
+    String input = activeInput.text;
+    int cursor = currPosition();
+    return cursor == input.length || input[cursor] == "\n";
+  }
 
-    Range range = window.getSelection().getRangeAt(0);
-    Node curr = range.startContainer;
-    int currOffset = range.startOffset;
-    //usingLength is needed because range.startOffset does not count the new line
-    //characters while curr.text.length does
-    bool usingLength = false;
-    //Ensure the curr is not the break element
-    for (curr in range.startContainer.childNodes.reversed) {
-      usingLength = true;
-      if (!curr.text.isEmpty && !curr.text.contains(new RegExp(r"^[\n]+$"))) {
-        currOffset = curr.text.length;
-        break;
-      }
-    }
-    while (usingLength && currOffset > 0 && curr.text[currOffset - 1] == "\n") {
-      currOffset -= 1;
-    }
-    return curr == lastNode && currOffset == index;
+  ///returns the location in the input string where the cursor is
+  int currPosition() {
+    return findPosition(activeInput, window.getSelection().getRangeAt(0));
   }
 }
