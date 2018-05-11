@@ -65,6 +65,8 @@ class Variable extends SelfEvaluating {
   }
 
   toString() => '?$value${tag ?? ""}';
+
+  String toProlog() => 'V_' + value.replaceAll('-', '_');
 }
 
 class _Negation extends SelfEvaluating {
@@ -84,6 +86,45 @@ class Fact extends SelfEvaluating {
       [Iterable<Expression> hypotheses, int tag]) {
     return new Fact._(Variable.convert(conclusion, tag) as Pair,
         (hypotheses ?? []).map((h) => Variable.convert(h, tag) as Pair));
+  }
+
+  String toProlog() {
+    var prologConclusion = _relationToProlog(conclusion);
+    if (hypotheses.isEmpty) {
+      return '$prologConclusion.';
+    } else {
+      var prologHypotheses = hypotheses.map(_relationToProlog).join(',\n  ');
+      return '$prologConclusion :-\n  $prologHypotheses.';
+    }
+  }
+
+  static String _relationToProlog(Pair p) {
+    if (p.first == not) {
+      return '\\+ ' + _exprToProlog(p.second);
+    }
+    return '${_exprToProlog(p.first)}(${_exprToProlog(p.second)})';
+  }
+
+  static String _exprToProlog(Expression expr, [bool inPair = false]) {
+    if (expr is Pair) {
+      var first = _exprToProlog(expr.first);
+      var second = _exprToProlog(expr.second, true);
+      var inner = '$first|$second';
+      if (expr.second is Pair) inner = '$first, $second';
+      if (expr.second == nil) inner = '$first';
+      return inPair ? inner : '[$inner]';
+    } else if (expr is Variable) {
+      return expr.toProlog();
+    } else if (expr == nil) {
+      if (inPair) return '';
+      return '[]';
+    } else {
+      var converted = expr.toString().replaceAll('-', '_');
+      if (new RegExp(r'^[a-z]\w*$').hasMatch(converted)) {
+        return converted;
+      }
+      return "'$expr'";
+    }
   }
 }
 

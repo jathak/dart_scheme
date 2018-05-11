@@ -5,6 +5,7 @@ abstract class _$LogicLibraryMixin {
   void fact(List<Expression> exprs, Frame env);
   void query(List<Expression> exprs, Frame env);
   void queryOne(List<Expression> exprs, Frame env);
+  String prolog(Frame env);
   void importAll(Frame __env) {
     addPrimitive(__env, const SchemeSymbol('logic'), (__exprs, __env) {
       var __value = undefined;
@@ -35,5 +36,8 @@ abstract class _$LogicLibraryMixin {
       this.queryOne(__exprs, __env);
       return __value;
     }, 0, -1);
+    addPrimitive(__env, const SchemeSymbol('prolog'), (__exprs, __env) {
+      return new SchemeString(this.prolog(__env));
+    }, 0);
   }
 }

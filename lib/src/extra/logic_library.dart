@@ -65,4 +65,9 @@ class LogicLibrary extends SchemeLibrary with _$LogicLibraryMixin {
     }
     return null;
   }
+
+  @SchemeSymbol('prolog')
+  String prolog(Frame env) {
+    return facts[env].map((f) => f.toProlog()).join('\n') + '\n';
+  }
 }
