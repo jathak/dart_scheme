@@ -225,9 +225,7 @@ class Repl {
       runActiveCode();
       await delay(100);
       input.innerHtml = highlight(input.text);
-    } else if ((missingParens ?? 0) > 0 &&
-        KeyCode.ENTER == event.keyCode &&
-        endOfLine()) {
+    } else if ((missingParens ?? 0) > 0 && KeyCode.ENTER == event.keyCode) {
       event.preventDefault();
       int cursor = currPosition();
       String newInput = input.text;
@@ -338,22 +336,20 @@ class Repl {
   ///Returns how many spaces the next line must be indented based
   ///on the line with the last open parentheses
   int countSpace(String inputText, int position) {
-    List<String> splitLines = inputText.split("\n");
+    List<String> splitLines = inputText.substring(0, position).split("\n");
     //if the cursor is at the end of a line but not at the end of the whole input
     //must find that line and start counting parens from there on
-    int firstLine = inputText.length - position;
     String refLine;
     int totalMissingCount = 0;
     for (refLine in splitLines.reversed) {
-      if (firstLine > refLine.length) {
-        firstLine -= refLine.length;
-      } else {
-        firstLine = -1;
-        totalMissingCount += countParens(refLine);
-        //find the first line where there exists an open parens
-        //with no closed parens
-        if (totalMissingCount >= 1) break;
-      }
+      //if the cursor is in the middle of the line, truncate to the position of the cursor
+      totalMissingCount += countParens(refLine);
+      //find the first line where there exists an open parens
+      //with no closed parens
+      if (totalMissingCount >= 1) break;
+    }
+    if (totalMissingCount == 0) {
+      return 0;
     }
     int strIndex = refLine.indexOf("(");
     while (strIndex < (refLine.length - 1)) {
