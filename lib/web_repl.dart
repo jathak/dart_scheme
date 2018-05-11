@@ -227,14 +227,14 @@ class Repl {
       input.innerHtml = highlight(input.text);
     } else if ((missingParens ?? 0) > 0 && KeyCode.ENTER == event.keyCode) {
       event.preventDefault();
-      int cursor = currPosition();
+      int cursor = _currPosition();
       String newInput = input.text;
       String first = newInput.substring(0, cursor) + "\n";
       String second = "";
       if (cursor != newInput.length) {
         second = newInput.substring(cursor);
       }
-      int spaces = countSpace(newInput, cursor);
+      int spaces = _countSpace(newInput, cursor);
       input.text = first + " " * spaces + second;
       highlightCustomCursor(input, cursor + spaces + 1);
     } else {
@@ -335,7 +335,7 @@ class Repl {
 
   ///Returns how many spaces the next line must be indented based
   ///on the line with the last open parentheses
-  int countSpace(String inputText, int position) {
+  int _countSpace(String inputText, int position) {
     List<String> splitLines = inputText.substring(0, position).split("\n");
     //if the cursor is at the end of a line but not at the end of the whole input
     //must find that line and start counting parens from there on
@@ -381,15 +381,8 @@ class Repl {
     return strIndex + 2;
   }
 
-  ///determines whether the cursor is at the end of a line in the inp
-  bool endOfLine() {
-    String input = activeInput.text;
-    int cursor = currPosition();
-    return cursor == input.length || input[cursor] == "\n";
-  }
-
   ///returns the location in the input string where the cursor is
-  int currPosition() {
+  int _currPosition() {
     return findPosition(activeInput, window.getSelection().getRangeAt(0));
   }
 }
