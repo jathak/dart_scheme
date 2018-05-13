@@ -52,4 +52,22 @@ class LogicLibrary extends SchemeLibrary with _$LogicLibraryMixin {
     if (!success) env.interpreter.logText('Failure.');
     return null;
   }
+
+  @SchemeSymbol('query-one')
+  @noeval
+  void queryOne(List<Expression> exprs, Frame env) {
+    var sols = logic.evaluate(new logic.Query(exprs), facts[env] ?? []);
+    if (sols.isNotEmpty) {
+      env.interpreter.logText('Success!');
+      env.interpreter.logger(sols.first, true);
+    } else {
+      env.interpreter.logText('Failure.');
+    }
+    return null;
+  }
+
+  @SchemeSymbol('prolog')
+  String prolog(Frame env) {
+    return facts[env].map((f) => f.toProlog()).join('\n') + '\n';
+  }
 }
