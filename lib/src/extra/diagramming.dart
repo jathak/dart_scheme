@@ -49,11 +49,13 @@ class FrameElement extends UIElement {
   int id;
   String tag;
   int parentId;
+  bool fromMacro;
   bool active = false;
   List<Binding> bindings = [];
   FrameElement(Frame frame, Diagram diagram, [Expression returnValue]) {
     id = frame.id;
     parentId = frame.parent?.id;
+    fromMacro = frame.fromMacro;
     tag = frame.tag;
     for (SchemeSymbol key in frame.bindings.keys) {
       if (frame.hidden[key]) continue;
@@ -69,7 +71,8 @@ class FrameElement extends UIElement {
     id = data['id'];
     tag = data['tag'];
     parentId = data['parentId'];
-    active = data['active'];
+    active = data['active'] ?? false;
+    fromMacro = data['fromMacro'] ?? false;
     bindings = data['bindings']?.map(Serialization.deserialize)?.toList();
   }
 
@@ -79,6 +82,7 @@ class FrameElement extends UIElement {
         'tag': tag,
         'parentId': parentId,
         'active': active,
+        'fromMacro': fromMacro,
         'bindings': bindings.map((el) => el.serialize()).toList()
       });
 

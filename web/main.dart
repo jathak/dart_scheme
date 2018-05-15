@@ -32,7 +32,7 @@ Shift+Enter to add missing parens and run the current input
 
 *Looking for the old version? """
     """[Interpreter](https://scheme-legacy.apps.cs61a.org) &mdash; """
-    """[Editor](https://scheme-legacy-apps.cs61a.org/editor.html)*
+    """[Editor](https://scheme-legacy.apps.cs61a.org/editor.html)*
 
 """;
 

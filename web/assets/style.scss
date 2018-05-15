@@ -93,7 +93,12 @@ body {
   }
 
   .repl-prompt {
+    vertical-align: top;
     @include prompt;
+  }
+
+  .repl-input {
+    display: inline-block;
   }
 
   .repl-async {

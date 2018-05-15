@@ -25,7 +25,7 @@ dev_dependencies:
   test: ^0.12.0
 
   # CLI REPL
-  cli_repl: ^0.0.1
+  cli_repl: ^0.1.1
 
   # Web app building
   sass_builder: ^1.0.0
