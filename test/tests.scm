@@ -935,6 +935,11 @@ b
       (dog (name ?gray-dog) (color gray)))
 ; expect Success!; a: fillmore	gray-dog: herbert; a: eisenhower	gray-dog: fillmore; a: eisenhower	gray-dog: herbert
 
+(query-one (ancestor ?a clinton)
+      (ancestor ?a ?gray-dog)
+      (dog (name ?gray-dog) (color gray)))
+; expect Success!; a: fillmore	gray-dog: herbert
+
 ;;; ***************************************************************************
 ;;; DO NOT ADD ANY TESTS AFTER THIS LINE!
 ;;; ***************************************************************************

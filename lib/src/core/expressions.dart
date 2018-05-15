@@ -424,6 +424,9 @@ class Frame extends SelfEvaluating {
   /// The global frame has id 0. All other frame are numbered sequentially.
   int id;
 
+  /// True if this frame was created by a MacroProcedure.
+  bool fromMacro = false;
+
   /// Mapping of symbols to values.
   Map<SchemeSymbol, Expression> bindings = {};
 

@@ -192,7 +192,11 @@ class HtmlRenderer {
     String name = frame.id == 0 ? 'Global frame' : 'f${frame.id}';
     String parent = "";
     if (frame.parentId != null && frame.parentId != 0) {
-      parent = '&nbsp;<span class="parent">[parent=f${frame.parentId}]</span>';
+      var m = frame.fromMacro ? 'macro, ' : '';
+      parent =
+          '&nbsp;<span class="parent">[${m}parent=f${frame.parentId}]</span>';
+    } else if (frame.fromMacro) {
+      parent = '&nbsp;<span class="parent">[macro]</span>';
     }
     header.innerHtml = '<b>$name</b>&nbsp;${frame.tag ?? ''}$parent';
     div.append(header);

@@ -20,6 +20,12 @@ class Repl {
   List<String> history = [];
   int historyIndex = -1;
 
+  List<SchemeSymbol> noIndent = [
+    const SchemeSymbol("let"),
+    const SchemeSymbol("define"),
+    const SchemeSymbol("lambda")
+  ];
+
   Repl(this.interpreter, Element parent) {
     if (window.localStorage.containsKey('#repl-history')) {
       var decoded = json.decode(window.localStorage['#repl-history']);
@@ -70,7 +76,7 @@ class Repl {
     addPrimitive(env, const SchemeSymbol('clear'), (_a, _b) {
       for (Element child in container.children.toList()) {
         if (child == activePrompt) break;
-        container.children.remove(child);
+        if (child != status) container.children.remove(child);
       }
       return undefined;
     }, 0);
@@ -82,7 +88,7 @@ class Repl {
       return undefined;
     }, 0);
     addPrimitive(env, const SchemeSymbol('disable-autodraw'), (_a, _b) {
-      logText('Autodraw disabled');
+      logText('Autodraw disabled\n');
       autodraw = false;
       return undefined;
     }, 0);
@@ -90,6 +96,10 @@ class Repl {
 
   buildNewInput() {
     activeLoggingArea = new SpanElement();
+    if (activeInput != null) {
+      activeInput.contentEditable = 'false';
+      container.append(new SpanElement()..text = '\n');
+    }
     container.append(activeLoggingArea);
     activePrompt = new SpanElement()
       ..text = 'scm> '
@@ -185,8 +195,12 @@ class Repl {
 
   keyListener(KeyboardEvent event) async {
     int code = event.keyCode;
-    if (code == KeyCode.BACKSPACE ||
-        (event.ctrlKey && (code == KeyCode.V || code == KeyCode.X))) {
+    if (code == KeyCode.BACKSPACE) {
+      //this should be changed to call highlightSaveCursor
+      //once the bug with newlines is fixed
+      await delay(0);
+      updateInputStatus();
+    } else if (event.ctrlKey && (code == KeyCode.V || code == KeyCode.X)) {
       await delay(0);
       updateInputStatus();
       highlightSaveCursor(activeInput);
@@ -211,6 +225,18 @@ class Repl {
       runActiveCode();
       await delay(100);
       input.innerHtml = highlight(input.text);
+    } else if ((missingParens ?? 0) > 0 && KeyCode.ENTER == event.keyCode) {
+      event.preventDefault();
+      int cursor = _currPosition();
+      String newInput = input.text;
+      String first = newInput.substring(0, cursor) + "\n";
+      String second = "";
+      if (cursor != newInput.length) {
+        second = newInput.substring(cursor);
+      }
+      int spaces = _countSpace(newInput, cursor);
+      input.text = first + " " * spaces + second;
+      highlightCustomCursor(input, cursor + spaces + 1);
     } else {
       await delay(5);
       highlightSaveCursor(input);
@@ -305,5 +331,58 @@ class Repl {
 
   Future delay(int milliseconds) {
     return new Future.delayed(new Duration(milliseconds: milliseconds));
+  }
+
+  ///Returns how many spaces the next line must be indented based
+  ///on the line with the last open parentheses
+  int _countSpace(String inputText, int position) {
+    List<String> splitLines = inputText.substring(0, position).split("\n");
+    //if the cursor is at the end of a line but not at the end of the whole input
+    //must find that line and start counting parens from there on
+    String refLine;
+    int totalMissingCount = 0;
+    for (refLine in splitLines.reversed) {
+      //if the cursor is in the middle of the line, truncate to the position of the cursor
+      totalMissingCount += countParens(refLine);
+      //find the first line where there exists an open parens
+      //with no closed parens
+      if (totalMissingCount >= 1) break;
+    }
+    if (totalMissingCount == 0) {
+      return 0;
+    }
+    int strIndex = refLine.indexOf("(");
+    while (strIndex < (refLine.length - 1)) {
+      int nextClose = refLine.indexOf(")", strIndex + 1);
+      int nextOpen = refLine.indexOf("(", strIndex + 1);
+      //find the location of the open parens that
+      //corresponds to the missing closed parnes
+      if (totalMissingCount > 1) {
+        totalMissingCount -= 1;
+      } else if (nextOpen == -1 || nextOpen < nextClose) {
+        Iterable<Expression> tokens = tokenizeLine(refLine.substring(strIndex));
+        Expression symbol = tokens.elementAt(1);
+        //decide whether to align with subexpressions if they exist
+        //otherwise indent by two spaces
+        if (symbol == const SchemeSymbol("(")) {
+          return strIndex + 1;
+        } else if (noIndent.contains(symbol)) {
+          return strIndex + 2;
+        } else if (tokens.length > 2) {
+          return refLine.indexOf(tokens.elementAt(2).toString(), strIndex + 1);
+        } else if (nextOpen == -1) {
+          return strIndex + 2;
+        }
+      } else if (nextClose == -1) {
+        return strIndex + 2;
+      }
+      strIndex = nextOpen;
+    }
+    return strIndex + 2;
+  }
+
+  ///returns the location in the input string where the cursor is
+  int _currPosition() {
+    return findPosition(activeInput, window.getSelection().getRangeAt(0));
   }
 }
