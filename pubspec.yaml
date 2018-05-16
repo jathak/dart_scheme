@@ -29,5 +29,6 @@ dev_dependencies:
 
   # Web app building
   sass_builder: ^1.0.0
+  webdev: any
   build_runner: any
   build_web_compilers: any

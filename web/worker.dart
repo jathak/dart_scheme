@@ -12,20 +12,21 @@ main() {
         new JsObject.jsify(['output', e.toString(), newline])
       ]);
   context['onmessage'] = (e) {
-    var command = e['data'][0];
+    var data = e.data;
+    var command = data[0];
     if (command == 'run') {
-      inter.run(e['data'][1]);
+      inter.run(data[1]);
     } else if (command == 'eval') {
-      var expr = schemeRead(tokenizeLine(e['data'][1]).toList(), inter.impl);
+      var expr = schemeRead(tokenizeLine(data[1]).toList(), inter.impl);
       var result = schemeEval(expr, inter.globalEnv);
       if (result is Serializable) {
         var serialized = Serialization.serializeToJson(result);
         context.callMethod('postMessage', [
-          new JsObject.jsify(['result', serialized, e['data'][2]])
+          new JsObject.jsify(['result', serialized, data[2]])
         ]);
       } else {
         context.callMethod('postMessage', [
-          new JsObject.jsify(['result-string', result.toString(), e['data'][2]])
+          new JsObject.jsify(['result-string', result.toString(), data[2]])
         ]);
       }
     }

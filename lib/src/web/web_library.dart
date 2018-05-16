@@ -191,6 +191,7 @@ class WebLibrary extends SchemeLibrary with _$WebLibraryMixin {
         env.interpreter.logText(e.data[1]);
       }
     });
+    logicWorker.postMessage(['run', '(logic)']);
   }
 
   @noeval

@@ -3,8 +3,4 @@ targets:
     builders:
       build_web_compilers|entrypoint:
         generate_for:
-          - web/main.dart
-        options:
-          dart2js_args:
-          - --minify
-          - --fast-startup
+        - web/**.dart
