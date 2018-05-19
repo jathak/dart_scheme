@@ -13,30 +13,13 @@ part 'logic_library.g.dart';
 /// the primitives and performs type checking on arguments).
 @schemelib
 class LogicLibrary extends SchemeLibrary with _$LogicLibraryMixin {
-  Map<Frame, List<logic.Fact>> facts = new Map.identity();
-
-  @override
-  void importAll(Frame env) {
-    Frame child = new Frame(env, env.interpreter);
-    super.importAll(child);
-    var sym = const SchemeSymbol('logic');
-
-    // Only import the loader to start. Calling logic imports the rest.
-    env.define(sym, child.bindings[sym]);
-    env.hidden[sym] = true;
-  }
-
-  @SchemeSymbol('logic')
-  void logicStart(Frame env) {
-    super.importAll(env);
-  }
+  List<logic.Fact> facts = [];
 
   @SchemeSymbol('fact')
   @SchemeSymbol('!')
   @noeval
   void fact(List<Expression> exprs, Frame env) {
-    if (!facts.containsKey(env)) facts[env] = [];
-    facts[env].add(new logic.Fact(exprs.first, exprs.skip(1)));
+    facts.add(new logic.Fact(exprs.first, exprs.skip(1)));
   }
 
   @SchemeSymbol('query')
@@ -44,7 +27,7 @@ class LogicLibrary extends SchemeLibrary with _$LogicLibraryMixin {
   @noeval
   void query(List<Expression> exprs, Frame env) {
     bool success = false;
-    for (var sol in logic.evaluate(new logic.Query(exprs), facts[env] ?? [])) {
+    for (var sol in logic.evaluate(new logic.Query(exprs), facts)) {
       if (!success) env.interpreter.logText('Success!');
       success = true;
       env.interpreter.logger(sol, true);
@@ -56,7 +39,7 @@ class LogicLibrary extends SchemeLibrary with _$LogicLibraryMixin {
   @SchemeSymbol('query-one')
   @noeval
   void queryOne(List<Expression> exprs, Frame env) {
-    var sols = logic.evaluate(new logic.Query(exprs), facts[env] ?? []);
+    var sols = logic.evaluate(new logic.Query(exprs), facts);
     if (sols.isNotEmpty) {
       env.interpreter.logText('Success!');
       env.interpreter.logger(sols.first, true);

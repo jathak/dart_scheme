@@ -20,13 +20,15 @@ class Repl {
   List<String> history = [];
   int historyIndex = -1;
 
+  final String prompt;
+
   List<SchemeSymbol> noIndent = [
     const SchemeSymbol("let"),
     const SchemeSymbol("define"),
     const SchemeSymbol("lambda")
   ];
 
-  Repl(this.interpreter, Element parent) {
+  Repl(this.interpreter, Element parent, {this.prompt}) {
     if (window.localStorage.containsKey('#repl-history')) {
       var decoded = json.decode(window.localStorage['#repl-history']);
       if (decoded is List) history = decoded.map((item) => '$item').toList();
@@ -102,7 +104,7 @@ class Repl {
     }
     container.append(activeLoggingArea);
     activePrompt = new SpanElement()
-      ..text = 'scm> '
+      ..text = prompt
       ..classes = ['repl-prompt'];
     container.append(activePrompt);
     activeInput = new SpanElement()

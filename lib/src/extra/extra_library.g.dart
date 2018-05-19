@@ -19,6 +19,7 @@ abstract class _$ExtraLibraryMixin {
   String serialize(Serializable expr);
   Expression deserialize(String json);
   MarkdownElement formatted(List<Expression> expressions, Frame env);
+  void logicStart(Frame env);
   void importAll(Frame __env) {
     addPrimitive(__env, const SchemeSymbol("run-async"), (__exprs, __env) {
       if (__exprs[0] is! Procedure)
@@ -117,5 +118,10 @@ abstract class _$ExtraLibraryMixin {
         (__exprs, __env) {
       return this.formatted(__exprs, __env);
     }, 0, -1);
+    addPrimitive(__env, const SchemeSymbol('logic'), (__exprs, __env) {
+      var __value = undefined;
+      this.logicStart(__env);
+      return __value;
+    }, 0);
   }
 }
