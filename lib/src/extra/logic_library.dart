@@ -18,7 +18,7 @@ class LogicLibrary extends SchemeLibrary with _$LogicLibraryMixin {
   @SchemeSymbol('fact')
   @SchemeSymbol('!')
   @noeval
-  void fact(List<Expression> exprs, Frame env) {
+  void fact(List<Expression> exprs) {
     facts.add(new logic.Fact(exprs.first, exprs.skip(1)));
   }
 
@@ -50,7 +50,7 @@ class LogicLibrary extends SchemeLibrary with _$LogicLibraryMixin {
   }
 
   @SchemeSymbol('prolog')
-  String prolog(Frame env) {
-    return facts[env].map((f) => f.toProlog()).join('\n') + '\n';
+  String prolog() {
+    return facts.map((f) => f.toProlog()).join('\n') + '\n';
   }
 }

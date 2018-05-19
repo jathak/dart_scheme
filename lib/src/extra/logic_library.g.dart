@@ -1,15 +1,15 @@
 part of cs61a_scheme.extra.logic_library;
 
 abstract class _$LogicLibraryMixin {
-  void fact(List<Expression> exprs, Frame env);
+  void fact(List<Expression> exprs);
   void query(List<Expression> exprs, Frame env);
   void queryOne(List<Expression> exprs, Frame env);
-  String prolog(Frame env);
+  String prolog();
   void importAll(Frame __env) {
     addVariableOperandPrimitive(__env, const SchemeSymbol('fact'),
         (__exprs, __env) {
       var __value = undefined;
-      this.fact(__exprs, __env);
+      this.fact(__exprs);
       return __value;
     }, 0, -1);
     __env.bindings[const SchemeSymbol('!')] =
@@ -31,7 +31,7 @@ abstract class _$LogicLibraryMixin {
       return __value;
     }, 0, -1);
     addPrimitive(__env, const SchemeSymbol('prolog'), (__exprs, __env) {
-      return new SchemeString(this.prolog(__env));
+      return new SchemeString(this.prolog());
     }, 0);
   }
 }
