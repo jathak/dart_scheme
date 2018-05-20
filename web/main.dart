@@ -39,6 +39,13 @@ Shift+Enter to add missing parens and run the current input
 main() async {
   String css = await HttpRequest.getString('assets/style.css');
   var style = querySelector('#theme');
+  var diagramBox = querySelector('#diagram');
+  var webLibrary = new WebLibrary(diagramBox, context['jsPlumb'], css, style);
+  if (window.location.href.contains('logic')) {
+    await startLogic(webLibrary);
+  } else {
+    await startScheme(webLibrary);
+  }
   if (window.localStorage.containsKey('#scheme-theme')) {
     try {
       var expr = Serialization
@@ -54,13 +61,6 @@ main() async {
   onThemeChange.listen((Theme theme) {
     window.localStorage['#scheme-theme'] = Serialization.serializeToJson(theme);
   });
-  var diagramBox = querySelector('#diagram');
-  var webLibrary = new WebLibrary(diagramBox, context['jsPlumb'], css, style);
-  if (window.location.href.contains('logic')) {
-    await startLogic(webLibrary);
-  } else {
-    await startScheme(webLibrary);
-  }
 }
 
 startScheme(WebLibrary webLibrary) async {

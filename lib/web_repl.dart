@@ -28,7 +28,7 @@ class Repl {
     const SchemeSymbol("lambda")
   ];
 
-  Repl(this.interpreter, Element parent, {this.prompt}) {
+  Repl(this.interpreter, Element parent, {this.prompt: 'scm> '}) {
     if (window.localStorage.containsKey('#repl-history')) {
       var decoded = json.decode(window.localStorage['#repl-history']);
       if (decoded is List) history = decoded.map((item) => '$item').toList();
