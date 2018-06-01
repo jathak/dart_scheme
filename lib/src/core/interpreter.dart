@@ -8,7 +8,6 @@ import 'project_interface.dart';
 import 'scheme_library.dart';
 import 'special_forms.dart';
 import 'standard_library.dart';
-import 'ui.dart';
 import 'utils.dart' show schemeEval;
 
 class Interpreter {
@@ -17,7 +16,6 @@ class Interpreter {
   ProjectInterface get implementation => impl;
   Frame globalEnv;
   bool tailCallOptimized = true;
-  Renderer renderer = (UIElement) => null;
   Logger _logger = (Expression e, bool newline) => null;
   Logger get logger => _logger;
   void set logger(Logger logger) => _logger = logger;

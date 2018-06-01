@@ -1,7 +1,6 @@
 part of cs61a_scheme.web.web_library;
 
 abstract class _$WebLibraryMixin {
-  void closeDiagram(Frame env);
   Expression js(List<Expression> exprs);
   Expression jsContext();
   Expression jsSet(JsExpression obj, Expression property, Expression value);
@@ -23,11 +22,6 @@ abstract class _$WebLibraryMixin {
   Future<Expression> theme(SchemeSymbol theme, Frame env);
   String colorToCss(Color color);
   void importAll(Frame __env) {
-    addPrimitive(__env, const SchemeSymbol("close-diagram"), (__exprs, __env) {
-      var __value = undefined;
-      this.closeDiagram(__env);
-      return __value;
-    }, 0);
     addVariablePrimitive(__env, const SchemeSymbol("js"), (__exprs, __env) {
       return this.js(__exprs);
     }, 0, -1);

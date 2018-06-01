@@ -4,7 +4,6 @@ abstract class _$ExtraLibraryMixin {
   Future<Expression> runAsync(Procedure proc, Frame env);
   Future<Expression> runAfter(Number millis, Procedure proc, Frame env);
   Boolean isCompleted(AsyncExpression expr);
-  void render(UIElement ui, Frame env);
   Diagram draw(Expression expression);
   Diagram diagram(Frame env);
   Visualization visualize(Expression code, Frame env);
@@ -18,7 +17,7 @@ abstract class _$ExtraLibraryMixin {
   Visualization traceToVisualization(FlagTrace trace);
   String serialize(Serializable expr);
   Expression deserialize(String json);
-  MarkdownElement formatted(List<Expression> expressions, Frame env);
+  MarkdownWidget formatted(List<Expression> expressions, Frame env);
   void logicStart(Frame env);
   void importAll(Frame __env) {
     addPrimitive(__env, const SchemeSymbol("run-async"), (__exprs, __env) {
@@ -38,13 +37,6 @@ abstract class _$ExtraLibraryMixin {
         throw new SchemeException(
             'Argument of invalid type passed to completed?.');
       return this.isCompleted(__exprs[0]);
-    }, 1);
-    addPrimitive(__env, const SchemeSymbol("render"), (__exprs, __env) {
-      if (__exprs[0] is! UIElement)
-        throw new SchemeException('Argument of invalid type passed to render.');
-      var __value = undefined;
-      this.render(__exprs[0], __env);
-      return __value;
     }, 1);
     addPrimitive(__env, const SchemeSymbol("draw"), (__exprs, __env) {
       return this.draw(__exprs[0]);

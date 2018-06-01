@@ -5,7 +5,7 @@ import 'package:dart2_constant/convert.dart' show json;
 import 'expressions.dart';
 import 'numbers.dart';
 import 'logging.dart';
-import 'ui.dart';
+import 'widgets.dart';
 
 final Map<String, Serializable> deserializers = {
   'Integer': Number.zero,
@@ -14,8 +14,8 @@ final Map<String, Serializable> deserializers = {
   'SchemeSymbol': const SchemeSymbol('x'),
   'SchemeString': const SchemeString('x'),
   'Anchor': new Anchor.withId(-1),
-  'TextElement': new TextElement(""),
-  'MarkdownElement': new MarkdownElement(null),
+  'TextWidget': new TextWidget(""),
+  'MarkdownWidget': new MarkdownWidget(null),
   'Strike': new Strike(),
   'Block': new Block.pair(null),
   'BlockGrid': new BlockGrid([[]])

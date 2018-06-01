@@ -3,7 +3,6 @@ library web_repl;
 import 'dart:async';
 import 'package:dart2_constant/convert.dart' show json;
 import 'dart:html';
-import 'dart:js';
 
 import 'package:cs61a_scheme/cs61a_scheme_web.dart';
 import 'package:cs61a_scheme/highlight.dart';
@@ -299,10 +298,9 @@ class Repl {
       });
     } else if (logging == null) {
       element.text = '';
-    } else if (logging is UIElement) {
+    } else if (logging is Widget) {
       element.classes.add('render');
-      var renderer = new HtmlRenderer(element, context['jsPlumb']);
-      renderer.render(logging);
+      render(logging, element);
       logging.onUpdate.listen(([_]) async {
         await delay(0);
         if (logging is Visualization &&

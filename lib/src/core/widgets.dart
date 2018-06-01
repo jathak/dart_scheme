@@ -1,6 +1,6 @@
-/// Defines some basic UI interfaces to allow for integration with the
-/// core interpreter. Implementation is in cs61a_scheme.extra.ui.
-library cs61a_scheme.core.ui;
+/// Defines some basic rendering primitives to allow for integration with the
+/// core interpreter. More rendering code is in extra/diagramming.dart.
+library cs61a_scheme.core.widgets;
 
 import 'dart:async';
 
@@ -48,8 +48,12 @@ class Direction extends SelfEvaluating {
   }
 }
 
-abstract class UIElement extends SelfEvaluating implements Serializable {
-  UIElement();
+/// The base class for any expressions that can be rendered.
+///
+/// Whenever something extending [Widget] is logged, the web REPL will render it
+/// instead of just printing it. Used primarily for diagramming.
+abstract class Widget extends SelfEvaluating implements Serializable {
+  Widget();
   toJS() => this;
   Map<Direction, Anchor> _anchors = {};
   Anchor anchor(Direction dir) => _anchors.putIfAbsent(dir, () => new Anchor());
@@ -83,7 +87,7 @@ abstract class UIElement extends SelfEvaluating implements Serializable {
   }
 }
 
-class Anchor extends UIElement {
+class Anchor extends Widget {
   static int nextId = 1;
   final int id;
   Anchor() : id = nextId++;
@@ -102,26 +106,26 @@ class Anchor extends UIElement {
   }
 }
 
-class TextElement extends UIElement {
+class TextWidget extends Widget {
   final String text;
-  TextElement(this.text);
+  TextWidget(this.text);
   toString() => text;
 
   Map serialize() => finishSerialize({
-        'type': 'TextElement',
+        'type': 'TextWidget',
         'text': text,
       });
-  TextElement deserialize(Map data) {
-    return new TextElement(data['text'])..finishDeserialize(data);
+  TextWidget deserialize(Map data) {
+    return new TextWidget(data['text'])..finishDeserialize(data);
   }
 }
 
-class MarkdownElement extends TextElement {
+class MarkdownWidget extends TextWidget {
   bool inline;
 
   Frame env;
 
-  MarkdownElement(String text, {this.inline: true, this.env}) : super(text);
+  MarkdownWidget(String text, {this.inline: true, this.env}) : super(text);
 
   void runLink(String name) {
     if (env == null) return;
@@ -133,12 +137,12 @@ class MarkdownElement extends TextElement {
 
   Map serialize() => {'type': 'MarkdownElement', 'text': text};
 
-  MarkdownElement deserialize(Map data) {
-    return new MarkdownElement(data['text']);
+  MarkdownWidget deserialize(Map data) {
+    return new MarkdownWidget(data['text']);
   }
 }
 
-class Strike extends UIElement {
+class Strike extends Widget {
   Strike();
 
   toString() => "#[Strike]";
@@ -149,9 +153,9 @@ class Strike extends UIElement {
   }
 }
 
-class Block extends UIElement {
+class Block extends Widget {
   final String type;
-  final UIElement inside;
+  final Widget inside;
   Block._(this.type, this.inside);
   Block.pair(this.inside) : type = "pair";
   Block.vector(this.inside) : type = "vector";
@@ -167,7 +171,7 @@ class Block extends UIElement {
   }
 }
 
-class BlockGrid extends UIElement {
+class BlockGrid extends Widget {
   final List<List<Block>> _grid;
   int _columns, _rows;
   int get columnCount => _columns;
@@ -227,14 +231,12 @@ class BlockGrid extends UIElement {
   }
 }
 
-abstract class DiagramInterface extends UIElement {
+abstract class DiagramInterface extends Widget {
   int get currentRow;
 
-  /// If expression.inlineUI is true, returns expression.draw(this).
+  /// If expression.inlineInDiagram is true, returns expression.draw(this).
   /// If not, returns an anchor that is linked to expression.draw(this).
   /// If parentRow is set, the new object will be on a new line, with spacing
   /// based on the parentRow.
-  UIElement pointTo(Expression expression, [int parentRow]);
+  Widget pointTo(Expression expression, [int parentRow]);
 }
-
-typedef void Renderer(UIElement element);
