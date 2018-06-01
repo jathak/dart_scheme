@@ -27,7 +27,7 @@ main() {
       expect(b.id, equals(a.id));
     });
     test("works for TextElement", () {
-      var a = new TextElement("abc");
+      var a = new TextWidget("abc");
       var b = remake(a);
       expect(b.text, equals(a.text));
     });
@@ -42,7 +42,7 @@ main() {
     });
     test("works for BlockGrid", () {
       var a = new BlockGrid.row([
-        new Block.pair(new TextElement("1")),
+        new Block.pair(new TextWidget("1")),
         new Block.vector(new Strike())
       ]);
       var b = remake(a);

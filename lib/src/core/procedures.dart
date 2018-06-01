@@ -2,7 +2,7 @@ library cs61a_scheme.core.procedures;
 
 import 'expressions.dart';
 import 'logging.dart';
-import 'ui.dart';
+import 'widgets.dart';
 
 /// Base class for all Scheme procedures.
 ///
@@ -115,7 +115,7 @@ abstract class UserDefinedProcedure extends Procedure {
   }
 
   @override
-  UIElement draw(diag) => new TextElement(new Pair(name, formals).toString());
+  Widget draw(diag) => new TextWidget(new Pair(name, formals).toString());
 }
 
 /// A [UserDefinedProcedure] with lexical scope and normal operand evaluation.
@@ -148,10 +148,10 @@ class LambdaProcedure extends UserDefinedProcedure {
       new Pair(new SchemeSymbol('lambda'), new Pair(formals, body)).toString();
 
   @override
-  UIElement draw(diag) {
+  Widget draw(diag) {
     var parent = env.id == 0 ? '' : ' [parent=f${env.id}]';
     var msg = "${new Pair(name, formals)}$parent";
-    return new TextElement(msg);
+    return new TextWidget(msg);
   }
 }
 

@@ -9,8 +9,8 @@ import 'package:quiver_hashcode/hashcode.dart';
 import 'interpreter.dart';
 import 'logging.dart';
 import 'serialization.dart';
-import 'ui.dart';
 import 'utils.dart';
+import 'widgets.dart';
 
 /// Base class for all Scheme data types.
 ///
@@ -28,14 +28,14 @@ abstract class Expression {
   ///
   /// If true, this expression should be inlined in diagrams.
   /// If false, it should be added to the objects with an arrow to it.
-  bool get inlineUI => false;
+  bool get inlineInDiagram => false;
 
-  /// Constructs a [UIElement] for this expression.
+  /// Constructs a [Widget] for this expression.
   ///
   /// The default implementation returns the string representation of this
-  /// expression as a [TextElement]. Some expressions may need to add
+  /// expression as a [TextWidget]. Some expressions may need to add
   /// additional objects to [diagram].
-  UIElement draw(DiagramInterface diagram) => new TextElement(toString());
+  Widget draw(DiagramInterface diagram) => new TextWidget(toString());
 
   /// Shorthand for `expr is EmptyList`.
   bool get isNil => false;
@@ -65,7 +65,7 @@ abstract class SelfEvaluating extends Expression {
 
 /// A Scheme boolean. There are only two: [schemeTrue] and [schemeFalse].
 class Boolean extends SelfEvaluating implements Serializable<Boolean> {
-  final inlineUI = true;
+  final inlineInDiagram = true;
   final bool value;
   const Boolean._internal(this.value);
   bool get isTruthy => value;
@@ -95,7 +95,7 @@ const schemeFalse = const Boolean._internal(false);
 /// create a constant instance, a lowercase string should be passed to maintain
 /// this. Use the [runtime] constructor when passing in non-constant strings.
 class SchemeSymbol extends Expression implements Serializable<SchemeSymbol> {
-  final inlineUI = true;
+  final inlineInDiagram = true;
   final String value;
 
   const SchemeSymbol(this.value);
@@ -113,7 +113,7 @@ class SchemeSymbol extends Expression implements Serializable<SchemeSymbol> {
 /// A Scheme string.
 class SchemeString extends SelfEvaluating
     implements Serializable<SchemeString> {
-  final inlineUI = true;
+  final inlineInDiagram = true;
   final String value;
   const SchemeString(this.value);
   toString() => json.encode(value);
@@ -182,7 +182,7 @@ abstract class PairOrEmpty extends Expression implements Iterable<Expression> {
 /// constructor, so we have to implement all the [Iterable] methods ourselves.
 class _EmptyList extends IterableBase<Expression>
     implements SelfEvaluating, PairOrEmpty {
-  final inlineUI = true;
+  final inlineInDiagram = true;
   const _EmptyList();
   bool get wellFormed => true;
   @deprecated
@@ -194,7 +194,7 @@ class _EmptyList extends IterableBase<Expression>
   num get lengthOrCycle => 0;
 
   get display => toString();
-  draw(DiagramInterface diagram) => new TextElement('()');
+  draw(DiagramInterface diagram) => new TextWidget('()');
   evaluate(Frame env) => this;
   get isTruthy => true;
   get pair => this as Pair;
@@ -247,10 +247,10 @@ class Pair<A extends Expression, B extends Expression> extends Expression
   Expression evaluate(Frame env) => evalCallExpression(this, env);
 
   @override
-  UIElement draw(DiagramInterface diagram) {
+  Widget draw(DiagramInterface diagram) {
     int parentRow = diagram.currentRow;
-    UIElement right = diagram.pointTo(second);
-    UIElement left = diagram.pointTo(first, parentRow);
+    Widget right = diagram.pointTo(second);
+    Widget left = diagram.pointTo(first, parentRow);
     return new BlockGrid.pair(new Block.pair(left), new Block.pair(right));
   }
 
@@ -386,8 +386,8 @@ class Promise extends SelfEvaluating {
 
   /// Promises are represented in diagrams as a circle with ⋯ inside prior to
   /// forcing, and the evaluated result afterwards.
-  UIElement draw(DiagramInterface diagram) {
-    var inside = _evaluated ? diagram.pointTo(expr) : new TextElement("⋯");
+  Widget draw(DiagramInterface diagram) {
+    var inside = _evaluated ? diagram.pointTo(expr) : new TextWidget("⋯");
     return new Block.promise(inside);
   }
 }

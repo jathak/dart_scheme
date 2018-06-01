@@ -6,7 +6,6 @@ import 'dart:js';
 
 import 'package:cs61a_scheme/cs61a_scheme_extra.dart';
 
-import 'html_ui.dart';
 import 'imports.dart';
 import 'js_interop.dart';
 import 'theming.dart';
@@ -18,12 +17,11 @@ part 'web_library.g.dart';
 /// the primitives and performs type checking on arguments).
 @schemelib
 class WebLibrary extends SchemeLibrary with _$WebLibraryMixin {
-  final html.Element renderContainer;
   final JsObject jsPlumb;
   final String css;
   final html.Element styleElement;
 
-  WebLibrary(this.renderContainer, this.jsPlumb, this.css, this.styleElement) {
+  WebLibrary(this.jsPlumb, this.css, this.styleElement) {
     Undefined.jsUndefined = context['undefined'];
     AsyncExpression.makePromise = (expr) {
       return new JsObject(context['Promise'], [
@@ -40,16 +38,9 @@ class WebLibrary extends SchemeLibrary with _$WebLibraryMixin {
 
   void importAll(Frame env) {
     super.importAll(env);
-    env.interpreter.renderer =
-        new HtmlRenderer(renderContainer, jsPlumb).render;
     Procedure.jsProcedure = (procedure) {
       return new SchemeFunction(procedure, env);
     };
-  }
-
-  @SchemeSymbol("close-diagram")
-  void closeDiagram(Frame env) {
-    env.interpreter.renderer(new TextElement(""));
   }
 
   Expression js(List<Expression> exprs) {

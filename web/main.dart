@@ -39,8 +39,7 @@ Shift+Enter to add missing parens and run the current input
 main() async {
   String css = await HttpRequest.getString('assets/style.css');
   var style = querySelector('#theme');
-  var diagramBox = querySelector('#diagram');
-  var webLibrary = new WebLibrary(diagramBox, context['jsPlumb'], css, style);
+  var webLibrary = new WebLibrary(context['jsPlumb'], css, style);
   if (window.location.href.contains('logic')) {
     await startLogic(webLibrary);
   } else {
@@ -103,13 +102,13 @@ startScheme(WebLibrary webLibrary) async {
       'builtin-turtle': turtles.join(' ')
     })
   ]);
-  inter.logger(new MarkdownElement(motd, env: demos), true);
+  inter.logger(new MarkdownWidget(motd, env: demos), true);
 }
 
 addDemo(Frame env, String demoName, String code) {
   addPrimitive(env, new SchemeSymbol.runtime(demoName), (_, __) {
     var prompt = "<span class='repl-prompt'>scm></span> `$code`";
-    env.interpreter.logger(new MarkdownElement(prompt), true);
+    env.interpreter.logger(new MarkdownWidget(prompt), true);
     env.interpreter.run(code);
     return undefined;
   }, 0);
@@ -153,7 +152,7 @@ startLogic(WebLibrary webLibrary) {
   addTheme(themeInter, webLibrary, const SchemeSymbol('monochrome'));
   addTheme(themeInter, webLibrary, const SchemeSymbol('monochrome-dark'));
   addTheme(themeInter, webLibrary, const SchemeSymbol('go-bears'));
-  inter.logger(new MarkdownElement(logicMotd, env: themeInter.globalEnv), true);
+  inter.logger(new MarkdownWidget(logicMotd, env: themeInter.globalEnv), true);
 }
 
 addTheme(Interpreter inter, WebLibrary web, SchemeSymbol themeName) {

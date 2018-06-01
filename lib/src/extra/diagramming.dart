@@ -14,9 +14,9 @@ class Arrow extends SelfEvaluating implements Serializable<Arrow> {
   }
 }
 
-class Binding extends UIElement {
+class Binding extends Widget {
   final SchemeSymbol symbol;
-  final UIElement value;
+  final Widget value;
   final bool isReturn;
   Binding(this.symbol, this.value, [this.isReturn = false]);
   Map serialize() => finishSerialize({
@@ -32,8 +32,8 @@ class Binding extends UIElement {
   }
 }
 
-class Row extends UIElement {
-  final List<UIElement> elements;
+class Row extends Widget {
+  final List<Widget> elements;
   Row(this.elements);
   toString() => elements.toString();
   Map serialize() => finishSerialize({
@@ -45,7 +45,7 @@ class Row extends UIElement {
         ..finishDeserialize(data);
 }
 
-class FrameElement extends UIElement {
+class FrameElement extends Widget {
   int id;
   String tag;
   int parentId;
@@ -157,12 +157,12 @@ class Diagram extends DiagramInterface {
     _incompleteArrows.clear();
   }
 
-  Map<Expression, UIElement> _known = new Map.identity();
+  Map<Expression, Widget> _known = new Map.identity();
   List<Pair<Anchor, Expression>> _incompleteArrows = [];
 
   Anchor _handleExisting(Expression expression) {
     Anchor anchor = new Anchor();
-    UIElement element = _known[expression];
+    Widget element = _known[expression];
     if (element == null) {
       _incompleteArrows.add(new Pair(anchor, expression));
     } else {
@@ -171,32 +171,32 @@ class Diagram extends DiagramInterface {
     return anchor;
   }
 
-  UIElement _build(Expression expression) {
+  Widget _build(Expression expression) {
     _known[expression] = null;
-    UIElement element = expression.draw(this);
+    Widget element = expression.draw(this);
     _known[expression] = element;
     return element;
   }
 
-  UIElement bindingTo(Expression expression) {
-    if (expression.inlineUI) return expression.draw(this);
+  Widget bindingTo(Expression expression) {
+    if (expression.inlineInDiagram) return expression.draw(this);
     if (_known.containsKey(expression)) return _handleExisting(expression);
     if (rows.last.elements.isNotEmpty) rows.add(new Row([]));
     int myRow = rows.length - 1;
-    UIElement element = _build(expression);
+    Widget element = _build(expression);
     rows[myRow].elements.insert(0, element);
     Anchor anchor = new Anchor();
     arrows.add(new Arrow(anchor, element.anchor(Direction.left)));
     return anchor;
   }
 
-  UIElement pointTo(Expression expression, [int parentRow = null]) {
+  Widget pointTo(Expression expression, [int parentRow = null]) {
     if (expression == nil) return new Strike();
-    if (expression.inlineUI) return expression.draw(this);
+    if (expression.inlineInDiagram) return expression.draw(this);
     if (_known.containsKey(expression)) return _handleExisting(expression);
     if (parentRow != null) rows.add(new Row([]));
     int myRow = rows.length - 1;
-    UIElement element = _build(expression);
+    Widget element = _build(expression);
     rows[myRow].elements.insert(0, element);
     if (parentRow != null) {
       _rowParent[myRow] = parentRow;
@@ -204,7 +204,7 @@ class Diagram extends DiagramInterface {
     }
     Anchor anchor = new Anchor();
     Direction dir = parentRow != null ? Direction.top : Direction.left;
-    UIElement anchoring = element;
+    Widget anchoring = element;
     if (element is BlockGrid) anchoring = element.rowAt(0).first;
     arrows.add(new Arrow(anchor, anchoring.anchor(dir)));
     return anchor;

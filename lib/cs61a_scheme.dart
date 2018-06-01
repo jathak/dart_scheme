@@ -16,5 +16,5 @@ export 'src/core/reader.dart';
 export 'src/core/scheme_library.dart';
 export 'src/core/serialization.dart';
 export 'src/core/standard_library.dart';
-export 'src/core/ui.dart';
 export 'src/core/utils.dart';
+export 'src/core/widgets.dart';

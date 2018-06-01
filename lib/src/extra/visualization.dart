@@ -7,9 +7,9 @@ import 'package:cs61a_scheme/cs61a_scheme.dart';
 import 'diagramming.dart';
 import 'flag_trace.dart';
 
-class Button extends UIElement {
+class Button extends Widget {
   void Function() click;
-  UIElement inside;
+  Widget inside;
   Button(this.inside, this.click);
   Button.forEvent(
       this.inside, SchemeSymbol id, List<Expression> data, Frame env) {
@@ -21,7 +21,7 @@ class Button extends UIElement {
   deserialize(data) => null;
 }
 
-class Visualization extends UIElement {
+class Visualization extends Widget {
   Frame env;
   Expression code;
   List<Diagram> diagrams = [];
@@ -29,7 +29,7 @@ class Visualization extends UIElement {
   int current = 0;
 
   Diagram get currentDiagram => diagrams[current];
-  List<UIElement> buttonRow;
+  List<Widget> buttonRow;
   Expression result;
 
   Visualization(this.code, this.env) {
@@ -73,16 +73,16 @@ class Visualization extends UIElement {
         animating = false;
       }
       current = index;
-      buttonRow[2] = new TextElement("${current+1}/${diagrams.length}");
+      buttonRow[2] = new TextWidget("${current+1}/${diagrams.length}");
       update();
     }
 
-    Button first = new Button(new TextElement("<<"), () => goto(0));
-    Button prev = new Button(new TextElement("<"), () => goto(current - 1));
-    TextElement status = new TextElement("${current+1}/${diagrams.length}");
-    Button next = new Button(new TextElement(">"), () => goto(current + 1));
-    Button last = new Button(new TextElement(">>"), () => goto(-1));
-    Button animate = new Button(new TextElement("Animate"), () async {
+    Button first = new Button(new TextWidget("<<"), () => goto(0));
+    Button prev = new Button(new TextWidget("<"), () => goto(current - 1));
+    TextWidget status = new TextWidget("${current+1}/${diagrams.length}");
+    Button next = new Button(new TextWidget(">"), () => goto(current + 1));
+    Button last = new Button(new TextWidget(">>"), () => goto(-1));
+    Button animate = new Button(new TextWidget("Animate"), () async {
       if (animating) {
         animating = false;
         return;

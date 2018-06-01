@@ -1,4 +1,4 @@
-library cs61a_scheme.web.html_ui;
+library cs61a_scheme.web.renderer;
 
 import 'dart:async';
 import 'dart:html';
@@ -11,34 +11,38 @@ import 'package:cs61a_scheme/highlight.dart';
 
 import 'theming.dart';
 
-class HtmlRenderer {
+void render(Widget widget, Element container) {
+  new _Renderer(container, context['jsPlumb']).render(widget);
+}
+
+class _Renderer {
   Element container;
   JsObject jsPlumb;
   Iterable connections;
 
   static int anchorCount = 0;
 
-  HtmlRenderer(this.container, JsObject masterJsPlumb) {
+  _Renderer(this.container, JsObject masterJsPlumb) {
     jsPlumb = masterJsPlumb.callMethod('getInstance');
     container.classes.add('render');
   }
 
   List<StreamSubscription> subs = [];
 
-  void render(UIElement element) {
+  void render(Widget widget) {
     var oldSubscriptions = subs;
     subs = [];
     connections = null;
     trueAnchorIds = {};
     anchorDirections = {};
-    Element el = convert(element);
+    Element el = convert(widget);
     container.text = "";
     for (StreamSubscription sub in oldSubscriptions) {
       sub.cancel();
     }
     container.append(el);
-    subs.add(element.onUpdate.listen(([_]) {
-      render(element);
+    subs.add(widget.onUpdate.listen(([_]) {
+      render(widget);
     }));
     if (connections != null) {
       refreshConnections();
@@ -90,14 +94,14 @@ class HtmlRenderer {
   Map<int, String> trueAnchorIds = {};
   Map<int, Direction> anchorDirections = {};
 
-  Element convert(UIElement element, [bool spaced = false]) {
-    Element node = _convertRaw(element, spaced);
-    if (element.spacer || spaced) {
+  Element convert(Widget widget, [bool spaced = false]) {
+    Element node = _convertRaw(widget, spaced);
+    if (widget.spacer || spaced) {
       node.style.visibility = 'hidden';
       return node;
     }
-    for (Direction dir in element.anchoredDirections) {
-      int id = element.anchor(dir).id;
+    for (Direction dir in widget.anchoredDirections) {
+      int id = widget.anchor(dir).id;
       anchorDirections[id] = dir;
       node.id = 'anchoredElement${anchorCount++}';
       trueAnchorIds[id] = node.id;
@@ -105,23 +109,23 @@ class HtmlRenderer {
     return node;
   }
 
-  Element _convertRaw(UIElement element, [bool spaced = false]) {
-    if (element is MarkdownElement) return convertMarkdown(element, spaced);
-    if (element is Visualization) return convertVisualization(element, spaced);
-    if (element is Button) return convertButton(element, spaced);
-    if (element is Diagram) return convertDiagram(element, spaced);
-    if (element is FrameElement) return convertFrameElement(element, spaced);
-    if (element is Row) return convertRow(element, spaced);
-    if (element is TextElement) return convertTextElement(element, spaced);
-    if (element is Block) return convertBlock(element, spaced);
-    if (element is BlockGrid) return convertBlockGrid(element, spaced);
-    if (element is Anchor) return convertAnchor(element, spaced);
-    if (element is Binding) return convertBinding(element, spaced);
-    if (element is Strike) return convertStrike(element, spaced);
-    throw new SchemeException("Cannot render $element");
+  Element _convertRaw(Widget widget, [bool spaced = false]) {
+    if (widget is MarkdownWidget) return convertMarkdown(widget, spaced);
+    if (widget is Visualization) return convertVisualization(widget, spaced);
+    if (widget is Button) return convertButton(widget, spaced);
+    if (widget is Diagram) return convertDiagram(widget, spaced);
+    if (widget is FrameElement) return convertFrameElement(widget, spaced);
+    if (widget is Row) return convertRow(widget, spaced);
+    if (widget is TextWidget) return convertTextElement(widget, spaced);
+    if (widget is Block) return convertBlock(widget, spaced);
+    if (widget is BlockGrid) return convertBlockGrid(widget, spaced);
+    if (widget is Anchor) return convertAnchor(widget, spaced);
+    if (widget is Binding) return convertBinding(widget, spaced);
+    if (widget is Strike) return convertStrike(widget, spaced);
+    throw new SchemeException("Cannot render $widget");
   }
 
-  Element convertMarkdown(MarkdownElement mark, [bool spaced = false]) {
+  Element convertMarkdown(MarkdownWidget mark, [bool spaced = false]) {
     String html = md.markdownToHtml(mark.text,
         extensionSet: md.ExtensionSet.gitHubFlavored, inlineOnly: mark.inline);
     Element element = new Element.span();
@@ -150,7 +154,7 @@ class HtmlRenderer {
     DivElement wrapper = new DivElement()..classes = ['visualization'];
     wrapper.append(convert(viz.currentDiagram));
     DivElement footer = new DivElement()..classes = ['footer'];
-    for (UIElement item in viz.buttonRow) {
+    for (Widget item in viz.buttonRow) {
       footer.append(convert(item));
     }
     wrapper.append(footer);
@@ -177,7 +181,7 @@ class HtmlRenderer {
     for (FrameElement frame in diagram.frames) {
       frames.append(convert(frame, spaced || diagram.spacer));
     }
-    for (UIElement row in diagram.rows) {
+    for (Widget row in diagram.rows) {
       objects.append(convert(row, spaced || diagram.spacer));
     }
     connections = diagram.arrows.map(makeConnection);
@@ -218,13 +222,13 @@ class HtmlRenderer {
 
   Element convertRow(Row row, [bool spaced = false]) {
     DivElement div = new DivElement()..className = 'row';
-    for (UIElement element in row.elements) {
+    for (Widget element in row.elements) {
       div.append(convert(element, spaced || row.spacer));
     }
     return div;
   }
 
-  Element convertTextElement(TextElement text, [bool spaced = false]) {
+  Element convertTextElement(TextWidget text, [bool spaced = false]) {
     return new SpanElement()..text = text.text;
   }
 
