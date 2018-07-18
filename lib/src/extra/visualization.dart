@@ -23,7 +23,7 @@ class Button extends Widget {
 
 class Visualization extends Widget {
   Frame env;
-  Expression code;
+  List<Expression> code;
   List<Diagram> diagrams = [];
   Map<Frame, Expression> frameReturnValues = new Map.identity();
   int current = 0;
@@ -44,7 +44,7 @@ class Visualization extends Widget {
     bool oldStatus = env.interpreter.tailCallOptimized;
     env.interpreter.tailCallOptimized = false;
     _makeVisualizeStep([], env);
-    schemeEval(code, env);
+    code.forEach((expr) => schemeEval(expr, env));
     _makeVisualizeStep([], env);
     env.interpreter.tailCallOptimized = oldStatus;
 

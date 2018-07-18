@@ -71,7 +71,7 @@ class ExtraLibrary extends SchemeLibrary with _$ExtraLibraryMixin {
   }
 
   @noeval
-  Visualization visualize(Expression code, Frame env) {
+  Visualization visualize(List<Expression> code, Frame env) {
     return new Visualization(code, env);
   }
 

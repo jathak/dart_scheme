@@ -6,7 +6,7 @@ abstract class _$ExtraLibraryMixin {
   Boolean isCompleted(AsyncExpression expr);
   Diagram draw(Expression expression);
   Diagram diagram(Frame env);
-  Visualization visualize(Expression code, Frame env);
+  Visualization visualize(List<Expression> code, Frame env);
   PairOrEmpty bindings(Frame env);
   void triggerEvent(List<Expression> exprs, Frame env);
   SchemeEventListener listenFor(SchemeSymbol id, Procedure onEvent, Frame env);
@@ -44,10 +44,10 @@ abstract class _$ExtraLibraryMixin {
     addPrimitive(__env, const SchemeSymbol("diagram"), (__exprs, __env) {
       return this.diagram(__env);
     }, 0);
-    addOperandPrimitive(__env, const SchemeSymbol("visualize"),
+    addVariableOperandPrimitive(__env, const SchemeSymbol("visualize"),
         (__exprs, __env) {
-      return this.visualize(__exprs[0], __env);
-    }, 1);
+      return this.visualize(__exprs, __env);
+    }, 0, -1);
     addPrimitive(__env, const SchemeSymbol("bindings"), (__exprs, __env) {
       return this.bindings(__env);
     }, 0);
