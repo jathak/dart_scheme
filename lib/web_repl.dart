@@ -24,7 +24,8 @@ class Repl {
   List<SchemeSymbol> noIndent = [
     const SchemeSymbol("let"),
     const SchemeSymbol("define"),
-    const SchemeSymbol("lambda")
+    const SchemeSymbol("lambda"),
+    const SchemeSymbol("define-macro")
   ];
 
   Repl(this.interpreter, Element parent, {this.prompt: 'scm> '}) {
