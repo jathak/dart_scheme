@@ -32,6 +32,14 @@ main() {
       var solutions = evaluate(query, [fact]);
       expect(solutions, isEmpty);
     });
+    test("negation as failure", () {
+      Fact fact = new Fact(clause(['equal', '?x', '?x']));
+      Pair relation = clause(['equal', 'jen', '?x']);
+      Query query = new Query(
+          [new Pair(const SchemeSymbol('not'), new Pair(relation, nil))]);
+      var solutions = evaluate(query, [fact]);
+      expect(solutions, isEmpty);
+    });
   });
 }
 
