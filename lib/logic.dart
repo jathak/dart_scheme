@@ -195,7 +195,7 @@ class _LogicRun {
     if (depth > depthLimit) return;
     Pair clause = clauses.first;
     if (clause.first == not) {
-      var grounded = ground(clause.second, env) as Iterable<Pair>;
+      var grounded = ground(clause.second, env).pair.map((expr) => expr.pair);
       if (search(grounded, env, depth).isEmpty) {
         var envHead = new LogicEnv(env);
         yield* search(clauses.skip(1), envHead, depth + 1);
@@ -214,8 +214,12 @@ class _LogicRun {
   }
 
   Expression ground(Expression expr, LogicEnv env) {
-    while (expr is Variable) {
-      expr = env.lookup(expr);
+    if (expr is Variable) {
+      var resolved = env.lookup(expr);
+      if (resolved == null || expr == resolved) {
+        return expr;
+      }
+      return ground(resolved, env);
     }
     if (expr is Pair) {
       return new Pair(ground(expr.first, env), ground(expr.second, env));
