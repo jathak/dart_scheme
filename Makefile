@@ -13,10 +13,10 @@ deploy: build
 	touch build/.static
 	# The static Dokku buildpack weirdly has missing URIs display index.html
 	# instead of 404-ing. This custom config should fix that.
-	cp tool/app-nginx.conf.sigil deploy/app-nginx.conf.sigil
-	echo "404 Not Found" > deploy/404.txt
+	cp tool/app-nginx.conf.sigil build/app-nginx.conf.sigil
+	echo "404 Not Found" > build/404.txt
 	# Because application cache is horrible even when you remove it
-	printf "CACHE MANIFEST\nNETWORK:\n*" > deploy/app.appcache 
+	printf "CACHE MANIFEST\nNETWORK:\n*" > build/app.appcache 
 	bash tool/deploy.sh
 
 checks:
