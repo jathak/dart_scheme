@@ -1,6 +1,6 @@
 library builder;
 
-import 'package:dart2_constant/convert.dart' show json;
+import 'dart:convert' show json;
 
 import 'package:analyzer/analyzer.dart';
 

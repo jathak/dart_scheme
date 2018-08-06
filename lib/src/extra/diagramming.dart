@@ -19,30 +19,12 @@ class Binding extends Widget {
   final Widget value;
   final bool isReturn;
   Binding(this.symbol, this.value, [this.isReturn = false]);
-  Map serialize() => finishSerialize({
-        'type': 'Binding',
-        'symbol': symbol.serialize(),
-        'value': value.serialize(),
-        'isReturn': isReturn
-      });
-  Binding deserialize(Map data) {
-    return new Binding(Serialization.deserialize(data['symbol']),
-        Serialization.deserialize(data['value']), data['isReturn'])
-      ..finishDeserialize(data);
-  }
 }
 
 class Row extends Widget {
   final List<Widget> elements;
   Row(this.elements);
   toString() => elements.toString();
-  Map serialize() => finishSerialize({
-        'type': 'Row',
-        'elements': elements.map((el) => el.serialize()).toList()
-      });
-  Row deserialize(Map data) =>
-      new Row(data['elements'].map(Serialization.deserialize).toList())
-        ..finishDeserialize(data);
 }
 
 class FrameElement extends Widget {
@@ -66,32 +48,6 @@ class FrameElement extends Widget {
       bindings.add(new Binding(symb, diagram.bindingTo(returnValue), true));
     }
   }
-
-  FrameElement._deserialize(Map data) {
-    id = data['id'];
-    tag = data['tag'];
-    parentId = data['parentId'];
-    active = data['active'] ?? false;
-    fromMacro = data['fromMacro'] ?? false;
-    bindings = data['bindings']?.map(Serialization.deserialize)?.toList();
-  }
-
-  Map serialize() => finishSerialize({
-        'type': 'FrameElement',
-        'id': id,
-        'tag': tag,
-        'parentId': parentId,
-        'active': active,
-        'fromMacro': fromMacro,
-        'bindings': bindings.map((el) => el.serialize()).toList()
-      });
-
-  FrameElement deserialize(Map data) {
-    return new FrameElement._deserialize(data)..finishDeserialize(data);
-  }
-
-  // Used to intialize the deserializer
-  static FrameElement stub = new FrameElement._deserialize({});
 }
 
 class Diagram extends DiagramInterface {
@@ -107,26 +63,6 @@ class Diagram extends DiagramInterface {
     }
     _finish();
   }
-
-  Map serialize() => finishSerialize({
-        'type': 'Diagram',
-        'frames': frames.map((frame) => frame.serialize()).toList(),
-        'rows': rows.map((row) => row.serialize()).toList(),
-        'arrows': arrows.map((arrow) => arrow.serialize()).toList()
-      });
-
-  Diagram._deserialize(Map data) {
-    frames = data['frames']?.map(Serialization.deserialize)?.toList();
-    rows = data['rows']?.map(Serialization.deserialize)?.toList();
-    arrows = data['arrows']?.map(Serialization.deserialize)?.toList();
-  }
-
-  Diagram deserialize(Map data) {
-    return new Diagram._deserialize(data)..finishDeserialize(data);
-  }
-
-  // Used to intialize the deserializer
-  static Diagram stub = new Diagram._deserialize({});
 
   Diagram.allFrames(List<Pair<Frame, Expression>> framePairs, Frame active) {
     for (Pair<Frame, Expression> framePair in framePairs) {

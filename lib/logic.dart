@@ -3,7 +3,7 @@
 /// This library does not depend on the implementation library.
 library logic;
 
-import 'package:quiver_hashcode/hashcode.dart' show hash2;
+import 'package:quiver/core.dart' show hash2;
 
 import 'package:cs61a_scheme/cs61a_scheme.dart';
 export 'package:cs61a_scheme/cs61a_scheme.dart'
@@ -187,7 +187,8 @@ class _LogicRun {
     yield* search(query.clauses, new LogicEnv(null), 0);
   }
 
-  search(Iterable<Pair> clauses, LogicEnv env, int depth) sync* {
+  Iterable<LogicEnv> search(
+      Iterable<Pair> clauses, LogicEnv env, int depth) sync* {
     if (clauses.isEmpty) {
       yield env;
       return;

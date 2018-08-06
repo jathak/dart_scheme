@@ -7,7 +7,6 @@ import 'dart:async';
 import 'expressions.dart';
 import 'logging.dart';
 import 'procedures.dart' show Procedure;
-import 'serialization.dart';
 import 'utils.dart' show schemeApply;
 
 class Direction extends SelfEvaluating {
@@ -52,7 +51,7 @@ class Direction extends SelfEvaluating {
 ///
 /// Whenever something extending [Widget] is logged, the web REPL will render it
 /// instead of just printing it. Used primarily for diagramming.
-abstract class Widget extends SelfEvaluating implements Serializable {
+abstract class Widget extends SelfEvaluating {
   Widget();
   toJS() => this;
   Map<Direction, Anchor> _anchors = {};
@@ -66,25 +65,6 @@ abstract class Widget extends SelfEvaluating implements Serializable {
   void update() => _controller.add(null);
   StreamController _controller = new StreamController.broadcast();
   Stream get onUpdate => _controller.stream;
-
-  Map finishSerialize(Map data) {
-    if (_anchors.isNotEmpty) {
-      data['anchors'] = new Map<String, dynamic>.fromIterables(
-          _anchors.keys.map((k) => k._id),
-          _anchors.values.map((v) => v.serialize()));
-    }
-    if (spacer) data['spacer'] = spacer;
-    return data;
-  }
-
-  void finishDeserialize(Map data) {
-    if (data.containsKey('anchors')) {
-      _anchors = new Map<Direction, Anchor>.fromIterables(
-          data['anchors'].keys.map((k) => new Direction(k)),
-          data['anchors'].values.map(Serialization.deserialize));
-    }
-    if (data.containsKey('spacer')) spacer = data['spacer'];
-  }
 }
 
 class Anchor extends Widget {
@@ -110,14 +90,6 @@ class TextWidget extends Widget {
   final String text;
   TextWidget(this.text);
   toString() => text;
-
-  Map serialize() => finishSerialize({
-        'type': 'TextWidget',
-        'text': text,
-      });
-  TextWidget deserialize(Map data) {
-    return new TextWidget(data['text'])..finishDeserialize(data);
-  }
 }
 
 class MarkdownWidget extends TextWidget {
@@ -134,23 +106,12 @@ class MarkdownWidget extends TextWidget {
       schemeApply(proc, nil, env);
     }
   }
-
-  Map serialize() => {'type': 'MarkdownElement', 'text': text};
-
-  MarkdownWidget deserialize(Map data) {
-    return new MarkdownWidget(data['text']);
-  }
 }
 
 class Strike extends Widget {
   Strike();
 
   toString() => "#[Strike]";
-
-  Map serialize() => finishSerialize({'type': 'Strike'});
-  Strike deserialize(Map data) {
-    return new Strike()..finishDeserialize(data);
-  }
 }
 
 class Block extends Widget {
@@ -160,15 +121,8 @@ class Block extends Widget {
   Block.pair(this.inside) : type = "pair";
   Block.vector(this.inside) : type = "vector";
   Block.promise(this.inside) : type = "promise";
-  Block.async(this.inside) : type = "async";
+  Block.asynch(this.inside) : type = "async";
   toString() => "#[Block:$type:$inside]";
-  Map serialize() => finishSerialize(
-      {'type': 'Block', 'blockType': type, 'inside': inside.serialize()});
-  Block deserialize(Map data) {
-    return new Block._(
-        data['blockType'], Serialization.deserialize(data['inside']))
-      ..finishDeserialize(data);
-  }
 }
 
 class BlockGrid extends Widget {
@@ -216,19 +170,6 @@ class BlockGrid extends Widget {
       .toList())
     ..spacer = true;
   toString() => "#$_grid";
-
-  Map serialize() => finishSerialize({
-        'type': 'BlockGrid',
-        'grid': _grid
-            .map((row) => row.map((item) => item.serialize()).toList())
-            .toList()
-      });
-  BlockGrid deserialize(Map data) {
-    return new BlockGrid(data['grid'].map((row) {
-      return row.map((item) => Serialization.deserialize(item)).toList();
-    }).toList())
-      ..finishDeserialize(data);
-  }
 }
 
 abstract class DiagramInterface extends Widget {

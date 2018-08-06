@@ -1,24 +1,17 @@
 library cs61a_scheme.core.serialization;
 
-import 'package:dart2_constant/convert.dart' show json;
+import 'dart:convert' show json;
 
 import 'expressions.dart';
 import 'numbers.dart';
 import 'logging.dart';
-import 'widgets.dart';
 
 final Map<String, Serializable> deserializers = {
   'Integer': Number.zero,
   'Double': new Double(1.5),
   'Boolean': schemeTrue,
   'SchemeSymbol': const SchemeSymbol('x'),
-  'SchemeString': const SchemeString('x'),
-  'Anchor': new Anchor.withId(-1),
-  'TextWidget': new TextWidget(""),
-  'MarkdownWidget': new MarkdownWidget(null),
-  'Strike': new Strike(),
-  'Block': new Block.pair(null),
-  'BlockGrid': new BlockGrid([[]])
+  'SchemeString': const SchemeString('x')
 };
 
 abstract class Serializable<T extends Expression> extends Expression {

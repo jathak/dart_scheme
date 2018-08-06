@@ -3,10 +3,7 @@
 ## Setting Up Your Development Environment
 
 This interpreter is written in [Dart][]. You should start by downloading
-version 1.24.3 of the [Dart SDK][]. This is the latest version at the time of
-this writing (March 2018), and is likely to be the last version released prior
-to Dart 2. I plan to transition this codebase to Dart 2 once it's released, but
-for now, you should use Dart 1.24.
+version 2.0.0 of the [Dart SDK][].
 
 You should then clone this repo and  the implementation skeleton into the same
 parent directory:
@@ -51,21 +48,17 @@ working `dart_scheme_impl` to run. You can skip these tests with
 
 ### Running the Web App
 
-You can run the web app with one of the following commands:
+To run the web app, you need to install the `webdev` package by running
+`pub global activate webdev`.
 
-#### `pub serve --web-compiler=dartdevc`
+You can then run the web app with `webdev serve`. This uses an incremental
+compiler that's faster for development, but may have some behavior differences
+compared to the released version. It will usually take a while to build the
+first time, but all intermediate files are cached on disk, so future builds will
+be much faster (even if you kill and relaunch the `webdev` process).
 
-This hosts a local server at `localhost:8080` using an incremental build that's
-faster, but may have some behavior differences from the deployed build. The app
-will be rebuilt whenever you make changes to the code and refresh.
-
-#### `pub serve`
-
-This also hosts a local server at `localhost:8080`, but using a build that's
-nearly identical to the deployed one (but without minification). Use this if
-you're testing something that acts weird in the dev compiler or when debugging
-performance. It takes longer to build, and requires rebuilding the whole app
-when any code is changed.
+Run `webdev serve --release` to build with the same compiler as the released
+version.
 
 ## Repo Organization
 

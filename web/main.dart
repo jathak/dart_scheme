@@ -47,8 +47,8 @@ main() async {
   }
   if (window.localStorage.containsKey('#scheme-theme')) {
     try {
-      var expr = Serialization
-          .deserializeFromJson(window.localStorage['#scheme-theme']);
+      var expr = Serialization.deserializeFromJson(
+          window.localStorage['#scheme-theme']);
       if (expr is Theme) {
         applyTheme(expr, css, style, false);
       }
@@ -84,10 +84,7 @@ startScheme(WebLibrary webLibrary) async {
   addDemo(demos, 'try-monochrome', "(theme 'monochrome)");
   addDemo(demos, 'try-monochrome-dark', "(theme 'monochrome-dark)");
   addDemo(demos, 'try-go-bears', "(theme 'go-bears)");
-  addDemo(
-      demos,
-      'try-viz',
-      """(define (fact n)
+  addDemo(demos, 'try-viz', """(define (fact n)
        (if (= n 0)
            1
            (* n (fact (- n 1)))))

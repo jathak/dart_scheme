@@ -1,7 +1,7 @@
 library web_repl;
 
 import 'dart:async';
-import 'package:dart2_constant/convert.dart' show json;
+import 'dart:convert' show json;
 import 'dart:html';
 
 import 'package:cs61a_scheme/cs61a_scheme_web.dart';

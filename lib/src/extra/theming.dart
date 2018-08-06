@@ -1,18 +1,6 @@
-library cs61a_scheme.web.theming;
+library cs61a_scheme.extra.theming;
 
-import 'dart:async';
-import 'dart:html';
-
-import 'package:cs61a_scheme/cs61a_scheme_extra.dart';
-
-StreamController<Theme> _controller = new StreamController();
-
-applyTheme(Theme theme, String css, Element style, [bool notify = true]) {
-  style.innerHtml = theme.compile(css);
-  if (notify) _controller.add(theme);
-}
-
-final Stream<Theme> onThemeChange = _controller.stream.asBroadcastStream();
+import 'package:cs61a_scheme/cs61a_scheme.dart';
 
 class Theme extends SelfEvaluating implements Serializable<Theme> {
   Map<SchemeSymbol, Color> colors = {};

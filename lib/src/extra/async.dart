@@ -44,7 +44,7 @@ class AsyncExpression<T extends Expression> extends Expression {
   Widget draw(DiagramInterface diagram) {
     Widget inside =
         complete ? diagram.pointTo(result) : new TextWidget("async");
-    return new Block.async(inside);
+    return new Block.asynch(inside);
   }
 }
 

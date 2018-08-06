@@ -13,8 +13,6 @@ abstract class _$ExtraLibraryMixin {
   void cancelListener(SchemeEventListener listener, Frame env);
   void cancelAll(SchemeSymbol id, Frame env);
   String stringAppend(List<Expression> exprs);
-  FlagTrace trace(Expression code, Frame env);
-  Visualization traceToVisualization(FlagTrace trace);
   String serialize(Serializable expr);
   Expression deserialize(String json);
   MarkdownWidget formatted(List<Expression> expressions, Frame env);
@@ -84,16 +82,6 @@ abstract class _$ExtraLibraryMixin {
         (__exprs, __env) {
       return new SchemeString(this.stringAppend(__exprs));
     }, 0, -1);
-    addOperandPrimitive(__env, const SchemeSymbol("trace"), (__exprs, __env) {
-      return this.trace(__exprs[0], __env);
-    }, 1);
-    addPrimitive(__env, const SchemeSymbol('trace->visualization'),
-        (__exprs, __env) {
-      if (__exprs[0] is! FlagTrace)
-        throw new SchemeException(
-            'Argument of invalid type passed to trace->visualization.');
-      return this.traceToVisualization(__exprs[0]);
-    }, 1);
     addPrimitive(__env, const SchemeSymbol("serialize"), (__exprs, __env) {
       if (__exprs[0] is! Serializable)
         throw new SchemeException(

@@ -1,7 +1,8 @@
 language: dart
 dart:
 - stable
-- dev
+# Disabling dev builds for now since the current one is 2.0.0-dev.69.5
+# - dev
 branches:
   only:
   - master
@@ -21,7 +22,7 @@ script:
 - pub run grinder check
 - pub run dart_style:format -n --set-exit-if-changed .
 - dartanalyzer --fatal-warnings --strong .
-- pub run dependency_validator
+- pub run dependency_validator --ignore build_runner,build_web_compilers,sass_builder
 before_deploy:
 - openssl aes-256-cbc -K $encrypted_2195c966699e_key -iv $encrypted_2195c966699e_iv
   -in .travis/deploy.key.enc -out .travis/deploy.key -d

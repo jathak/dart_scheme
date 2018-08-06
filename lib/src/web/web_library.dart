@@ -8,7 +8,6 @@ import 'package:cs61a_scheme/cs61a_scheme_extra.dart';
 
 import 'imports.dart';
 import 'js_interop.dart';
-import 'theming.dart';
 
 part 'web_library.g.dart';
 
@@ -162,3 +161,12 @@ class WebLibrary extends SchemeLibrary with _$WebLibraryMixin {
   @SchemeSymbol("color->css")
   String colorToCss(Color color) => color.toCSS();
 }
+
+StreamController<Theme> _controller = new StreamController();
+
+applyTheme(Theme theme, String css, html.Element style, [bool notify = true]) {
+  style.innerHtml = theme.compile(css);
+  if (notify) _controller.add(theme);
+}
+
+final Stream<Theme> onThemeChange = _controller.stream.asBroadcastStream();

@@ -100,7 +100,7 @@ parse_args() {
 	# vars should be declared here, with sane defaults if applicable.
 
 	# Source directory & target branch.
-	deploy_directory=${GIT_DEPLOY_DIR:-build/web}
+	deploy_directory=${GIT_DEPLOY_DIR:-build}
 	deploy_local_branch=${GIT_DEPLOY_LOCAL_BRANCH:-deploy}
 	deploy_remote_branch=${GIT_DEPLOY_REMOTE_BRANCH:-master}
 
