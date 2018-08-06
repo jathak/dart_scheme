@@ -4,10 +4,9 @@ abstract class _$ExtraLibraryMixin {
   Future<Expression> runAsync(Procedure proc, Frame env);
   Future<Expression> runAfter(Number millis, Procedure proc, Frame env);
   Boolean isCompleted(AsyncExpression expr);
-  void render(UIElement ui, Frame env);
   Diagram draw(Expression expression);
   Diagram diagram(Frame env);
-  Visualization visualize(Expression code, Frame env);
+  Visualization visualize(List<Expression> code, Frame env);
   PairOrEmpty bindings(Frame env);
   void triggerEvent(List<Expression> exprs, Frame env);
   SchemeEventListener listenFor(SchemeSymbol id, Procedure onEvent, Frame env);
@@ -18,7 +17,8 @@ abstract class _$ExtraLibraryMixin {
   Visualization traceToVisualization(FlagTrace trace);
   String serialize(Serializable expr);
   Expression deserialize(String json);
-  MarkdownElement formatted(List<Expression> expressions, Frame env);
+  MarkdownWidget formatted(List<Expression> expressions, Frame env);
+  void logicStart(Frame env);
   void importAll(Frame __env) {
     addPrimitive(__env, const SchemeSymbol("run-async"), (__exprs, __env) {
       if (__exprs[0] is! Procedure)
@@ -38,23 +38,16 @@ abstract class _$ExtraLibraryMixin {
             'Argument of invalid type passed to completed?.');
       return this.isCompleted(__exprs[0]);
     }, 1);
-    addPrimitive(__env, const SchemeSymbol("render"), (__exprs, __env) {
-      if (__exprs[0] is! UIElement)
-        throw new SchemeException('Argument of invalid type passed to render.');
-      var __value = undefined;
-      this.render(__exprs[0], __env);
-      return __value;
-    }, 1);
     addPrimitive(__env, const SchemeSymbol("draw"), (__exprs, __env) {
       return this.draw(__exprs[0]);
     }, 1);
     addPrimitive(__env, const SchemeSymbol("diagram"), (__exprs, __env) {
       return this.diagram(__env);
     }, 0);
-    addOperandPrimitive(__env, const SchemeSymbol("visualize"),
+    addVariableOperandPrimitive(__env, const SchemeSymbol("visualize"),
         (__exprs, __env) {
-      return this.visualize(__exprs[0], __env);
-    }, 1);
+      return this.visualize(__exprs, __env);
+    }, 0, -1);
     addPrimitive(__env, const SchemeSymbol("bindings"), (__exprs, __env) {
       return this.bindings(__env);
     }, 0);
@@ -117,5 +110,10 @@ abstract class _$ExtraLibraryMixin {
         (__exprs, __env) {
       return this.formatted(__exprs, __env);
     }, 0, -1);
+    addPrimitive(__env, const SchemeSymbol('logic'), (__exprs, __env) {
+      var __value = undefined;
+      this.logicStart(__env);
+      return __value;
+    }, 0);
   }
 }

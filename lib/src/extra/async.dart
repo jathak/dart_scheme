@@ -41,9 +41,9 @@ class AsyncExpression<T extends Expression> extends Expression {
   };
 
   @override
-  UIElement draw(DiagramInterface diagram) {
-    UIElement inside =
-        complete ? diagram.pointTo(result) : new TextElement("async");
+  Widget draw(DiagramInterface diagram) {
+    Widget inside =
+        complete ? diagram.pointTo(result) : new TextWidget("async");
     return new Block.async(inside);
   }
 }

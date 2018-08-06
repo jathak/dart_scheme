@@ -7,6 +7,7 @@ import 'package:cs61a_scheme/cs61a_scheme.dart';
 import 'async.dart';
 import 'diagramming.dart';
 import 'flag_trace.dart';
+import 'logic_library.dart';
 import 'operand_procedures.dart';
 import 'visualization.dart';
 
@@ -61,10 +62,6 @@ class ExtraLibrary extends SchemeLibrary with _$ExtraLibraryMixin {
   Boolean isCompleted(AsyncExpression expr) =>
       expr.complete ? schemeTrue : schemeFalse;
 
-  void render(UIElement ui, Frame env) {
-    env.interpreter.renderer(ui);
-  }
-
   Diagram draw(Expression expression) {
     return new Diagram(expression);
   }
@@ -74,7 +71,7 @@ class ExtraLibrary extends SchemeLibrary with _$ExtraLibraryMixin {
   }
 
   @noeval
-  Visualization visualize(Expression code, Frame env) {
+  Visualization visualize(List<Expression> code, Frame env) {
     return new Visualization(code, env);
   }
 
@@ -142,8 +139,13 @@ class ExtraLibrary extends SchemeLibrary with _$ExtraLibraryMixin {
     return Serialization.deserializeFromJson(json);
   }
 
-  MarkdownElement formatted(List<Expression> expressions, Frame env) {
+  MarkdownWidget formatted(List<Expression> expressions, Frame env) {
     String text = expressions.map((expr) => expr.display).join('');
-    return new MarkdownElement(text, inline: true, env: env);
+    return new MarkdownWidget(text, inline: true, env: env);
+  }
+
+  @SchemeSymbol('logic')
+  void logicStart(Frame env) {
+    env.interpreter.importLibrary(new LogicLibrary());
   }
 }

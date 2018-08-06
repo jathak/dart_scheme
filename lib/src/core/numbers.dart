@@ -13,7 +13,7 @@ import 'serialization.dart';
 /// With the exception of true division, all arithmetic operations between two
 /// [Integer] expressions should return another [Integer].
 abstract class Number extends SelfEvaluating {
-  final inlineUI = true;
+  final inlineInDiagram = true;
   dynamic get value;
 
   Number();

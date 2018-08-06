@@ -37,14 +37,14 @@ Shift+Enter to add missing parens and run the current input
 """;
 
 main() async {
-  var inter = new Interpreter(new StaffProjectImplementation());
-  var normals = inter.globalEnv.bindings.keys.toSet();
-  var extra = new ExtraLibrary();
-  var logic = new LogicLibrary();
-  var diagramBox = querySelector('#diagram');
   String css = await HttpRequest.getString('assets/style.css');
   var style = querySelector('#theme');
-  var web = new WebLibrary(diagramBox, context['jsPlumb'], css, style);
+  var webLibrary = new WebLibrary(context['jsPlumb'], css, style);
+  if (window.location.href.contains('logic')) {
+    await startLogic(webLibrary);
+  } else {
+    await startScheme(webLibrary);
+  }
   if (window.localStorage.containsKey('#scheme-theme')) {
     try {
       var expr = Serialization
@@ -60,9 +60,14 @@ main() async {
   onThemeChange.listen((Theme theme) {
     window.localStorage['#scheme-theme'] = Serialization.serializeToJson(theme);
   });
+}
+
+startScheme(WebLibrary webLibrary) async {
+  var inter = new Interpreter(new StaffProjectImplementation());
+  var normals = inter.globalEnv.bindings.keys.toSet();
+  var extra = new ExtraLibrary();
   inter.importLibrary(extra);
-  inter.importLibrary(logic);
-  inter.importLibrary(web);
+  inter.importLibrary(webLibrary);
   new Repl(inter, document.body);
   var specials = inter.globalEnv.bindings.keys.toSet().difference(normals);
   inter.importLibrary(new TurtleLibrary(querySelector('canvas'), inter));
@@ -94,14 +99,62 @@ main() async {
       'builtin-turtle': turtles.join(' ')
     })
   ]);
-  inter.logger(new MarkdownElement(motd, env: demos), true);
+  inter.logger(new MarkdownWidget(motd, env: demos), true);
 }
 
 addDemo(Frame env, String demoName, String code) {
   addPrimitive(env, new SchemeSymbol.runtime(demoName), (_, __) {
     var prompt = "<span class='repl-prompt'>scm></span> `$code`";
-    env.interpreter.logger(new MarkdownElement(prompt), true);
+    env.interpreter.logger(new MarkdownWidget(prompt), true);
     env.interpreter.run(code);
+    return undefined;
+  }, 0);
+}
+
+const String logicMotd = "**61A Logic Web Interpreter**"
+    "                                     <small>"
+    "[View Source on GitHub](https://github.com/Cal-CS-61A-Staff/dart_scheme)"
+    """</small>
+--------------------------------------------------------------------------------
+**Themes**
+[default](:default) [solarized](:solarized) [monochrome](:monochrome) """
+    """[monochrome-dark](:monochrome-dark) [go-bears](:go-bears)
+
+**Usage**
+`(fact consequent hypothesis1 ...)` or `(! consequent hypothesis1 ...)`:
+  Assert a consequent, followed by zero or more hypotheses.
+`(query clause1 clause2 ...)` or `(? clause1 clause2 ...)`
+  Query zero or more relations simultaneously.
+`(query-one clause1 clause2 ...)`
+  Like query, but finds at most one solution.
+
+""";
+
+startLogic(WebLibrary webLibrary) {
+  document.title = 'Logic Interpreter';
+  var inter = new Interpreter(new StaffProjectImplementation());
+  new Repl(inter, document.body, prompt: 'logic> ');
+  inter.globalEnv.bindings.clear();
+  inter.specialForms.clear();
+  inter.importLibrary(new LogicLibrary());
+  var keywords = inter.globalEnv.bindings.keys.toSet();
+  context.callMethod('hljsRegister', [
+    new JsObject.jsify({'builtin-special': keywords.join(' ')})
+  ]);
+  var themeInter = new Interpreter(new StaffProjectImplementation());
+  themeInter.importLibrary(new ExtraLibrary());
+  themeInter.importLibrary(webLibrary);
+  addTheme(themeInter, webLibrary, const SchemeSymbol('default'));
+  addTheme(themeInter, webLibrary, const SchemeSymbol('solarized'));
+  addTheme(themeInter, webLibrary, const SchemeSymbol('monochrome'));
+  addTheme(themeInter, webLibrary, const SchemeSymbol('monochrome-dark'));
+  addTheme(themeInter, webLibrary, const SchemeSymbol('go-bears'));
+  inter.logger(new MarkdownWidget(logicMotd, env: themeInter.globalEnv), true);
+}
+
+addTheme(Interpreter inter, WebLibrary web, SchemeSymbol themeName) {
+  addPrimitive(inter.globalEnv, themeName, (_, __) {
+    web.theme(themeName, inter.globalEnv);
     return undefined;
   }, 0);
 }
