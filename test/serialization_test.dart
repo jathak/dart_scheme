@@ -1,6 +1,6 @@
 import 'package:test/test.dart';
 
-import 'package:cs61a_scheme/cs61a_scheme.dart';
+import 'package:cs61a_scheme/cs61a_scheme_extra.dart';
 
 main() {
   group("serialization", () {
@@ -20,38 +20,6 @@ main() {
     });
     test("works for Double", () {
       stable(new Double(1.6));
-    });
-    test("works for Anchor", () {
-      var a = new Anchor();
-      var b = remake(a);
-      expect(b.id, equals(a.id));
-    });
-    test("works for TextElement", () {
-      var a = new TextWidget("abc");
-      var b = remake(a);
-      expect(b.text, equals(a.text));
-    });
-    test("works for Strike", () {
-      expect(remake(new Strike()), new isInstanceOf<Strike>());
-    });
-    test("works for Block", () {
-      var a = new Block.pair(new Strike());
-      var b = remake(a);
-      expect(b.type, equals(a.type));
-      expect(b.inside, new isInstanceOf<Strike>());
-    });
-    test("works for BlockGrid", () {
-      var a = new BlockGrid.row([
-        new Block.pair(new TextWidget("1")),
-        new Block.vector(new Strike())
-      ]);
-      var b = remake(a);
-      expect(b.rowCount, equals(1));
-      expect(b.columnCount, equals(2));
-      expect(b.rowAt(0).first.type, "pair");
-      expect(b.rowAt(0).first.inside.text, "1");
-      expect(b.rowAt(0).last.type, "vector");
-      expect(b.rowAt(0).last.inside, new isInstanceOf<Strike>());
     });
   });
 }

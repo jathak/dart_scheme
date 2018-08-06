@@ -1,4 +1,0 @@
-analyzer:
-  exclude:
-    - deploy/**
-  strong-mode: true

@@ -2,11 +2,9 @@ library cs61a_scheme.web_turtle;
 
 import 'dart:html';
 import 'dart:math' show cos, sin;
-import 'package:dart2_constant/math.dart' show pi;
+import 'dart:math' show pi;
 
-import 'package:cs61a_scheme/cs61a_scheme.dart';
-
-import 'theming.dart';
+import 'package:cs61a_scheme/cs61a_scheme_extra.dart';
 
 class Turtle {
   CanvasElement element;

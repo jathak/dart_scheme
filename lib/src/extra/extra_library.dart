@@ -6,7 +6,6 @@ import 'package:cs61a_scheme/cs61a_scheme.dart';
 
 import 'async.dart';
 import 'diagramming.dart';
-import 'flag_trace.dart';
 import 'logic_library.dart';
 import 'operand_procedures.dart';
 import 'visualization.dart';
@@ -18,10 +17,6 @@ part 'extra_library.g.dart';
 /// the primitives and performs type checking on arguments).
 @schemelib
 class ExtraLibrary extends SchemeLibrary with _$ExtraLibraryMixin {
-  ExtraLibrary() {
-    initTraceDeserializers();
-  }
-
   void importAll(Frame env) {
     super.importAll(env);
     env.interpreter.specialForms[const SchemeSymbol('define-async')] =
@@ -119,16 +114,6 @@ class ExtraLibrary extends SchemeLibrary with _$ExtraLibraryMixin {
   @SchemeSymbol('string-append')
   String stringAppend(List<Expression> exprs) {
     return exprs.map((e) => e.display).join('');
-  }
-
-  @noeval
-  FlagTrace trace(Expression code, Frame env) {
-    return new FlagTraceBuilder(code, env).trace;
-  }
-
-  @SchemeSymbol('trace->visualization')
-  Visualization traceToVisualization(FlagTrace trace) {
-    return new Visualization.fromTrace(trace);
   }
 
   String serialize(Serializable expr) {

@@ -9,7 +9,7 @@ import 'package:markdown/markdown.dart' as md;
 import 'package:cs61a_scheme/cs61a_scheme_extra.dart';
 import 'package:cs61a_scheme/highlight.dart';
 
-import 'theming.dart';
+import 'web_library.dart';
 
 void render(Widget widget, Element container) {
   new _Renderer(container, context['jsPlumb']).render(widget);

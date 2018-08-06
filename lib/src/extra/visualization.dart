@@ -5,7 +5,6 @@ import 'dart:async';
 import 'package:cs61a_scheme/cs61a_scheme.dart';
 
 import 'diagramming.dart';
-import 'flag_trace.dart';
 
 class Button extends Widget {
   void Function() click;
@@ -17,8 +16,6 @@ class Button extends Widget {
       env.interpreter.triggerEvent(id, data, env);
     };
   }
-  serialize() => throw new UnsupportedError('Buttons cannot be serialized');
-  deserialize(data) => null;
 }
 
 class Visualization extends Widget {
@@ -58,11 +55,6 @@ class Visualization extends Widget {
     _init();
   }
 
-  Visualization.fromTrace(FlagTrace trace) {
-    diagrams = trace.steps.map((step) => step.diagram).toList();
-    _init();
-  }
-
   _init() {
     bool animating = false;
     goto(int index, [bool keepAnimating = false]) {
@@ -73,13 +65,13 @@ class Visualization extends Widget {
         animating = false;
       }
       current = index;
-      buttonRow[2] = new TextWidget("${current+1}/${diagrams.length}");
+      buttonRow[2] = new TextWidget("${current + 1}/${diagrams.length}");
       update();
     }
 
     Button first = new Button(new TextWidget("<<"), () => goto(0));
     Button prev = new Button(new TextWidget("<"), () => goto(current - 1));
-    TextWidget status = new TextWidget("${current+1}/${diagrams.length}");
+    TextWidget status = new TextWidget("${current + 1}/${diagrams.length}");
     Button next = new Button(new TextWidget(">"), () => goto(current + 1));
     Button last = new Button(new TextWidget(">>"), () => goto(-1));
     Button animate = new Button(new TextWidget("Animate"), () async {
@@ -138,8 +130,4 @@ class Visualization extends Widget {
     _addDiagram(env);
     return undefined;
   }
-
-  serialize() =>
-      throw new UnsupportedError('Visualizations cannot be serialized');
-  deserialize(data) => null;
 }

@@ -1,10 +1,9 @@
 library cs61a_scheme.core.expressions;
 
 import 'dart:collection' show IterableMixin, IterableBase;
+import 'dart:convert' show json;
 
-import 'package:dart2_constant/convert.dart' show json;
-import 'package:dart2_constant/core.dart' as core;
-import 'package:quiver_hashcode/hashcode.dart';
+import 'package:quiver/core.dart';
 
 import 'interpreter.dart';
 import 'logging.dart';
@@ -236,7 +235,7 @@ class Pair<A extends Expression, B extends Expression> extends Expression
       slow = slow.pair.second;
       fast = fast.pair.second.pair.second;
       length += 2;
-      if (identical(slow, fast)) return core.double.infinity;
+      if (identical(slow, fast)) return double.infinity;
     }
     if (!wellFormed) throw new SchemeException("Malformed list");
     return length + (fast is Pair ? 1 : 0);

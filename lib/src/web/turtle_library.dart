@@ -4,7 +4,6 @@ import 'dart:html';
 
 import 'package:cs61a_scheme/cs61a_scheme_extra.dart';
 
-import 'theming.dart';
 import 'turtle.dart';
 
 part 'turtle_library.g.dart';
