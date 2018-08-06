@@ -1,7 +1,8 @@
 language: dart
 dart:
 - stable
-- dev
+# Disabling dev builds for now since the current one is 2.0.0-dev.69.5
+# - dev
 branches:
   only:
   - master

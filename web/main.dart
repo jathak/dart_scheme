@@ -47,8 +47,8 @@ main() async {
   }
   if (window.localStorage.containsKey('#scheme-theme')) {
     try {
-      var expr = Serialization
-          .deserializeFromJson(window.localStorage['#scheme-theme']);
+      var expr = Serialization.deserializeFromJson(
+          window.localStorage['#scheme-theme']);
       if (expr is Theme) {
         applyTheme(expr, css, style, false);
       }

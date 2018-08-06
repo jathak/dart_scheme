@@ -1,19 +1,16 @@
-.PHONY: deploy checks serve build
-
-serve:
-	pub get
-	pub run build_runner serve
+.PHONY: deploy checks build
 
 build:
 	pub get
-	pub run build_runner build --release --output web:deploy
+	pub global activate webdev
+	pub global run webdev build --release
 
 deploy: build
 	# Delete random Dart build artifacts
-	-cd deploy && rm -r packages .build.manifest .packages main.dart.js.deps \
+	-cd build && rm -r packages .build.manifest .packages main.dart.js.deps \
 		main.dart.js.map main.dart.js.tar.gz main.module main.dart
 	# Dokku static buildpack
-	touch deploy/.static
+	touch build/.static
 	# The static Dokku buildpack weirdly has missing URIs display index.html
 	# instead of 404-ing. This custom config should fix that.
 	cp tool/app-nginx.conf.sigil deploy/app-nginx.conf.sigil
@@ -25,7 +22,7 @@ deploy: build
 checks:
 	pub run test
 	pub run grinder check
-	pub run dependency_validator
-	pub run dart_style:format -n .
-	dartanalyzer --fatal-warnings --strong .
+	pub run dependency_validator --ignore build_runner,build_web_compilers,sass_builder
+	dartfmt -n .
+	dartanalyzer --fatal-warnings .
 
