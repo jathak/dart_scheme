@@ -162,13 +162,14 @@ class BlockGrid extends Widget {
     }
   }
 
-  BlockGrid toSpacer() => new BlockGrid(_grid
-      .map((row) => row.map((item) {
-            if (item is Anchor) return new TextMessage("x");
-            return item;
-          }).toList())
+  BlockGrid toSpacer() => BlockGrid(_grid
+      .map((row) => row
+          .map((item) => Block._(
+              item.type, item.inside is Anchor ? TextWidget("x") : item.inside))
+          .toList())
       .toList())
     ..spacer = true;
+
   toString() => "#$_grid";
 }
 
