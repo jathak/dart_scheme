@@ -34,7 +34,7 @@ abstract class Expression {
   /// The default implementation returns the string representation of this
   /// expression as a [TextWidget]. Some expressions may need to add
   /// additional objects to [diagram].
-  Widget draw(DiagramInterface diagram) => new TextWidget(toString());
+  Widget draw(DiagramInterface diagram) => TextWidget(toString());
 
   /// Shorthand for `expr is EmptyList`.
   bool get isNil => false;
@@ -64,58 +64,61 @@ abstract class SelfEvaluating extends Expression {
 
 /// A Scheme boolean. There are only two: [schemeTrue] and [schemeFalse].
 class Boolean extends SelfEvaluating implements Serializable<Boolean> {
-  final inlineInDiagram = true;
   final bool value;
   const Boolean._internal(this.value);
-  bool get isTruthy => value;
-  toString() => value ? "#t" : "#f";
-
-  /// The underlying Dart bool is passed to JS.
-  bool toJS() => value;
 
   /// Returns [schemeTrue] or [schemeFalse] depending on [value].
   ///
   /// Additional [Boolean] expressions will never be created.
   factory Boolean(bool value) => value ? schemeTrue : schemeFalse;
 
+  bool get isTruthy => value;
+  bool get inlineInDiagram => true;
+  toString() => value ? "#t" : "#f";
+
+  /// The underlying Dart bool is passed to JS.
+  bool toJS() => value;
+
   Map serialize() => {'type': 'Boolean', 'value': isTruthy};
-  Boolean deserialize(Map data) => new Boolean(data['value']);
+  Boolean deserialize(Map data) => Boolean(data['value']);
 }
 
 /// `#t` in Scheme.
-const schemeTrue = const Boolean._internal(true);
+const schemeTrue = Boolean._internal(true);
 
 /// `#f` in Scheme. This is the only false-y expression.
-const schemeFalse = const Boolean._internal(false);
+const schemeFalse = Boolean._internal(false);
 
 /// A Scheme identifier.
 ///
 /// These should be case insensitive. When calling the unnamed constructor to
 /// create a constant instance, a lowercase string should be passed to maintain
-/// this. Use the [runtime] constructor when passing in non-constant strings.
+/// this. Use the [SchemeSymbol.runtime] constructor when passing in non-constant
+/// strings.
 class SchemeSymbol extends Expression implements Serializable<SchemeSymbol> {
-  final inlineInDiagram = true;
   final String value;
 
   const SchemeSymbol(this.value);
   SchemeSymbol.runtime(String value) : this.value = value.toLowerCase();
   Expression evaluate(Frame env) => env.lookup(this);
+  bool get inlineInDiagram => true;
   toString() => value;
   operator ==(other) => other is SchemeSymbol && value == other.value;
   int get hashCode => hash2("SchemeSymbol", value);
   toJS() => value;
 
   Map serialize() => {'type': 'SchemeSymbol', 'value': value};
-  SchemeSymbol deserialize(Map data) => new SchemeSymbol.runtime(data['value']);
+  SchemeSymbol deserialize(Map data) => SchemeSymbol.runtime(data['value']);
 }
 
 /// A Scheme string.
 class SchemeString extends SelfEvaluating
     implements Serializable<SchemeString> {
-  final inlineInDiagram = true;
   final String value;
   const SchemeString(this.value);
   toString() => json.encode(value);
+  bool get inlineInDiagram => true;
+
   get display => value;
   operator ==(other) => other is SchemeString && value == other.value;
   int get hashCode => hash2("SchemeString", value);
@@ -123,15 +126,14 @@ class SchemeString extends SelfEvaluating
   toJS() => value;
 
   Map serialize() => {'type': 'SchemeString', 'value': value};
-  SchemeString deserialize(Map data) => new SchemeString(data['value']);
+  SchemeString deserialize(Map data) => SchemeString(data['value']);
 }
 
 class _SchemeListIterator extends Iterator<Expression> {
   Expression current;
   Pair pair;
-  _SchemeListIterator(Pair start) {
-    pair = start;
-    if (!pair.wellFormed) throw new TypeError();
+  _SchemeListIterator(this.pair) {
+    if (!pair.wellFormed) throw TypeError();
   }
   bool moveNext() {
     if (pair != null) {
@@ -156,21 +158,21 @@ class _NilIterator extends Iterator<Expression> {
 ///
 /// Iterating over this class will fail if [wellFormed] is false.
 abstract class PairOrEmpty extends Expression implements Iterable<Expression> {
+  /// Creates a Scheme list from the given Dart iterable.
+  factory PairOrEmpty.fromIterable(Iterable<Expression> iterable) {
+    PairOrEmpty result = nil;
+    for (Expression item in iterable.toList().reversed) {
+      result = Pair(item, result);
+    }
+    return result;
+  }
+
   /// Returns true iff this is a well-formed Scheme list.
   bool get wellFormed;
 
   /// See [wellFormed].
   @deprecated
   bool isWellFormedList() => wellFormed;
-
-  /// Creates a Scheme list from the given Dart iterable.
-  factory PairOrEmpty.fromIterable(Iterable<Expression> iterable) {
-    PairOrEmpty result = nil;
-    for (Expression item in iterable.toList().reversed) {
-      result = new Pair(item, result);
-    }
-    return result;
-  }
 
   num get lengthOrCycle;
 }
@@ -181,19 +183,19 @@ abstract class PairOrEmpty extends Expression implements Iterable<Expression> {
 /// constructor, so we have to implement all the [Iterable] methods ourselves.
 class _EmptyList extends IterableBase<Expression>
     implements SelfEvaluating, PairOrEmpty {
-  final inlineInDiagram = true;
   const _EmptyList();
+  bool get inlineInDiagram => true;
   bool get wellFormed => true;
   @deprecated
   bool isWellFormedList() => true;
   bool get isNil => true;
   toString() => "()";
-  get iterator => new _NilIterator();
+  get iterator => _NilIterator();
 
   num get lengthOrCycle => 0;
 
   get display => toString();
-  draw(DiagramInterface diagram) => new TextWidget('()');
+  draw(DiagramInterface diagram) => TextWidget('()');
   evaluate(Frame env) => this;
   get isTruthy => true;
   get pair => this as Pair;
@@ -201,7 +203,7 @@ class _EmptyList extends IterableBase<Expression>
 }
 
 /// The empty Scheme list.
-const nil = const _EmptyList();
+const nil = _EmptyList();
 
 /// A Scheme pair.
 ///
@@ -237,11 +239,11 @@ class Pair<A extends Expression, B extends Expression> extends Expression
       length += 2;
       if (identical(slow, fast)) return double.infinity;
     }
-    if (!wellFormed) throw new SchemeException("Malformed list");
+    if (!wellFormed) throw SchemeException("Malformed list");
     return length + (fast is Pair ? 1 : 0);
   }
 
-  Iterator<Expression> get iterator => new _SchemeListIterator(this);
+  Iterator<Expression> get iterator => _SchemeListIterator(this);
 
   Expression evaluate(Frame env) => evalCallExpression(this, env);
 
@@ -250,7 +252,7 @@ class Pair<A extends Expression, B extends Expression> extends Expression
     int parentRow = diagram.currentRow;
     Widget right = diagram.pointTo(second);
     Widget left = diagram.pointTo(first, parentRow);
-    return new BlockGrid.pair(new Block.pair(left), new Block.pair(right));
+    return BlockGrid.pair(Block.pair(left), Block.pair(right));
   }
 
   /// We use a recursive approach here to ensure that lists with cycles
@@ -287,7 +289,7 @@ class Pair<A extends Expression, B extends Expression> extends Expression
       if (arg is Pair && arg.wellFormed) {
         lst.addAll(arg);
       } else {
-        throw new SchemeException("Argument is not a well-formed list.");
+        throw SchemeException("Argument is not a well-formed list.");
       }
     }
     PairOrEmpty result = nil;
@@ -298,7 +300,7 @@ class Pair<A extends Expression, B extends Expression> extends Expression
       result = lastArg;
     }
     for (Expression expr in lst.reversed) {
-      result = new Pair(expr, result);
+      result = Pair(expr, result);
     }
     return result;
   }
@@ -315,11 +317,11 @@ class Undefined extends SelfEvaluating {
   toJS() => Undefined.jsUndefined;
 
   /// Initialized to the JS value `undefined` when the web library is loaded.
-  static var jsUndefined = null;
+  static dynamic jsUndefined;
 }
 
 /// Represents undefined values in Scheme, like `(if #f 1)`.
-const undefined = const Undefined._internal();
+const undefined = Undefined._internal();
 
 /// An expression to be evaluated in an environment.
 ///
@@ -339,14 +341,12 @@ class Thunk extends Expression {
       }
       return result;
     } on SchemeException catch (e) {
-      for (Expression expr in expressions) {
-        e.addCall(expr);
-      }
+      expressions.forEach(e.addCall);
       rethrow;
     }
   }
 
-  toJS() => throw new StateError("Thunks should not be passed to JS");
+  toJS() => throw StateError("Thunks should not be passed to JS");
   toString() => 'Thunk($expr in f${env.id})';
 }
 
@@ -386,8 +386,8 @@ class Promise extends SelfEvaluating {
   /// Promises are represented in diagrams as a circle with ⋯ inside prior to
   /// forcing, and the evaluated result afterwards.
   Widget draw(DiagramInterface diagram) {
-    var inside = _evaluated ? diagram.pointTo(expr) : new TextWidget("⋯");
-    return new Block.promise(inside);
+    var inside = _evaluated ? diagram.pointTo(expr) : TextWidget("⋯");
+    return Block.promise(inside);
   }
 }
 
@@ -444,9 +444,8 @@ class Frame extends SelfEvaluating {
   }
 
   /// Looks up the given symbol in this or a parent frame.
-  Expression lookup(SchemeSymbol symbol) {
-    return interpreter.impl.lookupInFrame(symbol, this);
-  }
+  Expression lookup(SchemeSymbol symbol) =>
+      interpreter.impl.lookupInFrame(symbol, this);
 
   /// Changes an existing binding to a new value in this or a parent frame.
   ///
@@ -456,12 +455,11 @@ class Frame extends SelfEvaluating {
       bindings[symbol] = value;
       return;
     }
-    if (parent == null) throw new SchemeException("$symbol is not bound");
+    if (parent == null) throw SchemeException("$symbol is not bound");
     parent.update(symbol, value);
   }
 
   /// Creates a frame with this as its parent and all [formals] bound to [vals].
-  Frame makeChildFrame(Expression formals, Expression vals) {
-    return interpreter.impl.makeChildOf(formals, vals, this);
-  }
+  Frame makeChildFrame(Expression formals, Expression vals) =>
+      interpreter.impl.makeChildOf(formals, vals, this);
 }

@@ -3,15 +3,13 @@ library cs61a_scheme.core.logging;
 import 'expressions.dart';
 
 /// Logs [expr] somewhere with a new line if [addNewLine] is true.
-typedef void Logger(Expression expr, bool addNewLine);
+typedef Logger = void Function(Expression expr, bool addNewLine);
 
 /// Given two loggers, returns a new one that calls both.
-Logger combineLoggers(Logger a, Logger b) {
-  return (Expression e, bool addNewLine) {
-    a(e, addNewLine);
-    b(e, addNewLine);
-  };
-}
+Logger combineLoggers(Logger a, Logger b) => (e, addNewLine) {
+      a(e, addNewLine);
+      b(e, addNewLine);
+    };
 
 /// Scheme expression representing an expression to be displayed.
 ///
@@ -39,12 +37,12 @@ class TextMessage extends SelfEvaluating {
 /// code. While other Dart errors will still be caught by the outer interpreter
 /// loop, throwing a [SchemeException] ensures that the logged stack trace is
 /// for Scheme, not Dart/JS.
-class SchemeException extends SelfEvaluating {
+class SchemeException extends SelfEvaluating implements Exception {
   final String message;
   final bool showTrace;
   final Expression context;
   final List<Expression> callStack = [];
-  SchemeException([this.message = null, this.showTrace = true, this.context]);
+  SchemeException([this.message, this.showTrace = true, this.context]);
 
   toString() {
     if (!showTrace || callStack.isEmpty) return 'Error: $message';
@@ -62,11 +60,10 @@ class SchemeException extends SelfEvaluating {
 }
 
 /// Logs [msg] to the interpreter's logger through a [TextMessage].
-logMessage(String msg, Frame env) {
-  return env.interpreter.logger(new TextMessage(msg), true);
-}
+logMessage(String msg, Frame env) =>
+    env.interpreter.logger(TextMessage(msg), true);
 
 /// Thrown by the built-in `exit` Scheme procedure.
-class ExitException {
+class ExitException implements Exception {
   const ExitException();
 }

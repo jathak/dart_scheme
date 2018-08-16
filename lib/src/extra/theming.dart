@@ -21,20 +21,20 @@ class Theme extends SelfEvaluating implements Serializable<Theme> {
   }
 
   String embedColor(String css, SchemeSymbol symbol, Color color) {
-    var symbReg = new RegExp(r'[-[\]{}()*+?.,\\^$|#\s]');
+    var symbReg = RegExp(r'[-[\]{}()*+?.,\\^$|#\s]');
     var val = symbol.value.replaceAllMapped(symbReg, (m) => '\\${m[0]}');
     // /*!COLOR|<css-prop>|<scheme-prop>*/<default-code>/*!END*/
     var expr = r'/\*!COLOR\|([a-z\-]*)\|' + val + r'\*/[^/]*/\*!END\*/';
-    var regex = new RegExp(expr, multiLine: true);
+    var regex = RegExp(expr, multiLine: true);
     return css.replaceAllMapped(regex, (m) => '${m[1]}: ${color.toCSS()};');
   }
 
   String embedCss(String css, SchemeSymbol symbol, SchemeString code) {
-    var symbReg = new RegExp(r'[-[\]{}()*+?.,\\^$|#\s]');
+    var symbReg = RegExp(r'[-[\]{}()*+?.,\\^$|#\s]');
     var val = symbol.value.replaceAllMapped(symbReg, (m) => '\\${m[0]}');
     // /*!CSS|<scheme-prop>*/<default-code>/*!END*/
     var expr = r'/\*!CSS\|' + val + r'\*/[^/]*/\*!END\*/';
-    var regex = new RegExp(expr, multiLine: true);
+    var regex = RegExp(expr, multiLine: true);
     return css.replaceAll(regex, code.value);
   }
 
@@ -51,15 +51,15 @@ class Theme extends SelfEvaluating implements Serializable<Theme> {
   }
 
   Theme deserialize(Map data) {
-    Theme theme = new Theme();
+    Theme theme = Theme();
     var colorMap = data['colors'];
     for (String key in colorMap.keys) {
-      theme.colors[new SchemeSymbol(key)] =
+      theme.colors[SchemeSymbol(key)] =
           Serialization.deserialize(colorMap[key]);
     }
     var cssMap = data['css'];
     for (String key in cssMap.keys) {
-      theme.cssProps[new SchemeSymbol(key)] =
+      theme.cssProps[SchemeSymbol(key)] =
           Serialization.deserialize(cssMap[key]);
     }
     return theme;
@@ -72,9 +72,9 @@ class Color extends SelfEvaluating implements Serializable<Color> {
 
   const Color(this.red, this.green, this.blue, [this.alpha = 1.0]);
 
-  static const white = const Color(255, 255, 255);
-  static const black = const Color(0, 0, 0);
-  static const transparent = const Color(0, 0, 0, 0.0);
+  static const white = Color(255, 255, 255);
+  static const black = Color(0, 0, 0);
+  static const transparent = Color(0, 0, 0, 0.0);
 
   factory Color.fromHexString(String str) {
     str = str.toLowerCase();
@@ -83,25 +83,25 @@ class Color extends SelfEvaluating implements Serializable<Color> {
       str = str[0] * 2 + str[1] * 2 + str[2] * 2;
     }
     if (str.length != 6) {
-      throw new SchemeException("#$str is not a valid color");
+      throw SchemeException("#$str is not a valid color");
     }
     int red = _toInt(str[0]) * 16 + _toInt(str[1]);
     int green = _toInt(str[2]) * 16 + _toInt(str[3]);
     int blue = _toInt(str[4]) * 16 + _toInt(str[5]);
-    return new Color(red, green, blue);
+    return Color(red, green, blue);
   }
 
   factory Color.fromString(String str) {
     if (Color.names.containsKey(str)) str = Color.names[str];
-    return new Color.fromHexString(str);
+    return Color.fromHexString(str);
   }
 
-  factory Color.fromAnything(dynamic expr) {
+  factory Color.fromAnything(expr) {
     if (expr is Color) return expr;
-    if (expr is SchemeString) return new Color.fromString(expr.value);
-    if (expr is SchemeSymbol) return new Color.fromString(expr.value);
-    if (expr is String) return new Color.fromString(expr);
-    throw new SchemeException('Could not interpret $expr as a color.');
+    if (expr is SchemeString) return Color.fromString(expr.value);
+    if (expr is SchemeSymbol) return Color.fromString(expr.value);
+    if (expr is String) return Color.fromString(expr);
+    throw SchemeException('Could not interpret $expr as a color.');
   }
 
   static int _toInt(String hexChar) {
@@ -139,7 +139,7 @@ class Color extends SelfEvaluating implements Serializable<Color> {
       case 'f':
         return 15;
       default:
-        throw new SchemeException("$hexChar is not a valid hexadecimal");
+        throw SchemeException("$hexChar is not a valid hexadecimal");
     }
   }
 
@@ -151,9 +151,7 @@ class Color extends SelfEvaluating implements Serializable<Color> {
         'alpha': alpha
       };
 
-  deserialize(Map data) {
-    return new Color(data['red'], data['green'], data['blue'], data['alpha']);
-  }
+  deserialize(Map d) => Color(d['red'], d['green'], d['blue'], d['alpha']);
 
   String toString() {
     if (alpha == 1.0) return '(rgb $red $green $blue)';
@@ -162,7 +160,7 @@ class Color extends SelfEvaluating implements Serializable<Color> {
 
   String toCSS() => 'rgba($red, $green, $blue, $alpha)';
 
-  static const Map<String, String> names = const {
+  static const Map<String, String> names = {
     "aliceblue": "f0f8ff",
     "antiquewhite": "faebd7",
     "aqua": "00ffff",

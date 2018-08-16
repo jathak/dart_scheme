@@ -136,19 +136,19 @@ abstract class ProjectInterface {
 /// If using this, make sure to set tailCallOptimization = true.
 abstract class UnimplementedTailCalls {
   Expression tailEval(Expression expression, Frame env) {
-    throw new UnimplementedError("Tail calls not implemented");
+    throw UnimplementedError("Tail calls not implemented");
   }
 }
 
 /// Use this as a mixin when not implementing continuations
 abstract class UnimplementedContinuations {
   Expression callWithCurrentContinuation(Procedure procedure, Frame env) {
-    throw new UnimplementedError("Continuations not supported");
+    throw UnimplementedError("Continuations not supported");
   }
 
   Expression continuationApply(
       Continuation procedure, PairOrEmpty args, Frame env) {
-    throw new UnimplementedError("Continuations not supported");
+    throw UnimplementedError("Continuations not supported");
   }
 }
 
@@ -156,56 +156,56 @@ abstract class UnimplementedContinuations {
 abstract class UnimplementedMacros {
   Expression macroCall(
       MacroProcedure procedure, PairOrEmpty operands, Frame env) {
-    throw new UnimplementedError("Macros not supported");
+    throw UnimplementedError("Macros not supported");
   }
 
   Expression doDefineMacro(PairOrEmpty expressions, Frame env) {
-    throw new UnimplementedError("Macros not supported");
+    throw UnimplementedError("Macros not supported");
   }
 }
 
 /// Use this as a mixin when not implementing the async-await.
 abstract class UnimplementedAsync {
   Future<Expression> asyncDefineForm(PairOrEmpty expressions, Frame env) {
-    throw new UnimplementedError("Async/await not supported");
+    throw UnimplementedError("Async/await not supported");
   }
 
   Future<Expression> asyncAndForm(PairOrEmpty expressions, Frame env) {
-    throw new UnimplementedError("Async/await not supported");
+    throw UnimplementedError("Async/await not supported");
   }
 
   Future<Expression> asyncOrForm(PairOrEmpty expressions, Frame env) {
-    throw new UnimplementedError("Async/await not supported");
+    throw UnimplementedError("Async/await not supported");
   }
 
   Future<Expression> asyncCondResult(
       PairOrEmpty clause, Frame env, Expression test) {
-    throw new UnimplementedError("Async/await not supported");
+    throw UnimplementedError("Async/await not supported");
   }
 
   Future<Expression> asyncEvalAll(PairOrEmpty expressions, Frame env) {
-    throw new UnimplementedError("Async/await not supported");
+    throw UnimplementedError("Async/await not supported");
   }
 
   Future<Frame> asyncLetFrame(PairOrEmpty bindings, Frame env) {
-    throw new UnimplementedError("Async/await not supported");
+    throw UnimplementedError("Async/await not supported");
   }
 
   Future<Expression> asyncEvalProcedureCall(
       Expression first, Expression rest, Frame env) {
-    throw new UnimplementedError("Async/await not supported");
+    throw UnimplementedError("Async/await not supported");
   }
 
   Future<Expression> asyncProcedureCall(
       Procedure procedure, PairOrEmpty operands, Frame env) {
-    throw new UnimplementedError("Async/await not supported");
+    throw UnimplementedError("Async/await not supported");
   }
 
   Expression doDefineAsync(PairOrEmpty expressions, Frame env) {
-    throw new UnimplementedError("Async/await not supported");
+    throw UnimplementedError("Async/await not supported");
   }
 
   LambdaProcedure doAsyncLambda(PairOrEmpty expressions, Frame env) {
-    throw new UnimplementedError("Async/await not supported");
+    throw UnimplementedError("Async/await not supported");
   }
 }

@@ -9,17 +9,17 @@ main() {
       expect(remake(schemeFalse), same(schemeFalse));
     });
     test("works for SchemeSymbol", () {
-      stable(new SchemeSymbol("test"));
+      stable(const SchemeSymbol("test"));
     });
     test("works for SchemeString", () {
-      stable(new SchemeString("this is a test"));
+      stable(const SchemeString("this is a test"));
     });
     test("works for Integer", () {
-      stable(new Integer(42));
-      stable(new Number.fromString("12345" * 10000) as Integer);
+      stable(Integer(42));
+      stable(Number.fromString("12345" * 10000) as Integer);
     });
     test("works for Double", () {
-      stable(new Double(1.6));
+      stable(Double(1.6));
     });
   });
 }
@@ -31,6 +31,4 @@ stable(Serializable expr) {
 }
 
 /// Serializes and then immediately deserializes an expression.
-remake(Serializable expr) {
-  return Serialization.deserialize(expr.serialize());
-}
+remake(Serializable expr) => Serialization.deserialize(expr.serialize());

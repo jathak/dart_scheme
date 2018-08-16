@@ -11,17 +11,8 @@ import 'utils.dart' show schemeApply;
 
 class Direction extends SelfEvaluating {
   final String _id;
-  toJS() => this;
+
   const Direction._(this._id);
-  toString() => "#[Direction.$_id]";
-  static const Direction left = const Direction._("left");
-  static const Direction right = const Direction._("right");
-  static const Direction top = const Direction._("top");
-  static const Direction bottom = const Direction._("bottom");
-  static const Direction topLeft = const Direction._("topLeft");
-  static const Direction topRight = const Direction._("topRight");
-  static const Direction bottomLeft = const Direction._("bottomLeft");
-  static const Direction bottomRight = const Direction._("bottomRight");
 
   factory Direction(String id) {
     switch (id) {
@@ -42,9 +33,20 @@ class Direction extends SelfEvaluating {
       case 'bottomRight':
         return bottomRight;
       default:
-        throw new UnsupportedError('Invalid direction $id');
+        throw UnsupportedError('Invalid direction $id');
     }
   }
+
+  toJS() => this;
+  toString() => "#[Direction.$_id]";
+  static const Direction left = Direction._("left");
+  static const Direction right = Direction._("right");
+  static const Direction top = Direction._("top");
+  static const Direction bottom = Direction._("bottom");
+  static const Direction topLeft = Direction._("topLeft");
+  static const Direction topRight = Direction._("topRight");
+  static const Direction bottomLeft = Direction._("bottomLeft");
+  static const Direction bottomRight = Direction._("bottomRight");
 }
 
 /// The base class for any expressions that can be rendered.
@@ -54,8 +56,8 @@ class Direction extends SelfEvaluating {
 abstract class Widget extends SelfEvaluating {
   Widget();
   toJS() => this;
-  Map<Direction, Anchor> _anchors = {};
-  Anchor anchor(Direction dir) => _anchors.putIfAbsent(dir, () => new Anchor());
+  final Map<Direction, Anchor> _anchors = {};
+  Anchor anchor(Direction dir) => _anchors.putIfAbsent(dir, () => Anchor());
   Iterable<Direction> get anchoredDirections => _anchors.keys;
   toString() => '#[UIElement]';
   // If true, element should be invisible but take up the same amount of space.
@@ -63,7 +65,7 @@ abstract class Widget extends SelfEvaluating {
   // Elements should call this when their contents update and they need to be
   // redrawn.
   void update() => _controller.add(null);
-  StreamController _controller = new StreamController.broadcast();
+  final StreamController _controller = StreamController.broadcast();
   Stream get onUpdate => _controller.stream;
 }
 
@@ -73,17 +75,9 @@ class Anchor extends Widget {
   Anchor() : id = nextId++;
   Anchor.withId(this.id);
   Anchor anchor(dir) =>
-      throw new UnimplementedError('Anchors cannot have anchors of their own.');
+      throw UnimplementedError('Anchors cannot have anchors of their own.');
 
   toString() => "#[Anchor:$id]";
-
-  Map serialize() => {
-        'type': 'Anchor',
-        'id': id,
-      };
-  Anchor deserialize(Map data) {
-    return new Anchor.withId(data['id']);
-  }
 }
 
 class TextWidget extends Widget {
@@ -97,11 +91,11 @@ class MarkdownWidget extends TextWidget {
 
   Frame env;
 
-  MarkdownWidget(String text, {this.inline: true, this.env}) : super(text);
+  MarkdownWidget(String text, {this.inline = true, this.env}) : super(text);
 
   void runLink(String name) {
     if (env == null) return;
-    var proc = env.lookup(new SchemeSymbol.runtime(name));
+    var proc = env.lookup(SchemeSymbol.runtime(name));
     if (proc is Procedure) {
       schemeApply(proc, nil, env);
     }
@@ -127,30 +121,30 @@ class Block extends Widget {
 
 class BlockGrid extends Widget {
   final List<List<Block>> _grid;
-  int _columns, _rows;
-  int get columnCount => _columns;
-  int get rowCount => _rows;
   BlockGrid(this._grid) {
-    if (_grid.isEmpty) throw new SchemeException("Empty block grid");
+    if (_grid.isEmpty) throw SchemeException("Empty block grid");
     _rows = _grid.length;
     for (List<Block> row in _grid) {
-      if (_columns == null) _columns = row.length;
-      if (row.length != _columns)
-        throw new SchemeException("Jagged block grid");
+      _columns ??= row.length;
+      if (row.length != _columns) throw SchemeException("Jagged block grid");
     }
   }
-  BlockGrid.row(List<Block> row) : _grid = new List.filled(1, row) {
-    if (row.isEmpty) throw new SchemeException("Empty block row");
+  BlockGrid.row(List<Block> row) : _grid = List.filled(1, row) {
+    if (row.isEmpty) throw SchemeException("Empty block row");
     _rows = 1;
     _columns = row.length;
   }
   BlockGrid.column(List<Block> col)
-      : _grid = new List.from(col.map((b) => new List.filled(1, b))) {
-    if (col.isEmpty) throw new SchemeException("Empty block column");
+      : _grid = List.from(col.map((b) => List.filled(1, b))) {
+    if (col.isEmpty) throw SchemeException("Empty block column");
     _rows = col.length;
     _columns = 1;
   }
-  BlockGrid.pair(Block a, Block b) : this.row(new List.from([a, b]));
+  BlockGrid.pair(Block a, Block b) : this.row(List.from([a, b]));
+
+  int _columns, _rows;
+  int get columnCount => _columns;
+  int get rowCount => _rows;
 
   Iterable<Block> rowAt(int index) sync* {
     yield* _grid[index];
@@ -162,13 +156,14 @@ class BlockGrid extends Widget {
     }
   }
 
-  BlockGrid toSpacer() => new BlockGrid(_grid
-      .map((row) => row.map((item) {
-            if (item is Anchor) return new TextMessage("x");
-            return item;
-          }).toList())
+  BlockGrid toSpacer() => BlockGrid(_grid
+      .map((row) => row
+          .map((item) => Block._(
+              item.type, item.inside is Anchor ? TextWidget("x") : item.inside))
+          .toList())
       .toList())
     ..spacer = true;
+
   toString() => "#$_grid";
 }
 

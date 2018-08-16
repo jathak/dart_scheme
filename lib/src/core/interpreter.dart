@@ -2,9 +2,9 @@ library cs61a_scheme.core.interpreter;
 
 import 'expressions.dart';
 import 'logging.dart';
-import 'reader.dart';
 import 'procedures.dart';
 import 'project_interface.dart';
+import 'reader.dart';
 import 'scheme_library.dart';
 import 'special_forms.dart';
 import 'standard_library.dart';
@@ -12,23 +12,36 @@ import 'utils.dart' show schemeEval;
 
 class Interpreter {
   final ProjectInterface impl;
-  @deprecated
-  ProjectInterface get implementation => impl;
   Frame globalEnv;
   bool tailCallOptimized = true;
-  Logger _logger = (Expression e, bool newline) => null;
-  Logger get logger => _logger;
-  void set logger(Logger logger) => _logger = logger;
+  Logger logger = (e, newline) => null;
   void Function() onExit = () => null;
   int frameCounter = 0;
 
-  void Function(dynamic) logError;
+  Interpreter(this.impl) {
+    globalEnv = Frame(null, this);
+    logError = (error) {
+      if (error is Expression) {
+        logger(error, true);
+      } else {
+        logger(TextMessage(error.toString()), true);
+      }
+    };
+    StandardLibrary().importAll(globalEnv);
+  }
 
-  Map<SchemeSymbol, List<SchemePrimitive>> _eventListeners = {};
+  @deprecated
+  ProjectInterface get implementation => impl;
+
+  void Function(Object) logError;
+
+  final Map<SchemeSymbol, List<SchemePrimitive>> _eventListeners = {};
 
   void triggerEvent(SchemeSymbol id, List<Expression> data, Frame env) {
     if (_eventListeners.containsKey(id)) {
-      for (var blocker in _eventListeners[id]) blocker(data.toList(), env);
+      for (var blocker in _eventListeners[id]) {
+        blocker(data.toList(), env);
+      }
     }
   }
 
@@ -47,19 +60,7 @@ class Interpreter {
     _eventListeners[id].clear();
   }
 
-  Interpreter(this.impl) {
-    globalEnv = new Frame(null, this);
-    logError = (error) {
-      if (error is Expression) {
-        logger(error, true);
-      } else {
-        logger(new TextMessage(error.toString()), true);
-      }
-    };
-    new StandardLibrary().importAll(globalEnv);
-  }
-
-  List<Expression> _tokens = [];
+  final List<Expression> _tokens = [];
 
   importLibrary(SchemeLibrary library) => library.importAll(globalEnv);
 
@@ -79,9 +80,9 @@ class Interpreter {
     }
   }
 
-  void addLogger(Logger logger) => _logger = combineLoggers(_logger, logger);
+  void addLogger(Logger newLog) => logger = combineLoggers(logger, newLog);
 
-  void logText(String text) => logger(new TextMessage(text), true);
+  void logText(String text) => logger(TextMessage(text), true);
 
   Map<SchemeSymbol, SpecialForm> specialForms = {
     const SchemeSymbol('define'): doDefineForm,

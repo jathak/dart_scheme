@@ -16,37 +16,34 @@ part 'standard_library.g.dart';
 /// the primitives and performs type checking on arguments).
 @schemelib
 class StandardLibrary extends SchemeLibrary with _$StandardLibraryMixin {
-  Expression apply(Procedure procedure, PairOrEmpty args, Frame env) {
-    return schemeApply(procedure, args, env);
-  }
+  Expression apply(Procedure procedure, PairOrEmpty args, Frame env) =>
+      schemeApply(procedure, args, env);
 
   void display(Expression message, Frame env) {
-    env.interpreter.logger(new DisplayOutput(message), false);
+    env.interpreter.logger(DisplayOutput(message), false);
   }
 
   Expression error(Expression message) {
-    throw new SchemeException(message.toString(), true, message);
+    throw SchemeException(message.toString(), true, message);
   }
 
   @SchemeSymbol('error-notrace')
   Expression errorNoTrace(Expression message) {
-    throw new SchemeException(message.toString(), false, message);
+    throw SchemeException(message.toString(), false, message);
   }
 
-  Expression eval(Expression expr, Frame env) {
-    return schemeEval(expr, env);
-  }
+  Expression eval(Expression expr, Frame env) => schemeEval(expr, env);
 
   Expression exit() {
     throw const ExitException();
   }
 
   Expression load(Expression file, Frame env) {
-    throw new UnimplementedError("load has not yet been implemented");
+    throw UnimplementedError("load has not yet been implemented");
   }
 
   void newline(Frame env) {
-    env.interpreter.logger(new TextMessage(""), true);
+    env.interpreter.logger(const TextMessage(""), true);
   }
 
   void print(Expression message, Frame env) {
@@ -54,9 +51,8 @@ class StandardLibrary extends SchemeLibrary with _$StandardLibraryMixin {
   }
 
   @SchemeSymbol("atom?")
-  bool isAtom(Expression val) {
-    return val is Boolean || val is Number || val is SchemeSymbol || val.isNil;
-  }
+  bool isAtom(Expression val) =>
+      val is Boolean || val is Number || val is SchemeSymbol || val.isNil;
 
   @SchemeSymbol("integer?")
   bool isInteger(Expression val) => val is Integer;
@@ -91,27 +87,22 @@ class StandardLibrary extends SchemeLibrary with _$StandardLibraryMixin {
 
   Expression cdr(Pair val) => val.second;
 
-  Pair cons(Expression car, Expression cdr) => new Pair(car, cdr);
+  Pair cons(Expression car, Expression cdr) => Pair(car, cdr);
 
   num length(PairOrEmpty lst) => lst.lengthOrCycle;
 
-  PairOrEmpty list(List<Expression> args) => new PairOrEmpty.fromIterable(args);
+  PairOrEmpty list(List<Expression> args) => PairOrEmpty.fromIterable(args);
 
-  PairOrEmpty map(Procedure fn, PairOrEmpty lst, Frame env) {
-    return new PairOrEmpty.fromIterable(lst.map((item) {
-      return completeEval(fn.apply(new Pair(item, nil), env));
-    }));
-  }
+  PairOrEmpty map(Procedure fn, PairOrEmpty lst, Frame env) =>
+      PairOrEmpty.fromIterable(
+          lst.map((item) => completeEval(fn.apply(Pair(item, nil), env))));
 
-  PairOrEmpty filter(Procedure pred, PairOrEmpty lst, Frame env) {
-    return new PairOrEmpty.fromIterable(lst.where((item) {
-      return completeEval(pred.apply(new Pair(item, nil), env)).isTruthy;
-    }));
-  }
+  PairOrEmpty filter(Procedure pred, PairOrEmpty lst, Frame env) =>
+      PairOrEmpty.fromIterable(lst.where(
+          (item) => completeEval(pred.apply(Pair(item, nil), env)).isTruthy));
 
-  Expression reduce(Procedure combiner, PairOrEmpty lst, Frame env) {
-    return lst.reduce((a, b) => combiner.apply(list([a, b]), env));
-  }
+  Expression reduce(Procedure combiner, PairOrEmpty lst, Frame env) =>
+      lst.reduce((a, b) => combiner.apply(list([a, b]), env));
 
   @SchemeSymbol("+")
   Number add(List<Expression> args) =>
@@ -121,7 +112,7 @@ class StandardLibrary extends SchemeLibrary with _$StandardLibraryMixin {
   @MinArgs(1)
   Number sub(List<Expression> args) {
     Iterable<Number> numbers = allNumbers(args);
-    if (numbers.length == 1) return -(numbers.first);
+    if (numbers.length == 1) return -numbers.first;
     return numbers.skip(1).fold(numbers.first, (a, b) => a - b);
   }
 
@@ -147,7 +138,7 @@ class StandardLibrary extends SchemeLibrary with _$StandardLibraryMixin {
       }
       return total;
     }
-    return new Number.fromNum(pow(base.toJS(), power.toJS()));
+    return Number.fromNum(pow(base.toJS(), power.toJS()));
   }
 
   Number modulo(Number a, Number b) => a % b;
@@ -222,7 +213,6 @@ class StandardLibrary extends SchemeLibrary with _$StandardLibraryMixin {
       env.interpreter.impl.callWithCurrentContinuation(procedure, env);
 
   @SchemeSymbol("runtime-type")
-  String getRuntimeType(Expression expression) {
-    return expression.runtimeType.toString();
-  }
+  String getRuntimeType(Expression expression) =>
+      expression.runtimeType.toString();
 }

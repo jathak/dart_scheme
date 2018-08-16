@@ -22,9 +22,9 @@ class Variable extends SelfEvaluating {
 
   factory Variable.fromSymbol(SchemeSymbol sym) {
     if (!sym.value.startsWith('?')) {
-      throw new LogicException('Invalid variable $sym');
+      throw LogicException('Invalid variable $sym');
     }
-    return new Variable(sym.value.substring(1));
+    return Variable(sym.value.substring(1));
   }
 
   /// Finds all variables in a given input
@@ -46,20 +46,20 @@ class Variable extends SelfEvaluating {
     }
   }
 
-  operator ==(v) => v is Variable && value == v.value && tag == v.tag;
+  bool operator ==(v) => v is Variable && value == v.value && tag == v.tag;
 
   int get hashCode => hash2(value, tag);
 
   /// Converts so all symbols starting with '?' are converted to variables
   static Expression convert(Expression expr, [int tag]) {
     if (expr is Pair) {
-      return new Pair(convert(expr.first, tag), convert(expr.second, tag));
+      return Pair(convert(expr.first, tag), convert(expr.second, tag));
     } else if (expr is SchemeSymbol && expr.value.startsWith('?')) {
-      return new Variable.fromSymbol(expr)..tag = tag;
+      return Variable.fromSymbol(expr)..tag = tag;
     } else if (expr is SchemeSymbol && expr.value == 'not') {
       return not;
     } else if (expr is Variable) {
-      return new Variable(expr.value)..tag = tag;
+      return Variable(expr.value)..tag = tag;
     }
     return expr;
   }
@@ -75,18 +75,18 @@ class _Negation extends SelfEvaluating {
   toString() => 'not';
 }
 
-const not = const _Negation();
+const not = _Negation();
 
 class Fact extends SelfEvaluating {
   final Pair conclusion;
   final Iterable<Pair> hypotheses;
-  Fact._(this.conclusion, this.hypotheses);
 
   factory Fact(Expression conclusion,
-      [Iterable<Expression> hypotheses, int tag]) {
-    return new Fact._(Variable.convert(conclusion, tag) as Pair,
-        (hypotheses ?? []).map((h) => Variable.convert(h, tag) as Pair));
-  }
+          [Iterable<Expression> hypotheses, int tag]) =>
+      Fact._(Variable.convert(conclusion, tag) as Pair,
+          (hypotheses ?? []).map((h) => Variable.convert(h, tag) as Pair));
+
+  Fact._(this.conclusion, this.hypotheses);
 
   String toProlog() {
     var prologConclusion = _relationToProlog(conclusion);
@@ -120,7 +120,7 @@ class Fact extends SelfEvaluating {
       return '[]';
     } else {
       var converted = expr.toString().replaceAll('-', '_');
-      if (new RegExp(r'^[a-z]\w*$').hasMatch(converted)) {
+      if (RegExp(r'^[a-z]\w*$').hasMatch(converted)) {
         return converted;
       }
       return "'$expr'";
@@ -130,11 +130,11 @@ class Fact extends SelfEvaluating {
 
 class Query extends SelfEvaluating {
   final Iterable<Pair> clauses;
-  Query._(this.clauses);
 
-  factory Query(Iterable<Expression> clauses) {
-    return new Query._(clauses.map((h) => Variable.convert(h) as Pair));
-  }
+  factory Query(Iterable<Expression> clauses) =>
+      Query._(clauses.map((h) => Variable.convert(h) as Pair));
+
+  Query._(this.clauses);
 }
 
 class Solution extends SelfEvaluating {
@@ -145,14 +145,13 @@ class Solution extends SelfEvaluating {
 }
 
 class LogicEnv extends SelfEvaluating {
-  final Solution partial = new Solution();
+  final Solution partial = Solution();
   final LogicEnv parent;
 
   LogicEnv(this.parent);
 
-  Expression lookup(Variable variable) {
-    return partial.assignments[variable] ?? parent?.lookup(variable);
-  }
+  Expression lookup(Variable variable) =>
+      partial.assignments[variable] ?? parent?.lookup(variable);
 
   Expression completeLookup(Expression expr) {
     if (expr is Variable) {
@@ -166,9 +165,9 @@ class LogicEnv extends SelfEvaluating {
 
 Iterable<Solution> evaluate(Query query, List<Fact> facts,
     [int depthLimit = 50]) sync* {
-  var run = new _LogicRun(facts, depthLimit);
+  var run = _LogicRun(facts, depthLimit);
   for (LogicEnv env in run.searchQuery(query)) {
-    var solution = new Solution();
+    var solution = Solution();
     for (var variable in Variable.findIn(query)) {
       solution.assignments[variable] = run.ground(variable, env);
     }
@@ -184,7 +183,7 @@ class _LogicRun {
 
   Iterable<LogicEnv> searchQuery(Query query) sync* {
     _globalCounter = 0;
-    yield* search(query.clauses, new LogicEnv(null), 0);
+    yield* search(query.clauses, LogicEnv(null), 0);
   }
 
   Iterable<LogicEnv> search(
@@ -198,13 +197,13 @@ class _LogicRun {
     if (clause.first == not) {
       var grounded = ground(clause.second, env).pair.map((expr) => expr.pair);
       if (search(grounded, env, depth).isEmpty) {
-        var envHead = new LogicEnv(env);
+        var envHead = LogicEnv(env);
         yield* search(clauses.skip(1), envHead, depth + 1);
       }
     } else {
       for (var fact in facts) {
-        fact = new Fact(fact.conclusion, fact.hypotheses, _globalCounter++);
-        var envHead = new LogicEnv(env);
+        fact = Fact(fact.conclusion, fact.hypotheses, _globalCounter++);
+        var envHead = LogicEnv(env);
         if (unify(fact.conclusion, clause, envHead)) {
           for (var envRule in search(fact.hypotheses, envHead, depth + 1)) {
             yield* search(clauses.skip(1), envRule, depth + 1);
@@ -223,7 +222,7 @@ class _LogicRun {
       return ground(resolved, env);
     }
     if (expr is Pair) {
-      return new Pair(ground(expr.first, env), ground(expr.second, env));
+      return Pair(ground(expr.first, env), ground(expr.second, env));
     }
     return expr;
   }

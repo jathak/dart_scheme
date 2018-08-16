@@ -7,44 +7,6 @@ import 'dart:math' show pi;
 import 'package:cs61a_scheme/cs61a_scheme_extra.dart';
 
 class Turtle {
-  CanvasElement element;
-  CanvasRenderingContext2D context;
-  int _gridWidth = 1000;
-  int _gridHeight = 1000;
-  int get gridWidth => _gridWidth;
-  int get gridHeight => _gridHeight;
-  void set gridWidth(width) {
-    element.width = width;
-    _gridWidth = width;
-  }
-
-  void set gridHeight(height) {
-    element.height = height;
-    _gridHeight = height;
-  }
-
-  int _elementWidth = 500;
-  int _elementHeight = 500;
-  int get elementWidth => _elementWidth;
-  int get elementHeight => _elementHeight;
-  void set elementWidth(width) {
-    _elementWidth = width;
-    element.style.width = '${width}px';
-  }
-
-  void set elementHeight(height) {
-    _elementHeight = height;
-    element.style.height = '${height}px';
-  }
-
-  num heading = 0;
-  num x = 0;
-  num y = 0;
-  int pixelSize = 1;
-  int penSize = 1;
-  bool penDown = false;
-  bool filling = false;
-
   Turtle(this.element, Interpreter inter) {
     context = element.context2D;
     context.imageSmoothingEnabled = false;
@@ -87,22 +49,61 @@ class Turtle {
     }
   }
 
+  CanvasElement element;
+  CanvasRenderingContext2D context;
+  int _gridWidth = 1000;
+  int _gridHeight = 1000;
+  int get gridWidth => _gridWidth;
+  int get gridHeight => _gridHeight;
+  set gridWidth(width) {
+    element.width = width;
+    _gridWidth = width;
+  }
+
+  set gridHeight(height) {
+    element.height = height;
+    _gridHeight = height;
+  }
+
+  int _elementWidth = 500;
+  int _elementHeight = 500;
+  int get elementWidth => _elementWidth;
+  int get elementHeight => _elementHeight;
+  set elementWidth(width) {
+    _elementWidth = width;
+    element.style.width = '${width}px';
+  }
+
+  set elementHeight(height) {
+    _elementHeight = height;
+    element.style.height = '${height}px';
+  }
+
+  num heading = 0;
+  num x = 0;
+  num y = 0;
+  int pixelSize = 1;
+  int penSize = 1;
+  bool penDown = false;
+  bool filling = false;
+
   clickPointToTurtlePoint(num x, num y) {
     var ratioX = gridWidth / elementWidth;
     var ratioY = gridHeight / elementHeight;
-    var tx = new Number.fromNum(x * ratioX - (gridWidth / 2));
-    var ty = new Number.fromNum((gridHeight / 2) - y * ratioY);
-    ;
+    var tx = Number.fromNum(x * ratioX - (gridWidth / 2));
+    var ty = Number.fromNum((gridHeight / 2) - y * ratioY);
     return [tx, ty];
   }
 
-  void set backgroundColor(Color color) {
+  Color get backgroundColor => Color.fromString(element.style.background);
+
+  set backgroundColor(Color color) {
     element.style.background = color.toCSS();
   }
 
   Color _penColor;
   Color get penColor => _penColor;
-  void set penColor(Color color) {
+  set penColor(Color color) {
     _penColor = color;
     context.setFillColorRgb(color.red, color.green, color.blue, color.alpha);
     context.setStrokeColorRgb(0, 0, 0, 0);
@@ -111,8 +112,8 @@ class Turtle {
   num get realHeading => (heading - 90) / 180 * pi;
   num get realX => x + (gridWidth / 2);
   num get realY => (gridHeight / 2) - y;
-  void set realX(num realX) => x = realX - (gridWidth / 2);
-  void set realY(num realY) => y = (gridHeight / 2) - realY;
+  set realX(num realX) => x = realX - (gridWidth / 2);
+  set realY(num realY) => y = (gridHeight / 2) - realY;
 
   void show() {
     element.style.display = 'block';
@@ -165,9 +166,8 @@ class Turtle {
     moves.clear();
   }
 
-  static List<num> getPointTo(num ang, num forward, num x, num y) {
-    return [x + forward * cos(ang), y + forward * sin(ang)];
-  }
+  static List<num> getPointTo(num ang, num forward, num x, num y) =>
+      [x + forward * cos(ang), y + forward * sin(ang)];
 
   point(n) => getPointTo(realHeading, n, realX, realY);
 

@@ -22,7 +22,7 @@ class JsExpression extends SelfEvaluating {
   JsExpression(this.obj);
   toString() {
     var objString = obj.toString();
-    if (objString.length > 20) objString.substring(0, 17) + "...";
+    if (objString.length > 20) objString = objString.substring(0, 17) + "...";
     return "#[js:$objString]";
   }
 
@@ -34,7 +34,7 @@ class NativeExpression extends SelfEvaluating {
   NativeExpression(this.obj);
   toString() {
     var objString = obj.toString();
-    if (objString.length > 20) objString.substring(0, 17) + "...";
+    if (objString.length > 20) objString = objString.substring(0, 17) + "...";
     return "#[native:$objString]";
   }
 
@@ -43,35 +43,36 @@ class NativeExpression extends SelfEvaluating {
 
 Expression jsToScheme(obj) {
   if (obj is Expression) return obj;
-  if (obj is num) return new Number.fromNum(obj);
+  if (obj is num) return Number.fromNum(obj);
   if (obj is bool) return obj ? schemeTrue : schemeFalse;
-  if (obj is String) return new SchemeString(obj);
+  if (obj is String) return SchemeString(obj);
   if (obj is SchemeFunction) return obj.procedure;
-  if (obj is JsFunction) return new JsProcedure(obj);
+  if (obj is JsFunction) return JsProcedure(obj);
   if (obj is JsObject) return jsObjectToScheme(obj);
   if (obj == null) return undefined;
   if (obj == context['undefined']) return undefined;
-  return new NativeExpression(obj);
+  return NativeExpression(obj);
 }
 
 Expression jsObjectToScheme(JsObject obj) {
   var type =
       context['Object']['prototype']['toString'].callMethod('call', [obj]);
   if (type == '[object Promise]') {
-    var completer = new Completer();
+    var completer = Completer();
     obj.callMethod('then', [completer.complete, completer.completeError]);
-    var future = completer.future.then((result) => jsToScheme(result));
-    return new AsyncExpression(future)..jsPromise = obj;
+    var future = completer.future.then(jsToScheme);
+    return AsyncExpression(future)..jsPromise = obj;
   }
-  return new JsExpression(obj);
+  return JsExpression(obj);
 }
 
 Expression jsEval(String code) {
   try {
     return jsToScheme(context.callMethod("eval", [code]));
+    // ignore: avoid_catches_without_on_clauses
   } catch (e) {
     if (e is SchemeException) rethrow;
-    throw new SchemeException("$e");
+    throw SchemeException("$e");
   }
 }
 
@@ -81,12 +82,11 @@ class SchemeFunction {
   SchemeFunction(this.procedure, this.env);
   call() => schemeApply(procedure, nil, null).toJS();
   noSuchMethod(Invocation invocation) {
-    if (invocation.memberName == new Symbol("call")) {
-      var args = invocation.positionalArguments.map((arg) => jsToScheme(arg));
-      return schemeApply(procedure, new PairOrEmpty.fromIterable(args), env)
-          .toJS();
+    if (invocation.memberName == const Symbol("call")) {
+      var args = invocation.positionalArguments.map(jsToScheme);
+      return schemeApply(procedure, PairOrEmpty.fromIterable(args), env).toJS();
     }
-    throw new SchemeException(
+    throw SchemeException(
         "Something has gone horribly wrong with wrapped procedures");
   }
 }

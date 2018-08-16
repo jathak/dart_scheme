@@ -7,10 +7,10 @@
 library cs61a_scheme.core;
 
 export 'src/core/expressions.dart';
-export 'src/core/procedures.dart';
 export 'src/core/interpreter.dart';
 export 'src/core/logging.dart';
 export 'src/core/numbers.dart';
+export 'src/core/procedures.dart';
 export 'src/core/project_interface.dart';
 export 'src/core/reader.dart';
 export 'src/core/scheme_library.dart';

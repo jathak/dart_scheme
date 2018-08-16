@@ -19,7 +19,7 @@ abstract class SchemeLibrary {
   ///
   /// If you override and use @library, you should make sure to call super.
   void importAll(Frame env) {
-    throw new UnimplementedError();
+    throw UnimplementedError();
   }
 
   /// Loads only the single named binding into env.
@@ -29,7 +29,7 @@ abstract class SchemeLibrary {
 
   /// Loads only the listed bindings into env.
   void import(Frame env, Iterable<SchemeSymbol> names) {
-    Frame inner = new Frame(env, env.interpreter);
+    Frame inner = Frame(env, env.interpreter);
     importAll(inner);
     for (var name in names) {
       if (inner.bindings.containsKey(name)) {
@@ -43,7 +43,7 @@ abstract class SchemeLibrary {
 ///
 /// When present, all methods within the class that do not start with "import"
 /// or an underscore will be added as built-in procedures.
-const _Library schemelib = const _Library();
+const _Library schemelib = _Library();
 
 class _Library {
   const _Library();
@@ -53,7 +53,7 @@ class _Library {
 ///
 /// This procedure is defined in the extra library, so don't use this inside
 /// the core library.
-const _NoEval noeval = const _NoEval();
+const _NoEval noeval = _NoEval();
 
 class _NoEval {
   const _NoEval();
@@ -62,7 +62,7 @@ class _NoEval {
 /// Annotation to call turtle.show().
 ///
 /// This may only be used inside of TurtleLibrary.
-const _Turtle turtlestart = const _Turtle();
+const _Turtle turtlestart = _Turtle();
 
 class _Turtle {
   const _Turtle();

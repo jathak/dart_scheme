@@ -10,27 +10,26 @@ import 'project_interface.dart';
 /// Reads the first complete Scheme expression from [tokens].
 ///
 /// This function mutates [tokens].
-Expression schemeRead(List<Expression> tokens, ProjectInterface impl) {
-  return impl.read(tokens);
-}
+Expression schemeRead(List<Expression> tokens, ProjectInterface impl) =>
+    impl.read(tokens);
 
-Set _numeralStarts = new Set.from("0123456789+-.".split(""));
-Set _symbolChars = new Set.from(
+Set _numeralStarts = Set.from("0123456789+-.".split(""));
+Set _symbolChars = Set.from(
         r"!$%&*/:<=>?@^_~abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
             .split(""))
     .union(_numeralStarts);
-Set _stringDelims = new Set.from(['"']);
-Set _whitespace = new Set.from([' ', '\t', '\n', '\r']);
-Set _singleCharTokens = new Set.from(['(', ')', '[', ']', "'", '`', '#']);
+Set _stringDelims = Set.from(['"']);
+Set _whitespace = Set.from([' ', '\t', '\n', '\r']);
+Set _singleCharTokens = Set.from(['(', ')', '[', ']', "'", '`', '#']);
 Set _tokenEnd = _whitespace
     .union(_singleCharTokens)
     .union(_stringDelims)
-    .union(new Set.from([',', ',@']));
-Set _delimiters = _singleCharTokens.union(new Set.from(['.', ',', ',@']));
+    .union(Set.from([',', ',@']));
+Set _delimiters = _singleCharTokens.union(Set.from(['.', ',', ',@']));
 
 /// Returns whether [s] is a well-formed symbol.
 bool validSymbol(String s) {
-  if (s.length == 0) return false;
+  if (s.isEmpty) return false;
   for (String c in s.split('')) {
     if (!_symbolChars.contains(c)) return false;
   }
@@ -67,22 +66,22 @@ List nextCandidateToken(String line, int k) {
     } else if (_stringDelims.contains(c)) {
       String str = c;
       k++;
-      try {
-        while (line[k] != '"') {
-          if (line[k] == "\\") {
-            k++;
-            str += "\\" + line[k];
-          } else
-            str += line[k];
+      while (line[k] != '"') {
+        if (line[k] == "\\") {
           k++;
+          str += "\\" + line[k];
+        } else {
+          str += line[k];
         }
-      } catch (e) {
-        throw new FormatException("Invalid string $str");
+        k++;
+        if (k >= line.length) throw FormatException("Invalid string $str");
       }
       return [str + '"', k + 1];
     } else {
-      int j = k;
-      while (j < line.length && !_tokenEnd.contains(line[j])) j++;
+      int j;
+      for (j = k; j < line.length; j++) {
+        if (_tokenEnd.contains(line[j])) break;
+      }
       return [line.substring(k, j), min(j, line.length)];
     }
   }
@@ -95,7 +94,7 @@ Iterable<Expression> tokenizeLine(String line) sync* {
   int i = candidate[1];
   while (text != null) {
     if (_delimiters.contains(text)) {
-      yield new SchemeSymbol(text);
+      yield SchemeSymbol(text);
     } else if (text == '#t' || text.toLowerCase() == 'true') {
       yield schemeTrue;
     } else if (text == '#f' || text.toLowerCase() == 'false') {
@@ -106,21 +105,23 @@ Iterable<Expression> tokenizeLine(String line) sync* {
       bool number = false;
       if (_numeralStarts.contains(text[0])) {
         try {
-          yield new Number.fromString(text);
+          yield Number.fromString(text);
           number = true;
-        } on FormatException {}
+        } on FormatException {
+          // pass
+        }
       }
       if (!number) {
         if (validSymbol(text)) {
-          yield new SchemeSymbol.runtime(text);
+          yield SchemeSymbol.runtime(text);
         } else {
-          throw new FormatException("invalid numeral or symbol: $text");
+          throw FormatException("invalid numeral or symbol: $text");
         }
       }
     } else if (_stringDelims.contains(text[0])) {
-      yield new SchemeString(json.decode(text));
+      yield SchemeString(json.decode(text));
     } else {
-      throw new FormatException("warning: invalid token: $text in $line");
+      throw FormatException("warning: invalid token: $text in $line");
     }
     candidate = nextCandidateToken(line, i);
     text = candidate[0];

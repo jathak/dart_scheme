@@ -40,7 +40,11 @@ String _buildMixin(ClassDeclaration decl) {
     abstractMethods.add('Turtle get turtle;');
   }
   String mixinName = decl.withClause.mixinTypes[0].name.toSource();
-  return """abstract class $mixinName {
+  return """// ignore_for_file: curly_braces_in_flow_control_structures
+// ignore_for_file: unnecessary_this
+// ignore_for_file: prefer_expression_function_bodies
+// ignore_for_file: unnecessary_lambdas
+abstract class $mixinName {
   ${abstractMethods.join("\n  ")}
   void importAll(Frame __env) {
     ${primitives.join("\n    ")}
@@ -48,9 +52,8 @@ String _buildMixin(ClassDeclaration decl) {
 }""";
 }
 
-String _buildAbstract(MethodDeclaration method) {
-  return "${method.returnType} ${method.name}${method.parameters};";
-}
+String _buildAbstract(MethodDeclaration method) =>
+    "${method.returnType} ${method.name}${method.parameters};";
 
 bool needsTurtle = false;
 
@@ -94,38 +97,38 @@ String _buildPrimitive(MethodDeclaration method) {
     returning = 'var __value = undefined; ';
     after += ' return __value;';
   } else if (returnType == 'int') {
-    returning += ' new Number.fromInt(';
+    returning += ' Number.fromInt(';
     after = ')' + after;
   } else if (returnType == 'double') {
-    returning += ' new Number.fromDouble(';
+    returning += ' Number.fromDouble(';
     after = ')' + after;
   } else if (returnType == 'num') {
-    returning += ' new Number.fromNum(';
+    returning += ' Number.fromNum(';
     after = ')' + after;
   } else if (returnType == 'String') {
-    returning += ' new SchemeString(';
+    returning += ' SchemeString(';
     after = ')' + after;
   } else if (returnType == 'bool') {
-    returning += ' new Boolean(';
+    returning += ' Boolean(';
     after = ')' + after;
   } else if (returnType == 'Future<Expression>') {
-    returning += ' new AsyncExpression(';
+    returning += ' AsyncExpression(';
     after = ')' + after;
   } else if (returnType == 'JsFunction') {
-    returning += ' new JsProcedure(';
+    returning += ' JsProcedure(';
     after = ')' + after;
   } else if (returnType == 'JsObject') {
-    returning += ' new JsExpression(';
+    returning += ' JsExpression(';
     after = ')' + after;
   }
-  if (method.parameters.parameters.length > 0) {
+  if (method.parameters.parameters.isNotEmpty) {
     FormalParameter param = method.parameters.parameters[0];
     if (param is SimpleFormalParameter) {
       if (param.type.toSource() == "List<Expression>") {
         variable = true;
       }
     } else {
-      throw new Exception("Primitives may not have optional parameters.");
+      throw Exception("Primitives may not have optional parameters.");
     }
   }
   String symb = "const SchemeSymbol($name)";
@@ -139,7 +142,7 @@ String _buildPrimitive(MethodDeclaration method) {
     String fn = "this." + method.name.toSource();
     int paramCount = method.parameters.parameters.length;
     if (paramCount != 1 && paramCount != 2) {
-      throw new Exception("$fn has an invalid number of parameters!");
+      throw Exception("$fn has an invalid number of parameters!");
     }
     if (after != "") {
       String args = paramCount == 1 ? '__exprs' : '__exprs, __env';
@@ -153,24 +156,24 @@ String _buildPrimitive(MethodDeclaration method) {
     for (FormalParameter param in method.parameters.parameters) {
       if (param is SimpleFormalParameter) {
         if (param.type == null) {
-          throw new Exception("Primitive parameters must be typed.");
+          throw Exception("Primitive parameters must be typed.");
         }
         types.add(param.type.toSource());
       } else {
-        throw new Exception("Primitives may not have optional parameters.");
+        throw Exception("Primitives may not have optional parameters.");
       }
     }
-    bool takesFrame = types.length > 0 && types.last == "Frame";
+    bool takesFrame = types.isNotEmpty && types.last == "Frame";
     if (takesFrame) types.removeLast();
     String checks = "";
     var passes = [];
     var pieces = [];
     for (int i = 0; i < types.length; i++) {
       if (types[i] == 'int') {
-        pieces.add("(__exprs[$i] is! Integer)");
+        pieces.add("__exprs[$i] is! Integer");
         passes.add("__exprs[$i].toJS().toInt()");
       } else if (types[i] == 'double') {
-        pieces.add("(__exprs[$i] is! Double)");
+        pieces.add("__exprs[$i] is! Double");
         passes.add("__exprs[$i].toJS().toDouble()");
       } else if (types[i] == 'num') {
         pieces.add("__exprs[$i] is! Number");
@@ -188,8 +191,8 @@ String _buildPrimitive(MethodDeclaration method) {
     }
     if (types.any((type) => type != "Expression")) {
       var decodeName = name.substring(1, name.length - 1);
-      var error = "Argument of invalid type passed to ${decodeName}.";
-      checks = "if(${pieces.join('||')}) throw new SchemeException('$error');";
+      var error = "Argument of invalid type passed to $decodeName.";
+      checks = "if(${pieces.join('||')}) throw SchemeException('$error');";
     }
     if (takesFrame) passes.add("__env");
     var passStr = passes.join(",");

@@ -2,10 +2,10 @@
 
 import 'package:test/test.dart';
 
-import 'tests.scm' show tests_scm;
-
 import 'package:cs61a_scheme/cs61a_scheme_extra.dart';
 import 'package:cs61a_scheme_impl/impl.dart' show StaffProjectImplementation;
+
+import 'tests.scm' show tests_scm;
 
 main() {
   /// tests.scm all runs in sequence, so we run it as one test here
@@ -26,11 +26,11 @@ String runSchemeTests() {
   String log = "";
   List<String> run = [];
   bool foundError = false;
-  var inter = new Interpreter(new StaffProjectImplementation());
-  inter.importLibrary(new ExtraLibrary());
-  inter.importLibrary(new LogicLibrary());
+  var inter = Interpreter(StaffProjectImplementation());
+  inter.importLibrary(ExtraLibrary());
+  inter.importLibrary(LogicLibrary());
   bool awaitingInput = false;
-  inter.logger = (Expression logging, [bool newline = true]) {
+  inter.logger = (logging, [newline = true]) {
     if (logging is SchemeException) foundError = true;
     log += '$logging${newline ? '\n' : ''}';
   };
@@ -70,6 +70,7 @@ String runSchemeTests() {
         awaitingInput = false;
         try {
           inter.run(run.join('\n'));
+          // ignore: avoid_catches_without_on_clauses
         } catch (e) {
           foundError = true;
           log += '$e\n';
@@ -83,22 +84,6 @@ String runSchemeTests() {
     print("Failed $failedCount/$testCount tests in tests.scm");
     return output;
   }
-}
-
-countParens(String text) {
-  var tokens;
-  try {
-    tokens = tokenizeLines(text.split('\n')).toList();
-  } on FormatException {
-    return null;
-  }
-  int left = tokens.fold(0, (val, token) {
-    return val + (token == const SchemeSymbol('(') ? 1 : 0);
-  });
-  int right = tokens.fold(0, (val, token) {
-    return val + (token == const SchemeSymbol(')') ? 1 : 0);
-  });
-  return left - right;
 }
 
 formatActual(actual) {

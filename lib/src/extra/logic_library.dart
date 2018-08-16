@@ -19,7 +19,7 @@ class LogicLibrary extends SchemeLibrary with _$LogicLibraryMixin {
   @SchemeSymbol('!')
   @noeval
   void fact(List<Expression> exprs) {
-    facts.add(new logic.Fact(exprs.first, exprs.skip(1)));
+    facts.add(logic.Fact(exprs.first, exprs.skip(1)));
   }
 
   @SchemeSymbol('query')
@@ -27,7 +27,7 @@ class LogicLibrary extends SchemeLibrary with _$LogicLibraryMixin {
   @noeval
   void query(List<Expression> exprs, Frame env) {
     bool success = false;
-    for (var sol in logic.evaluate(new logic.Query(exprs), facts)) {
+    for (var sol in logic.evaluate(logic.Query(exprs), facts)) {
       if (!success) env.interpreter.logText('Success!');
       success = true;
       env.interpreter.logger(sol, true);
@@ -39,7 +39,7 @@ class LogicLibrary extends SchemeLibrary with _$LogicLibraryMixin {
   @SchemeSymbol('query-one')
   @noeval
   void queryOne(List<Expression> exprs, Frame env) {
-    var sols = logic.evaluate(new logic.Query(exprs), facts);
+    var sols = logic.evaluate(logic.Query(exprs), facts);
     if (sols.isNotEmpty) {
       env.interpreter.logText('Success!');
       env.interpreter.logger(sols.first, true);
@@ -50,7 +50,5 @@ class LogicLibrary extends SchemeLibrary with _$LogicLibraryMixin {
   }
 
   @SchemeSymbol('prolog')
-  String prolog() {
-    return facts.map((f) => f.toProlog()).join('\n') + '\n';
-  }
+  String prolog() => facts.map((f) => f.toProlog()).join('\n') + '\n';
 }

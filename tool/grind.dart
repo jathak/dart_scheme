@@ -4,7 +4,7 @@ import 'package:cs61a_scheme/builder.dart';
 import 'package:grinder/grinder.dart';
 import 'package:dart_style/dart_style.dart';
 
-const libraries = const [
+const libraries = [
   'core/standard_library',
   'extra/extra_library',
   'extra/logic_library',
@@ -35,22 +35,22 @@ check() async {
 
 buildLibrary(String name) async {
   String code = await generateCode(name);
-  var output = new File("lib/src/$name.g.dart");
-  if (!await output.exists()) await output.create(recursive: true);
+  var output = File("lib/src/$name.g.dart");
+  if (!output.existsSync()) await output.create(recursive: true);
   await output.writeAsString(code);
 }
 
 generateCode(String name) async {
-  String source = await new File("lib/src/$name.dart").readAsString();
+  String source = await File("lib/src/$name.dart").readAsString();
   String mixin = generateImportMixin(source);
   String dottedName = name.replaceAll("/", ".");
-  String code = "part of cs61a_scheme.${dottedName};\n\n$mixin";
-  return new DartFormatter().format(code);
+  String code = "part of cs61a_scheme.$dottedName;\n\n$mixin";
+  return DartFormatter().format(code);
 }
 
 checkBuilt(String name) async {
   String code = await generateCode(name);
-  var output = new File("lib/src/$name.g.dart");
+  var output = File("lib/src/$name.g.dart");
   String existing = await output.readAsString();
   if (code != existing) {
     print('Generated code for $name out of sync!');
