@@ -35,12 +35,6 @@ abstract class ProjectInterface {
 
   /// Analagous to BuiltinProcedure.apply in Problem 4
   Expression builtinApply(
-          BuiltinProcedure procedure, PairOrEmpty args, Frame env) =>
-      // ignore: deprecated_member_use
-      primitiveApply(procedure, args, env);
-
-  @deprecated
-  Expression primitiveApply(
       BuiltinProcedure procedure, PairOrEmpty args, Frame env);
 
   /// Analagous to part of scheme_eval implemented in Problem 5
