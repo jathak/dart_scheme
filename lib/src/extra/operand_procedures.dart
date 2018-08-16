@@ -2,12 +2,11 @@ library cs61a_scheme.extra.operand_procedures;
 
 import 'package:cs61a_scheme/cs61a_scheme.dart';
 
-class OperandPrimitiveProcedure extends PrimitiveProcedure {
-  OperandPrimitiveProcedure.fixed(
-      SchemeSymbol name, SchemePrimitive fn, int args)
+class OperandBuiltinProcedure extends BuiltinProcedure {
+  OperandBuiltinProcedure.fixed(SchemeSymbol name, SchemeBuiltin fn, int args)
       : super.fixed(name, fn, args);
-  OperandPrimitiveProcedure.variable(
-      SchemeSymbol name, SchemePrimitive fn, int minArgs,
+  OperandBuiltinProcedure.variable(
+      SchemeSymbol name, SchemeBuiltin fn, int minArgs,
       [int maxArgs = -1])
       : super.variable(name, fn, minArgs, maxArgs);
 
@@ -15,14 +14,13 @@ class OperandPrimitiveProcedure extends PrimitiveProcedure {
   Expression call(PairOrEmpty operands, Frame env) => apply(operands, env);
 }
 
-addOperandPrimitive(
-    Frame env, SchemeSymbol name, SchemePrimitive fn, int args) {
-  env.define(name, OperandPrimitiveProcedure.fixed(name, fn, args), true);
+addOperandBuiltin(Frame env, SchemeSymbol name, SchemeBuiltin fn, int args) {
+  env.define(name, OperandBuiltinProcedure.fixed(name, fn, args), true);
 }
 
-addVariableOperandPrimitive(
-    Frame env, SchemeSymbol name, SchemePrimitive fn, int minArgs,
+addVariableOperandBuiltin(
+    Frame env, SchemeSymbol name, SchemeBuiltin fn, int minArgs,
     [int maxArgs = -1]) {
-  var p = OperandPrimitiveProcedure.variable(name, fn, minArgs, maxArgs);
+  var p = OperandBuiltinProcedure.variable(name, fn, minArgs, maxArgs);
   env.define(name, p, true);
 }

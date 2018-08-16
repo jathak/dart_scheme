@@ -14,7 +14,7 @@ part 'extra_library.g.dart';
 
 /// Note: When the signatures (including any annotations) of any of theses methods
 /// change, make sure to `pub run grinder` to rebuild the mixin (which registers
-/// the primitives and performs type checking on arguments).
+/// the built-ins and performs type checking on arguments).
 @schemelib
 class ExtraLibrary extends SchemeLibrary with _$ExtraLibraryMixin {
   void importAll(Frame env) {
@@ -37,10 +37,10 @@ class ExtraLibrary extends SchemeLibrary with _$ExtraLibraryMixin {
       completer.completeError(SchemeException("${args[0]}"));
       return undefined;
     };
-    var resolve = PrimitiveProcedure.fixed(
+    var resolve = BuiltinProcedure.fixed(
         const SchemeSymbol("async:resolve"), resolver, 1);
-    var reject = PrimitiveProcedure.fixed(
-        const SchemeSymbol("async:reject"), rejecter, 1);
+    var reject =
+        BuiltinProcedure.fixed(const SchemeSymbol("async:reject"), rejecter, 1);
     var operands = PairOrEmpty.fromIterable([resolve, reject]);
     Future.microtask(() => completeEval(proc.apply(operands, env)));
     return completer.future;

@@ -104,7 +104,7 @@ startScheme(WebLibrary webLibrary) async {
 }
 
 addDemo(Frame env, String demoName, String code) {
-  addPrimitive(env, SchemeSymbol.runtime(demoName), (_, __) {
+  addBuiltin(env, SchemeSymbol.runtime(demoName), (_, __) {
     var prompt = "<span class='repl-prompt'>scm></span> `$code`";
     env.interpreter.logger(MarkdownWidget(prompt), true);
     env.interpreter.run(code);
@@ -154,7 +154,7 @@ startLogic(WebLibrary webLibrary) {
 }
 
 addTheme(Interpreter inter, WebLibrary web, SchemeSymbol themeName) {
-  addPrimitive(inter.globalEnv, themeName, (_, __) {
+  addBuiltin(inter.globalEnv, themeName, (_, __) {
     web.theme(themeName, inter.globalEnv);
     return undefined;
   }, 0);

@@ -13,7 +13,7 @@ import 'expressions.dart';
 /// copying the selected names over.
 ///
 /// This should almost always be used with the @library annotation to easily
-/// add primitive procedures.
+/// add built-in procedures.
 abstract class SchemeLibrary {
   /// Loads all bindings.
   ///
@@ -49,7 +49,7 @@ class _Library {
   const _Library();
 }
 
-/// Annotation to make an OperandPrimitiveProcedure.
+/// Annotation to make an OperandBuiltinProcedure.
 ///
 /// This procedure is defined in the extra library, so don't use this inside
 /// the core library.
@@ -71,14 +71,14 @@ class _Turtle {
 /// Annotation to specify a name other than the function name for the
 /// Scheme binding.
 
-/// Annotation to specify MinArgs when primitive takes a list.
+/// Annotation to specify MinArgs when built-in takes a list.
 /// If not set, defaults to 0 (no minimum)
 class MinArgs {
   final int value;
   const MinArgs(this.value);
 }
 
-/// Annotation to specify MaxArgs when primitive takes a list.
+/// Annotation to specify MaxArgs when built-in takes a list.
 /// If not set, defaults to -1 (no maximum)
 class MaxArgs {
   final int value;

@@ -21,7 +21,7 @@ abstract class Procedure extends SelfEvaluating {
   /// Applies the procedure in [env] to a list of [arguments].
   ///
   /// Arguments are typically evaluated, except in the case of [MacroProcedure]
-  /// or [OperandPrimitiveProcedure].
+  /// or [OperandBuiltinProcedure].
   Expression apply(PairOrEmpty arguments, Frame env);
   @override
   toString() => '#[$name]';
@@ -41,20 +41,20 @@ abstract class Procedure extends SelfEvaluating {
 }
 
 /// Used for defining built-in Scheme procedures.
-typedef SchemePrimitive = Expression Function(List<Expression> args, Frame env);
+typedef SchemeBuiltin = Expression Function(List<Expression> args, Frame env);
 
 /// A built-in Scheme procedure.
 ///
 /// The constructors here should typically not be called directly. Use
-/// [addPrimitive] or [addVariablePrimitive] instead, or, even better, create
+/// [addBuiltin] or [addVariableBuiltin] instead, or, even better, create
 /// a [SchemeLibrary] to create a collection with automatic type checking and
 /// conversion.
-class PrimitiveProcedure extends Procedure {
+class BuiltinProcedure extends Procedure {
   /// The intrinsic name of this built-in procedure.
   final SchemeSymbol name;
 
   /// Underlying Dart function that is called when this procedure is called.
-  final SchemePrimitive fn;
+  final SchemeBuiltin fn;
 
   /// True if this procedure takes a fixed number of arguments.
   final bool fixedArgs;
@@ -66,19 +66,19 @@ class PrimitiveProcedure extends Procedure {
   final int minArgs, maxArgs;
 
   /// Creates a new procedure [name] that calls [fn] and takes [args] args.
-  PrimitiveProcedure.fixed(this.name, this.fn, int args)
+  BuiltinProcedure.fixed(this.name, this.fn, int args)
       : fixedArgs = true,
         minArgs = args,
         maxArgs = args;
 
   /// Creates a new procedure [name] that calls [fn] and takes between [minArgs]
   /// and [maxArgs] arguments.
-  PrimitiveProcedure.variable(this.name, this.fn, this.minArgs,
+  BuiltinProcedure.variable(this.name, this.fn, this.minArgs,
       [this.maxArgs = -1])
       : fixedArgs = false;
 
   Expression apply(PairOrEmpty arguments, Frame env) =>
-      env.interpreter.impl.primitiveApply(this, arguments, env);
+      env.interpreter.impl.builtinApply(this, arguments, env);
 }
 
 /// A [Procedure] that was defined by the user within Scheme code.

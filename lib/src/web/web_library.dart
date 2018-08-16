@@ -13,7 +13,7 @@ part 'web_library.g.dart';
 
 /// Note: When the signatures (including any annotations) of any of this methods
 /// change, make sure to `pub run grinder` to rebuild the mixin (which registers
-/// the primitives and performs type checking on arguments).
+/// the built-ins and performs type checking on arguments).
 @schemelib
 class WebLibrary extends SchemeLibrary with _$WebLibraryMixin {
   final JsObject jsPlumb;
@@ -112,7 +112,7 @@ class WebLibrary extends SchemeLibrary with _$WebLibraryMixin {
   }
 
   @SchemeSymbol('apply-theme')
-  void applyThemePrimitive(Theme theme) => applyTheme(theme, css, styleElement);
+  void applyThemeBuiltin(Theme theme) => applyTheme(theme, css, styleElement);
 
   @SchemeSymbol('import')
   Future<Expression> schemeImport(List<Expression> args, Frame env) async {
@@ -148,7 +148,7 @@ class WebLibrary extends SchemeLibrary with _$WebLibraryMixin {
     ImportedLibrary lib = await import('scm/theme/$theme', [], env);
     Expression myTheme = lib.reference(const SchemeSymbol('imported-theme'));
     if (myTheme is! Theme) throw SchemeException("No theme exists");
-    applyThemePrimitive(myTheme);
+    applyThemeBuiltin(myTheme);
     return undefined;
   }
 

@@ -68,14 +68,13 @@ Expression evalCallExpression(Pair expr, Frame env) {
 
 Expression completeEval(val) => val is Thunk ? val.evaluate(null) : val;
 
-addPrimitive(Frame env, SchemeSymbol name, SchemePrimitive fn, int args) {
-  env.define(name, PrimitiveProcedure.fixed(name, fn, args), true);
+addBuiltin(Frame env, SchemeSymbol name, SchemeBuiltin fn, int args) {
+  env.define(name, BuiltinProcedure.fixed(name, fn, args), true);
 }
 
-addVariablePrimitive(
-    Frame env, SchemeSymbol name, SchemePrimitive fn, int minArgs,
+addVariableBuiltin(Frame env, SchemeSymbol name, SchemeBuiltin fn, int minArgs,
     [int maxArgs = -1]) {
-  var p = PrimitiveProcedure.variable(name, fn, minArgs, maxArgs);
+  var p = BuiltinProcedure.variable(name, fn, minArgs, maxArgs);
   env.define(name, p, true);
 }
 
