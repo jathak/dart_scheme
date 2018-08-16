@@ -16,7 +16,7 @@ class TurtleLibrary extends SchemeLibrary with _$TurtleLibraryMixin {
   Turtle turtle;
 
   TurtleLibrary(CanvasElement element, Interpreter interpreter) {
-    turtle = new Turtle(element, interpreter);
+    turtle = Turtle(element, interpreter);
   }
 
   @turtlestart
@@ -44,14 +44,16 @@ class TurtleLibrary extends SchemeLibrary with _$TurtleLibraryMixin {
   @MinArgs(1)
   @MaxArgs(2)
   void circle(List<Expression> exprs) {
-    if (exprs[0] is! Number)
-      throw new SchemeException('${exprs[0]} is not a number');
+    if (exprs[0] is! Number) {
+      throw SchemeException('${exprs[0]} is not a number');
+    }
     if (exprs.length == 1) {
       turtle.circle(exprs[0].toJS());
       return;
     }
-    if (exprs[1] is! Number)
-      throw new SchemeException('${exprs[1]} is not a number');
+    if (exprs[1] is! Number) {
+      throw SchemeException('${exprs[1]} is not a number');
+    }
     turtle.circle(exprs[0].toJS(), exprs[1].toJS());
   }
 
@@ -82,7 +84,7 @@ class TurtleLibrary extends SchemeLibrary with _$TurtleLibraryMixin {
 
   @turtlestart
   void color(Expression color) {
-    turtle.penColor = new Color.fromAnything(color);
+    turtle.penColor = Color.fromAnything(color);
   }
 
   @turtlestart
@@ -97,7 +99,7 @@ class TurtleLibrary extends SchemeLibrary with _$TurtleLibraryMixin {
 
   void exitonclick(Frame env) {
     var msg = 'Use (turtle-exit) to close turtle view.';
-    env.interpreter.logger(new TextMessage(msg), true);
+    env.interpreter.logger(TextMessage(msg), true);
   }
 
   @SchemeSymbol('turtle-exit')
@@ -105,7 +107,7 @@ class TurtleLibrary extends SchemeLibrary with _$TurtleLibraryMixin {
 
   @turtlestart
   void bgcolor(Expression color) {
-    turtle.backgroundColor = new Color.fromAnything(color);
+    turtle.backgroundColor = Color.fromAnything(color);
   }
 
   @turtlestart
@@ -119,7 +121,7 @@ class TurtleLibrary extends SchemeLibrary with _$TurtleLibraryMixin {
     var gw = turtle.gridWidth;
     var gh = turtle.gridHeight;
     env.interpreter.logger(
-        new TextMessage("Canvas is ${cw}x${ch} on a ${gw}x${gh} grid\n"
+        TextMessage("Canvas is ${cw}x$ch on a ${gw}x$gh grid\n"
             "(turtle-grid w h) changes the turtle grid (clears drawing)\n"
             "(turtle-canvas w h) changes the canvas size in pixels.\n"
             "(turtle-exit) hides the canvas and clears the drawing."),
@@ -141,7 +143,7 @@ class TurtleLibrary extends SchemeLibrary with _$TurtleLibraryMixin {
 
   @turtlestart
   void pixel(num x, num y, Expression color) {
-    turtle.drawPixel(x, y, new Color.fromAnything(color));
+    turtle.drawPixel(x, y, Color.fromAnything(color));
   }
 
   void pixelsize(int size) {
@@ -164,6 +166,6 @@ class TurtleLibrary extends SchemeLibrary with _$TurtleLibraryMixin {
   @SchemeSymbol('ht')
   void unsupported(List<Expression> exprs, Frame env) {
     env.interpreter
-        .logger(new TextMessage('Unsupported turtle command.'), true);
+        .logger(const TextMessage('Unsupported turtle command.'), true);
   }
 }

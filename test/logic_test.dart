@@ -5,16 +5,16 @@ import 'package:cs61a_scheme/logic.dart';
 main() {
   group("logic", () {
     test("simple success", () {
-      Fact fact = new Fact(clause(['likes', 'marvin', 'logic']));
-      Query query = new Query([
+      Fact fact = Fact(clause(['likes', 'marvin', 'logic']));
+      Query query = Query([
         clause(['likes', 'marvin', 'logic'])
       ]);
       var solutions = evaluate(query, [fact]);
       expect(solutions, hasLength(1));
     });
     test("success with variables", () {
-      Fact fact = new Fact(clause(['likes', 'marvin', 'logic']));
-      Query query = new Query([
+      Fact fact = Fact(clause(['likes', 'marvin', 'logic']));
+      Query query = Query([
         clause(['likes', '?who', '?what'])
       ]);
       var solutions = evaluate(query, [fact]);
@@ -25,18 +25,18 @@ main() {
       expect(solution['?what'], equals('logic'));
     });
     test("simple failure", () {
-      Fact fact = new Fact(clause(['likes', 'marvin', 'logic']));
-      Query query = new Query([
+      Fact fact = Fact(clause(['likes', 'marvin', 'logic']));
+      Query query = Query([
         clause(['likes', 'john', 'logic'])
       ]);
       var solutions = evaluate(query, [fact]);
       expect(solutions, isEmpty);
     });
     test("negation as failure", () {
-      Fact fact = new Fact(clause(['equal', '?x', '?x']));
+      Fact fact = Fact(clause(['equal', '?x', '?x']));
       Pair relation = clause(['equal', 'jen', '?x']);
-      Query query = new Query(
-          [new Pair(const SchemeSymbol('not'), new Pair(relation, nil))]);
+      Query query =
+          Query([Pair(const SchemeSymbol('not'), Pair(relation, nil))]);
       var solutions = evaluate(query, [fact]);
       expect(solutions, isEmpty);
     });
@@ -45,7 +45,7 @@ main() {
 
 PairOrEmpty clause(Iterable<String> parts) {
   if (parts.isEmpty) return nil;
-  return new Pair(new SchemeSymbol(parts.first), clause(parts.skip(1)));
+  return Pair(SchemeSymbol(parts.first), clause(parts.skip(1)));
 }
 
 Map<String, String> solutionMap(Solution solution) {

@@ -1,5 +1,9 @@
 part of cs61a_scheme.web.turtle_library;
 
+// ignore_for_file: curly_braces_in_flow_control_structures
+// ignore_for_file: unnecessary_this
+// ignore_for_file: prefer_expression_function_bodies
+// ignore_for_file: unnecessary_lambdas
 abstract class _$TurtleLibraryMixin {
   void forward(num distance);
   void backward(num distance);
@@ -30,8 +34,7 @@ abstract class _$TurtleLibraryMixin {
   void importAll(Frame __env) {
     addPrimitive(__env, const SchemeSymbol('forward'), (__exprs, __env) {
       if (__exprs[0] is! Number)
-        throw new SchemeException(
-            'Argument of invalid type passed to forward.');
+        throw SchemeException('Argument of invalid type passed to forward.');
       turtle.show();
       var __value = undefined;
       this.forward(__exprs[0].toJS());
@@ -42,8 +45,7 @@ abstract class _$TurtleLibraryMixin {
     __env.hidden[const SchemeSymbol('fd')] = true;
     addPrimitive(__env, const SchemeSymbol('backward'), (__exprs, __env) {
       if (__exprs[0] is! Number)
-        throw new SchemeException(
-            'Argument of invalid type passed to backward.');
+        throw SchemeException('Argument of invalid type passed to backward.');
       turtle.show();
       var __value = undefined;
       this.backward(__exprs[0].toJS());
@@ -57,7 +59,7 @@ abstract class _$TurtleLibraryMixin {
     __env.hidden[const SchemeSymbol('bk')] = true;
     addPrimitive(__env, const SchemeSymbol('left'), (__exprs, __env) {
       if (__exprs[0] is! Number)
-        throw new SchemeException('Argument of invalid type passed to left.');
+        throw SchemeException('Argument of invalid type passed to left.');
       turtle.show();
       var __value = undefined;
       this.left(__exprs[0].toJS());
@@ -68,7 +70,7 @@ abstract class _$TurtleLibraryMixin {
     __env.hidden[const SchemeSymbol('lt')] = true;
     addPrimitive(__env, const SchemeSymbol('right'), (__exprs, __env) {
       if (__exprs[0] is! Number)
-        throw new SchemeException('Argument of invalid type passed to right.');
+        throw SchemeException('Argument of invalid type passed to right.');
       turtle.show();
       var __value = undefined;
       this.right(__exprs[0].toJS());
@@ -85,7 +87,7 @@ abstract class _$TurtleLibraryMixin {
     }, 1, 2);
     addPrimitive(__env, const SchemeSymbol('setposition'), (__exprs, __env) {
       if (__exprs[0] is! Number || __exprs[1] is! Number)
-        throw new SchemeException(
+        throw SchemeException(
             'Argument of invalid type passed to setposition.');
       turtle.show();
       var __value = undefined;
@@ -100,8 +102,7 @@ abstract class _$TurtleLibraryMixin {
     __env.hidden[const SchemeSymbol('goto')] = true;
     addPrimitive(__env, const SchemeSymbol('setheading'), (__exprs, __env) {
       if (__exprs[0] is! Number)
-        throw new SchemeException(
-            'Argument of invalid type passed to setheading.');
+        throw SchemeException('Argument of invalid type passed to setheading.');
       turtle.show();
       var __value = undefined;
       this.setHeading(__exprs[0].toJS());
@@ -176,8 +177,7 @@ abstract class _$TurtleLibraryMixin {
     }, 1);
     addPrimitive(__env, const SchemeSymbol("pensize"), (__exprs, __env) {
       if (__exprs[0] is! Number)
-        throw new SchemeException(
-            'Argument of invalid type passed to pensize.');
+        throw SchemeException('Argument of invalid type passed to pensize.');
       turtle.show();
       var __value = undefined;
       this.pensize(__exprs[0].toJS());
@@ -189,16 +189,16 @@ abstract class _$TurtleLibraryMixin {
       return __value;
     }, 0);
     addPrimitive(__env, const SchemeSymbol('turtle-grid'), (__exprs, __env) {
-      if ((__exprs[0] is! Integer) || (__exprs[1] is! Integer))
-        throw new SchemeException(
+      if (__exprs[0] is! Integer || __exprs[1] is! Integer)
+        throw SchemeException(
             'Argument of invalid type passed to turtle-grid.');
       var __value = undefined;
       this.setGridSize(__exprs[0].toJS().toInt(), __exprs[1].toJS().toInt());
       return __value;
     }, 2);
     addPrimitive(__env, const SchemeSymbol('turtle-canvas'), (__exprs, __env) {
-      if ((__exprs[0] is! Integer) || (__exprs[1] is! Integer))
-        throw new SchemeException(
+      if (__exprs[0] is! Integer || __exprs[1] is! Integer)
+        throw SchemeException(
             'Argument of invalid type passed to turtle-canvas.');
       var __value = undefined;
       this.setCanvasSize(__exprs[0].toJS().toInt(), __exprs[1].toJS().toInt());
@@ -208,28 +208,27 @@ abstract class _$TurtleLibraryMixin {
       if (__exprs[0] is! Number ||
           __exprs[1] is! Number ||
           __exprs[2] is! Expression)
-        throw new SchemeException('Argument of invalid type passed to pixel.');
+        throw SchemeException('Argument of invalid type passed to pixel.');
       turtle.show();
       var __value = undefined;
       this.pixel(__exprs[0].toJS(), __exprs[1].toJS(), __exprs[2]);
       return __value;
     }, 3);
     addPrimitive(__env, const SchemeSymbol("pixelsize"), (__exprs, __env) {
-      if ((__exprs[0] is! Integer))
-        throw new SchemeException(
-            'Argument of invalid type passed to pixelsize.');
+      if (__exprs[0] is! Integer)
+        throw SchemeException('Argument of invalid type passed to pixelsize.');
       var __value = undefined;
       this.pixelsize(__exprs[0].toJS().toInt());
       return __value;
     }, 1);
     addPrimitive(__env, const SchemeSymbol('screen_width'), (__exprs, __env) {
-      return new Number.fromNum(this.screenWidth());
+      return Number.fromNum(this.screenWidth());
     }, 0);
     __env.bindings[const SchemeSymbol('screen-width')] =
         __env.bindings[const SchemeSymbol('screen_width')];
     __env.hidden[const SchemeSymbol('screen-width')] = true;
     addPrimitive(__env, const SchemeSymbol('screen_height'), (__exprs, __env) {
-      return new Number.fromNum(this.screenHeight());
+      return Number.fromNum(this.screenHeight());
     }, 0);
     __env.bindings[const SchemeSymbol('screen-height')] =
         __env.bindings[const SchemeSymbol('screen_height')];

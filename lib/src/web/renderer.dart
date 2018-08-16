@@ -12,7 +12,7 @@ import 'package:cs61a_scheme/highlight.dart';
 import 'web_library.dart';
 
 void render(Widget widget, Element container) {
-  new _Renderer(container, context['jsPlumb']).render(widget);
+  _Renderer(container, context['jsPlumb']).render(widget);
 }
 
 class _Renderer {
@@ -54,7 +54,7 @@ class _Renderer {
 
   void refreshConnections() {
     if (connections == null) return;
-    var base = new JsObject.jsify({
+    var base = JsObject.jsify({
       'endpoint': [
         'Dot',
         {'radius': 3}
@@ -76,15 +76,15 @@ class _Renderer {
     jsPlumb?.callMethod('setContainer', [container]);
     jsPlumb?.callMethod('setDraggable', [false]);
     for (var c in connections) {
-      jsPlumb?.callMethod('connect', [new JsObject.jsify(c), base]);
+      jsPlumb?.callMethod('connect', [JsObject.jsify(c), base]);
     }
     jsPlumb?.callMethod('repaintEverything');
-    new Future.delayed(const Duration(milliseconds: 50), () {
+    Future.delayed(const Duration(milliseconds: 50), () {
       jsPlumb?.callMethod('repaintEverything');
     });
     if (jsPlumb != null) {
       subs.add(window.onResize.listen((e) {
-        new Future.delayed(const Duration(milliseconds: 50), () {
+        Future.delayed(const Duration(milliseconds: 50), () {
           jsPlumb.callMethod('repaintEverything');
         });
       }));
@@ -122,16 +122,16 @@ class _Renderer {
     if (widget is Anchor) return convertAnchor(widget, spaced);
     if (widget is Binding) return convertBinding(widget, spaced);
     if (widget is Strike) return convertStrike(widget, spaced);
-    throw new SchemeException("Cannot render $widget");
+    throw SchemeException("Cannot render $widget");
   }
 
   Element convertMarkdown(MarkdownWidget mark, [bool spaced = false]) {
     String html = md.markdownToHtml(mark.text,
         extensionSet: md.ExtensionSet.gitHubFlavored, inlineOnly: mark.inline);
-    Element element = new Element.span();
+    Element element = Element.span();
     element.appendHtml(html,
-        validator: new NodeValidatorBuilder.common()
-          ..allowNavigation(new _AnyUriPolicy()));
+        validator: NodeValidatorBuilder.common()
+          ..allowNavigation(_AnyUriPolicy()));
     for (var link in element.querySelectorAll('a')) {
       String href = link.attributes['href'];
       if (href?.startsWith(':') ?? false) {
@@ -144,16 +144,16 @@ class _Renderer {
     }
     for (var code in element.querySelectorAll('code')) {
       var styled = highlight(code.innerHtml);
-      code.setInnerHtml(styled, validator: new NodeValidatorBuilder.common());
+      code.setInnerHtml(styled, validator: NodeValidatorBuilder.common());
     }
     element.classes.add('markdown');
     return element;
   }
 
   Element convertVisualization(Visualization viz, [bool spaced = false]) {
-    DivElement wrapper = new DivElement()..classes = ['visualization'];
+    DivElement wrapper = DivElement()..classes = ['visualization'];
     wrapper.append(convert(viz.currentDiagram));
-    DivElement footer = new DivElement()..classes = ['footer'];
+    DivElement footer = DivElement()..classes = ['footer'];
     for (Widget item in viz.buttonRow) {
       footer.append(convert(item));
     }
@@ -162,7 +162,7 @@ class _Renderer {
   }
 
   Element convertButton(Button button, [bool spaced = false]) {
-    DivElement element = new DivElement()..classes = ['button'];
+    DivElement element = DivElement()..classes = ['button'];
     element.append(convert(button.inside));
     subs.add(element.onClick.listen((event) {
       button.click();
@@ -171,10 +171,10 @@ class _Renderer {
   }
 
   Element convertDiagram(Diagram diagram, [bool spaced = false]) {
-    TableElement table = new TableElement()..classes = ['diagram'];
-    TableRowElement tr = new TableRowElement();
-    TableCellElement frames = new TableCellElement()..classes = ['frames'];
-    TableCellElement objects = new TableCellElement()..classes = ['objects'];
+    TableElement table = TableElement()..classes = ['diagram'];
+    TableRowElement tr = TableRowElement();
+    TableCellElement frames = TableCellElement()..classes = ['frames'];
+    TableCellElement objects = TableCellElement()..classes = ['objects'];
     tr.append(frames);
     tr.append(objects);
     table.append(tr);
@@ -189,10 +189,10 @@ class _Renderer {
   }
 
   Element convertFrameElement(FrameElement frame, [bool spaced = false]) {
-    DivElement div = new DivElement();
+    DivElement div = DivElement();
     div.id = 'frame${frame.id}';
     div.classes.add(frame.active ? 'current-frame' : 'other-frame');
-    DivElement header = new DivElement();
+    DivElement header = DivElement();
     String name = frame.id == 0 ? 'Global frame' : 'f${frame.id}';
     String parent = "";
     if (frame.parentId != null && frame.parentId != 0) {
@@ -211,29 +211,28 @@ class _Renderer {
   }
 
   Element convertBinding(Binding binding, [bool spaced = false]) {
-    DivElement div = new DivElement()..className = 'binding';
+    DivElement div = DivElement()..className = 'binding';
     if (binding.isReturn) div.classes.add('return');
     div.innerHtml = '${binding.symbol}&nbsp;';
-    SpanElement span = new SpanElement()..className = 'align-right';
+    SpanElement span = SpanElement()..className = 'align-right';
     div.append(span);
     span.append(convert(binding.value, spaced || binding.spacer));
     return div;
   }
 
   Element convertRow(Row row, [bool spaced = false]) {
-    DivElement div = new DivElement()..className = 'row';
+    DivElement div = DivElement()..className = 'row';
     for (Widget element in row.elements) {
       div.append(convert(element, spaced || row.spacer));
     }
     return div;
   }
 
-  Element convertTextElement(TextWidget text, [bool spaced = false]) {
-    return new SpanElement()..text = text.text;
-  }
+  Element convertTextElement(TextWidget text, [bool spaced = false]) =>
+      SpanElement()..text = text.text;
 
   Element convertBlock(Block block, [bool spaced = false]) {
-    DivElement div = new DivElement();
+    DivElement div = DivElement();
     div.classes = ['block', block.type];
     div.append(convert(block.inside, spaced || block.spacer));
     return div;
@@ -241,9 +240,9 @@ class _Renderer {
 
   Element convertBlockGrid(BlockGrid blockGrid, [bool spaced = false]) {
     if (blockGrid.rowCount != 1) {
-      throw new SchemeException("Multiple BlockGrid rows not yet implemented");
+      throw SchemeException("Multiple BlockGrid rows not yet implemented");
     }
-    DivElement div = new DivElement();
+    DivElement div = DivElement();
     div.className = 'block-grid';
     for (Block block in blockGrid.rowAt(0)) {
       div.append(convert(block, spaced || blockGrid.spacer));
@@ -253,21 +252,19 @@ class _Renderer {
 
   Element convertAnchor(Anchor anchor, [bool spaced = false]) {
     if (spaced) {
-      return new SpanElement()..innerHtml = '&nbsp';
+      return SpanElement()..innerHtml = '&nbsp';
     }
     String htmlAnchorId = 'trueAnchor${anchorCount++}';
     trueAnchorIds[anchor.id] = htmlAnchorId;
     anchorDirections[anchor.id] = null;
-    return new SpanElement()
+    return SpanElement()
       ..id = htmlAnchorId
       ..innerHtml = '&nbsp;';
   }
 
-  Element convertStrike(Strike strike, [bool spaced = false]) {
-    return new SpanElement()
-      ..innerHtml = '-'
-      ..classes = ['strike'];
-  }
+  Element convertStrike(Strike strike, [bool spaced = false]) => SpanElement()
+    ..innerHtml = '-'
+    ..classes = ['strike'];
 
   List<num> _anchorForDirection(Direction dir) {
     if (dir == Direction.left) return [0, 0.5, 1, 0, 0, 0];

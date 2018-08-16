@@ -9,14 +9,14 @@ import 'widgets.dart';
 /// A Scheme procedure is analagous to a Dart or JS function and call be called
 /// with 0 or more arguments through a call expression.
 abstract class Procedure extends SelfEvaluating {
-  /// Intrinsic name of this procedure. `null` if none.
-  SchemeSymbol get name;
   Procedure();
 
+  /// Intrinsic name of this procedure. `null` if none.
+  SchemeSymbol get name;
+
   /// Calls the procedure in [env] with a list of unevaluated [operands].
-  Expression call(PairOrEmpty operands, Frame env) {
-    return env.interpreter.impl.procedureCall(this, operands, env);
-  }
+  Expression call(PairOrEmpty operands, Frame env) =>
+      env.interpreter.impl.procedureCall(this, operands, env);
 
   /// Applies the procedure in [env] to a list of [arguments].
   ///
@@ -35,13 +35,13 @@ abstract class Procedure extends SelfEvaluating {
   /// That function can then be converted to a JS function when passed to JS.
   /// Errors if web library has not been loaded.
   static dynamic Function(Procedure) jsProcedure = (p) {
-    throw new SchemeException(
+    throw SchemeException(
         "JS interop must be enabled for Procedure.toJS() to work");
   };
 }
 
 /// Used for defining built-in Scheme procedures.
-typedef Expression SchemePrimitive(List<Expression> args, Frame env);
+typedef SchemePrimitive = Expression Function(List<Expression> args, Frame env);
 
 /// A built-in Scheme procedure.
 ///
@@ -77,9 +77,8 @@ class PrimitiveProcedure extends Procedure {
       [this.maxArgs = -1])
       : fixedArgs = false;
 
-  Expression apply(PairOrEmpty arguments, Frame env) {
-    return env.interpreter.impl.primitiveApply(this, arguments, env);
-  }
+  Expression apply(PairOrEmpty arguments, Frame env) =>
+      env.interpreter.impl.primitiveApply(this, arguments, env);
 }
 
 /// A [Procedure] that was defined by the user within Scheme code.
@@ -115,7 +114,7 @@ abstract class UserDefinedProcedure extends Procedure {
   }
 
   @override
-  Widget draw(diag) => new TextWidget(new Pair(name, formals).toString());
+  Widget draw(diag) => TextWidget(Pair(name, formals).toString());
 }
 
 /// A [UserDefinedProcedure] with lexical scope and normal operand evaluation.
@@ -139,19 +138,18 @@ class LambdaProcedure extends UserDefinedProcedure {
       [this.name = const SchemeSymbol('λ')]);
 
   /// Creates a call frame based on [env], the frame this lambda was defined in.
-  Frame makeCallFrame(PairOrEmpty arguments, Frame _) {
-    return env.interpreter.impl.makeLambdaFrame(this, arguments, env);
-  }
+  Frame makeCallFrame(PairOrEmpty arguments, Frame _) =>
+      env.interpreter.impl.makeLambdaFrame(this, arguments, env);
 
   @override
   toString() =>
-      new Pair(new SchemeSymbol('lambda'), new Pair(formals, body)).toString();
+      Pair(const SchemeSymbol('lambda'), Pair(formals, body)).toString();
 
   @override
   Widget draw(diag) {
     var parent = env.id == 0 ? '' : ' [parent=f${env.id}]';
-    var msg = "${new Pair(name, formals)}$parent";
-    return new TextWidget(msg);
+    var msg = "${Pair(name, formals)}$parent";
+    return TextWidget(msg);
   }
 }
 
@@ -164,12 +162,11 @@ class MacroProcedure extends LambdaProcedure {
 
   /// Instead of evaluated the operands, they are passed directly to [apply].
   @override
-  Expression call(PairOrEmpty operands, Frame env) {
-    return env.interpreter.impl.macroCall(this, operands, env);
-  }
+  Expression call(PairOrEmpty operands, Frame env) =>
+      env.interpreter.impl.macroCall(this, operands, env);
 
   toString() =>
-      new Pair(new SchemeSymbol('#macro'), new Pair(formals, body)).toString();
+      Pair(const SchemeSymbol('#macro'), Pair(formals, body)).toString();
 }
 
 /// A [UserDefinedProcedure] with dynamic scope and normal operand evaluation.
@@ -184,12 +181,10 @@ class MuProcedure extends UserDefinedProcedure {
   MuProcedure(this.formals, this.body, [this.name = const SchemeSymbol('μ')]);
 
   /// Creates a call frame based on [env], the frame this mu was called in.
-  Frame makeCallFrame(PairOrEmpty arguments, Frame env) {
-    return env.interpreter.impl.makeMuFrame(this, arguments, env);
-  }
+  Frame makeCallFrame(PairOrEmpty arguments, Frame env) =>
+      env.interpreter.impl.makeMuFrame(this, arguments, env);
 
-  toString() =>
-      new Pair(new SchemeSymbol('mu'), new Pair(formals, body)).toString();
+  toString() => Pair(const SchemeSymbol('mu'), Pair(formals, body)).toString();
 }
 
 /// An approximation of a first-class continuation.
@@ -207,9 +202,8 @@ class Continuation extends Procedure {
   Expression result;
   Continuation() : id = counter++;
 
-  Expression apply(PairOrEmpty args, Frame env) {
-    return env.interpreter.impl.continuationApply(this, args, env);
-  }
+  Expression apply(PairOrEmpty args, Frame env) =>
+      env.interpreter.impl.continuationApply(this, args, env);
 
   toString() => "#[continuation$id]";
 }

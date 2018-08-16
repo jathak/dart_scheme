@@ -3,28 +3,29 @@ library cs61a_scheme.core.utils;
 import 'expressions.dart';
 import 'logging.dart';
 import 'procedures.dart';
+import 'reader.dart';
 
 void checkForm(Expression expressions, int min, [int max = -1]) {
   if (expressions is PairOrEmpty && expressions.wellFormed) {
     int length = expressions.length;
-    if (length < min)
-      throw new SchemeException(
-          "$expressions must contain at least $min items.");
+    if (length < min) {
+      throw SchemeException("$expressions must contain at least $min items.");
+    }
     if (max > -1 && length > max) {
-      throw new SchemeException("$expressions may contain at most $max items.");
+      throw SchemeException("$expressions may contain at most $max items.");
     }
     return;
   }
-  throw new SchemeException("$expressions is not a valid list.");
+  throw SchemeException("$expressions is not a valid list.");
 }
 
 void checkFormals(Expression formals) {
-  var symbols = new Set<SchemeSymbol>();
+  var symbols = Set<SchemeSymbol>();
   void checkAndAdd(Expression symbol) {
     if (symbol is! SchemeSymbol) {
-      throw new SchemeException("Non-symbol: $symbol");
+      throw SchemeException("Non-symbol: $symbol");
     } else if (symbols.contains(symbol)) {
-      throw new SchemeException("Duplicate symbol: $symbol");
+      throw SchemeException("Duplicate symbol: $symbol");
     }
     symbols.add(symbol);
   }
@@ -45,13 +46,12 @@ Expression schemeEval(Expression expr, Frame env) {
   }
 }
 
-Expression schemeApply(Procedure procedure, PairOrEmpty args, Frame env) {
-  return completeEval(procedure.apply(args, env));
-}
+Expression schemeApply(Procedure procedure, PairOrEmpty args, Frame env) =>
+    completeEval(procedure.apply(args, env));
 
 Expression evalCallExpression(Pair expr, Frame env) {
   if (!expr.wellFormed) {
-    throw new SchemeException("Malformed list: $expr");
+    throw SchemeException("Malformed list: $expr");
   }
   Expression first = expr.first;
   Expression rest = expr.second;
@@ -69,12 +69,26 @@ Expression evalCallExpression(Pair expr, Frame env) {
 Expression completeEval(val) => val is Thunk ? val.evaluate(null) : val;
 
 addPrimitive(Frame env, SchemeSymbol name, SchemePrimitive fn, int args) {
-  env.define(name, new PrimitiveProcedure.fixed(name, fn, args), true);
+  env.define(name, PrimitiveProcedure.fixed(name, fn, args), true);
 }
 
 addVariablePrimitive(
     Frame env, SchemeSymbol name, SchemePrimitive fn, int minArgs,
     [int maxArgs = -1]) {
-  var p = new PrimitiveProcedure.variable(name, fn, minArgs, maxArgs);
+  var p = PrimitiveProcedure.variable(name, fn, minArgs, maxArgs);
   env.define(name, p, true);
+}
+
+int countParens(String text) {
+  Iterable<Expression> tokens;
+  try {
+    tokens = tokenizeLines(text.split('\n')).toList();
+  } on FormatException {
+    return null;
+  }
+  int left = tokens.fold(
+      0, (val, token) => val + (token == const SchemeSymbol('(') ? 1 : 0));
+  int right = tokens.fold(
+      0, (val, token) => val + (token == const SchemeSymbol(')') ? 1 : 0));
+  return left - right;
 }

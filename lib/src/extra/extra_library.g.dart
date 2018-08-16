@@ -1,5 +1,9 @@
 part of cs61a_scheme.extra.extra_library;
 
+// ignore_for_file: curly_braces_in_flow_control_structures
+// ignore_for_file: unnecessary_this
+// ignore_for_file: prefer_expression_function_bodies
+// ignore_for_file: unnecessary_lambdas
 abstract class _$ExtraLibraryMixin {
   Future<Expression> runAsync(Procedure proc, Frame env);
   Future<Expression> runAfter(Number millis, Procedure proc, Frame env);
@@ -20,20 +24,17 @@ abstract class _$ExtraLibraryMixin {
   void importAll(Frame __env) {
     addPrimitive(__env, const SchemeSymbol("run-async"), (__exprs, __env) {
       if (__exprs[0] is! Procedure)
-        throw new SchemeException(
-            'Argument of invalid type passed to run-async.');
-      return new AsyncExpression(this.runAsync(__exprs[0], __env));
+        throw SchemeException('Argument of invalid type passed to run-async.');
+      return AsyncExpression(this.runAsync(__exprs[0], __env));
     }, 1);
     addPrimitive(__env, const SchemeSymbol("run-after"), (__exprs, __env) {
       if (__exprs[0] is! Number || __exprs[1] is! Procedure)
-        throw new SchemeException(
-            'Argument of invalid type passed to run-after.');
-      return new AsyncExpression(this.runAfter(__exprs[0], __exprs[1], __env));
+        throw SchemeException('Argument of invalid type passed to run-after.');
+      return AsyncExpression(this.runAfter(__exprs[0], __exprs[1], __env));
     }, 2);
     addPrimitive(__env, const SchemeSymbol("completed?"), (__exprs, __env) {
       if (__exprs[0] is! AsyncExpression)
-        throw new SchemeException(
-            'Argument of invalid type passed to completed?.');
+        throw SchemeException('Argument of invalid type passed to completed?.');
       return this.isCompleted(__exprs[0]);
     }, 1);
     addPrimitive(__env, const SchemeSymbol("draw"), (__exprs, __env) {
@@ -57,14 +58,13 @@ abstract class _$ExtraLibraryMixin {
     }, 1, -1);
     addPrimitive(__env, const SchemeSymbol('listen-for'), (__exprs, __env) {
       if (__exprs[0] is! SchemeSymbol || __exprs[1] is! Procedure)
-        throw new SchemeException(
-            'Argument of invalid type passed to listen-for.');
+        throw SchemeException('Argument of invalid type passed to listen-for.');
       return this.listenFor(__exprs[0], __exprs[1], __env);
     }, 2);
     addPrimitive(__env, const SchemeSymbol('cancel-listener'),
         (__exprs, __env) {
       if (__exprs[0] is! SchemeEventListener)
-        throw new SchemeException(
+        throw SchemeException(
             'Argument of invalid type passed to cancel-listener.');
       var __value = undefined;
       this.cancelListener(__exprs[0], __env);
@@ -72,25 +72,23 @@ abstract class _$ExtraLibraryMixin {
     }, 1);
     addPrimitive(__env, const SchemeSymbol('cancel-all'), (__exprs, __env) {
       if (__exprs[0] is! SchemeSymbol)
-        throw new SchemeException(
-            'Argument of invalid type passed to cancel-all.');
+        throw SchemeException('Argument of invalid type passed to cancel-all.');
       var __value = undefined;
       this.cancelAll(__exprs[0], __env);
       return __value;
     }, 1);
     addVariablePrimitive(__env, const SchemeSymbol('string-append'),
         (__exprs, __env) {
-      return new SchemeString(this.stringAppend(__exprs));
+      return SchemeString(this.stringAppend(__exprs));
     }, 0, -1);
     addPrimitive(__env, const SchemeSymbol("serialize"), (__exprs, __env) {
       if (__exprs[0] is! Serializable)
-        throw new SchemeException(
-            'Argument of invalid type passed to serialize.');
-      return new SchemeString(this.serialize(__exprs[0]));
+        throw SchemeException('Argument of invalid type passed to serialize.');
+      return SchemeString(this.serialize(__exprs[0]));
     }, 1);
     addPrimitive(__env, const SchemeSymbol("deserialize"), (__exprs, __env) {
       if (__exprs[0] is! SchemeString)
-        throw new SchemeException(
+        throw SchemeException(
             'Argument of invalid type passed to deserialize.');
       return this.deserialize((__exprs[0] as SchemeString).value);
     }, 1);

@@ -28,13 +28,13 @@ class Repl {
     const SchemeSymbol("define-macro")
   ];
 
-  Repl(this.interpreter, Element parent, {this.prompt: 'scm> '}) {
+  Repl(this.interpreter, Element parent, {this.prompt = 'scm> '}) {
     if (window.localStorage.containsKey('#repl-history')) {
       var decoded = json.decode(window.localStorage['#repl-history']);
       if (decoded is List) history = decoded.map((item) => '$item').toList();
     }
     addPrimitives();
-    container = new PreElement()..classes = ['repl'];
+    container = PreElement()..classes = ['repl'];
     container.onClick.listen((e) async {
       if (activeInput.contains(e.target)) return;
       await delay(0);
@@ -44,23 +44,23 @@ class Repl {
         if (range.startOffset != range.endOffset) return;
       }
       activeInput.focus();
-      var range = new Range();
+      var range = Range();
       range.selectNodeContents(activeInput);
       range.collapse(false);
       selection.removeAllRanges();
       selection.addRange(range);
     });
     parent.append(container);
-    status = new SpanElement()..classes = ['repl-status'];
+    status = SpanElement()..classes = ['repl-status'];
     container.append(status);
     buildNewInput();
-    interpreter.logger = (Expression logging, [bool newline = true]) {
-      var box = new SpanElement();
+    interpreter.logger = (logging, [newline = true]) {
+      var box = SpanElement();
       activeLoggingArea.append(box);
       logInto(box, logging, newline);
     };
     interpreter.logError = (e) {
-      var errorElement = new SpanElement()
+      var errorElement = SpanElement()
         ..text = '$e\n'
         ..classes = ['error'];
       activeLoggingArea.append(errorElement);
@@ -97,17 +97,17 @@ class Repl {
   }
 
   buildNewInput() {
-    activeLoggingArea = new SpanElement();
+    activeLoggingArea = SpanElement();
     if (activeInput != null) {
       activeInput.contentEditable = 'false';
-      container.append(new SpanElement()..text = '\n');
+      container.append(SpanElement()..text = '\n');
     }
     container.append(activeLoggingArea);
-    activePrompt = new SpanElement()
+    activePrompt = SpanElement()
       ..text = prompt
       ..classes = ['repl-prompt'];
     container.append(activePrompt);
-    activeInput = new SpanElement()
+    activeInput = SpanElement()
       ..classes = ['repl-input']
       ..contentEditable = 'true';
     activeInput.onKeyPress.listen(onInputKeyPress);
@@ -131,19 +131,20 @@ class Repl {
         Expression expr = schemeRead(tokens, interpreter.impl);
         result = schemeEval(expr, interpreter.globalEnv);
         if (result is! Undefined) {
-          var box = new SpanElement();
+          var box = SpanElement();
           loggingArea.append(box);
           await logInto(box, result, true);
         }
       } on SchemeException catch (e) {
-        loggingArea.append(new SpanElement()
+        loggingArea.append(SpanElement()
           ..text = '$e\n'
           ..classes = ['error']);
       } on ExitException {
         interpreter.onExit();
         return;
+        // ignore: avoid_catches_without_on_clauses
       } catch (e) {
-        loggingArea.append(new SpanElement()
+        loggingArea.append(SpanElement()
           ..text = '$e\n'
           ..classes = ['error']);
         if (e is Error) {
@@ -151,9 +152,9 @@ class Repl {
         }
       } finally {
         if (autodraw && result is Pair) {
-          var box = new SpanElement();
+          var box = SpanElement();
           loggingArea.append(box);
-          logInto(box, new Diagram(result), true);
+          logInto(box, Diagram(result), true);
         }
       }
     }
@@ -205,7 +206,7 @@ class Repl {
     } else if (event.ctrlKey && (code == KeyCode.V || code == KeyCode.X)) {
       await delay(0);
       updateInputStatus();
-      highlightSaveCursor(activeInput);
+      await highlightSaveCursor(activeInput);
     }
   }
 
@@ -238,10 +239,10 @@ class Repl {
       }
       int spaces = _countSpace(newInput, cursor);
       input.text = first + " " * spaces + second;
-      highlightCustomCursor(input, cursor + spaces + 1);
+      await highlightCustomCursor(input, cursor + spaces + 1);
     } else {
       await delay(5);
-      highlightSaveCursor(input);
+      await highlightSaveCursor(input);
     }
     updateInputStatus();
   }
@@ -270,29 +271,13 @@ class Repl {
     updateInputStatus();
   }
 
-  countParens(String text) {
-    var tokens;
-    try {
-      tokens = tokenizeLines(text.split('\n')).toList();
-    } on FormatException {
-      return null;
-    }
-    int left = tokens.fold(0, (val, token) {
-      return val + (token == const SchemeSymbol('(') ? 1 : 0);
-    });
-    int right = tokens.fold(0, (val, token) {
-      return val + (token == const SchemeSymbol(')') ? 1 : 0);
-    });
-    return left - right;
-  }
-
   logInto(Element element, Expression logging, [bool newline = true]) {
     if (logging is AsyncExpression) {
-      var box = new SpanElement()
+      var box = SpanElement()
         ..text = '$logging\n'
         ..classes = ['repl-async'];
       element.append(box);
-      return logging.future.then((Expression expr) {
+      return logging.future.then((expr) {
         box.classes = ['repl-log'];
         logInto(box, expr is Undefined ? null : expr);
         return null;
@@ -330,9 +315,8 @@ class Repl {
     container.scrollTop = container.scrollHeight;
   }
 
-  Future delay(int milliseconds) {
-    return new Future.delayed(new Duration(milliseconds: milliseconds));
-  }
+  Future delay(int milliseconds) =>
+      Future.delayed(Duration(milliseconds: milliseconds));
 
   ///Returns how many spaces the next line must be indented based
   ///on the line with the last open parentheses
@@ -382,8 +366,7 @@ class Repl {
     return strIndex + 2;
   }
 
-  ///returns the location in the input string where the cursor is
-  int _currPosition() {
-    return findPosition(activeInput, window.getSelection().getRangeAt(0));
-  }
+  /// Returns the location in the input string where the cursor is
+  int _currPosition() =>
+      findPosition(activeInput, window.getSelection().getRangeAt(0));
 }

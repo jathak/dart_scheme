@@ -12,19 +12,17 @@ class OperandPrimitiveProcedure extends PrimitiveProcedure {
       : super.variable(name, fn, minArgs, maxArgs);
 
   @override
-  Expression call(PairOrEmpty operands, Frame env) {
-    return apply(operands, env);
-  }
+  Expression call(PairOrEmpty operands, Frame env) => apply(operands, env);
 }
 
 addOperandPrimitive(
     Frame env, SchemeSymbol name, SchemePrimitive fn, int args) {
-  env.define(name, new OperandPrimitiveProcedure.fixed(name, fn, args), true);
+  env.define(name, OperandPrimitiveProcedure.fixed(name, fn, args), true);
 }
 
 addVariableOperandPrimitive(
     Frame env, SchemeSymbol name, SchemePrimitive fn, int minArgs,
     [int maxArgs = -1]) {
-  var p = new OperandPrimitiveProcedure.variable(name, fn, minArgs, maxArgs);
+  var p = OperandPrimitiveProcedure.variable(name, fn, minArgs, maxArgs);
   env.define(name, p, true);
 }

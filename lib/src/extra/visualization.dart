@@ -22,10 +22,9 @@ class Visualization extends Widget {
   Frame env;
   List<Expression> code;
   List<Diagram> diagrams = [];
-  Map<Frame, Expression> frameReturnValues = new Map.identity();
+  Map<Frame, Expression> frameReturnValues = Map.identity();
   int current = 0;
 
-  Diagram get currentDiagram => diagrams[current];
   List<Widget> buttonRow;
   Expression result;
 
@@ -41,7 +40,9 @@ class Visualization extends Widget {
     bool oldStatus = env.interpreter.tailCallOptimized;
     env.interpreter.tailCallOptimized = false;
     _makeVisualizeStep([], env);
-    code.forEach((expr) => schemeEval(expr, env));
+    for (var expr in code) {
+      schemeEval(expr, env);
+    }
     _makeVisualizeStep([], env);
     env.interpreter.tailCallOptimized = oldStatus;
 
@@ -55,6 +56,8 @@ class Visualization extends Widget {
     _init();
   }
 
+  Diagram get currentDiagram => diagrams[current];
+
   _init() {
     bool animating = false;
     goto(int index, [bool keepAnimating = false]) {
@@ -65,31 +68,31 @@ class Visualization extends Widget {
         animating = false;
       }
       current = index;
-      buttonRow[2] = new TextWidget("${current + 1}/${diagrams.length}");
+      buttonRow[2] = TextWidget("${current + 1}/${diagrams.length}");
       update();
     }
 
-    Button first = new Button(new TextWidget("<<"), () => goto(0));
-    Button prev = new Button(new TextWidget("<"), () => goto(current - 1));
-    TextWidget status = new TextWidget("${current + 1}/${diagrams.length}");
-    Button next = new Button(new TextWidget(">"), () => goto(current + 1));
-    Button last = new Button(new TextWidget(">>"), () => goto(-1));
-    Button animate = new Button(new TextWidget("Animate"), () async {
+    Button first = Button(TextWidget("<<"), () => goto(0));
+    Button prev = Button(TextWidget("<"), () => goto(current - 1));
+    TextWidget status = TextWidget("${current + 1}/${diagrams.length}");
+    Button next = Button(TextWidget(">"), () => goto(current + 1));
+    Button last = Button(TextWidget(">>"), () => goto(-1));
+    Button animate = Button(TextWidget("Animate"), () async {
       if (animating) {
         animating = false;
         return;
       }
       animating = true;
-      await new Future.delayed(new Duration(seconds: 1));
-      while (animating) {
+      await Future.delayed(Duration(seconds: 1));
+      while (animating && current < diagrams.length - 1) {
         goto(current + 1, true);
-        await new Future.delayed(new Duration(seconds: 1));
+        await Future.delayed(Duration(seconds: 1));
       }
     });
     buttonRow = [first, prev, status, next, last, animate];
   }
 
-  void _addFrames(Frame myEnv, [Expression returnValue = null]) {
+  void _addFrames(Frame myEnv, [Expression returnValue]) {
     if (myEnv.tag == '#imported') return;
     if (frameReturnValues.containsKey(myEnv)) {
       frameReturnValues[myEnv] = returnValue;
@@ -108,10 +111,9 @@ class Visualization extends Widget {
   void _addDiagram(Frame active) {
     List<Frame> frames = frameReturnValues.keys.toList()
       ..sort((a, b) => a.id - b.id);
-    List<Pair<Frame, Expression>> passing = frames.map((frame) {
-      return new Pair(frame, frameReturnValues[frame]);
-    }).toList();
-    diagrams.add(new Diagram.allFrames(passing, active));
+    List<Pair<Frame, Expression>> passing =
+        frames.map((frame) => Pair(frame, frameReturnValues[frame])).toList();
+    diagrams.add(Diagram.allFrames(passing, active));
   }
 
   Undefined _makeVisualizeStep(List<Expression> exprs, Frame env) {
@@ -122,7 +124,7 @@ class Visualization extends Widget {
 
   Undefined _makeVisualizeReturnStep(List<Expression> exprs, Frame env) {
     if (exprs.length != 1) {
-      throw new SchemeException(
+      throw SchemeException(
           "Invalid event $exprs trigged during visualization");
     }
     Expression returnValue = exprs[0];

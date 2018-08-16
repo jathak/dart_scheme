@@ -39,7 +39,7 @@ Shift+Enter to add missing parens and run the current input
 main() async {
   String css = await HttpRequest.getString('assets/style.css');
   var style = querySelector('#theme');
-  var webLibrary = new WebLibrary(context['jsPlumb'], css, style);
+  var webLibrary = WebLibrary(context['jsPlumb'], css, style);
   if (window.location.href.contains('logic')) {
     await startLogic(webLibrary);
   } else {
@@ -52,30 +52,31 @@ main() async {
       if (expr is Theme) {
         applyTheme(expr, css, style, false);
       }
+      // ignore: avoid_catches_without_on_clauses
     } catch (e) {
       print("Saved theme invalid. Removing...");
       window.localStorage.remove("#scheme-theme");
     }
   }
-  onThemeChange.listen((Theme theme) {
+  onThemeChange.listen((theme) {
     window.localStorage['#scheme-theme'] = Serialization.serializeToJson(theme);
   });
 }
 
 startScheme(WebLibrary webLibrary) async {
-  var inter = new Interpreter(new StaffProjectImplementation());
+  var inter = Interpreter(StaffProjectImplementation());
   var normals = inter.globalEnv.bindings.keys.toSet();
-  var extra = new ExtraLibrary();
+  var extra = ExtraLibrary();
   inter.importLibrary(extra);
   inter.importLibrary(webLibrary);
-  new Repl(inter, document.body);
+  Repl(inter, document.body);
   var specials = inter.globalEnv.bindings.keys.toSet().difference(normals);
-  inter.importLibrary(new TurtleLibrary(querySelector('canvas'), inter));
+  inter.importLibrary(TurtleLibrary(querySelector('canvas'), inter));
   var turtles = inter.globalEnv.bindings.keys
       .toSet()
       .difference(specials)
       .difference(normals);
-  var demos = new Frame(inter.globalEnv, inter);
+  var demos = Frame(inter.globalEnv, inter);
   addDemo(demos, 'try-draw', "(draw '(1 2 3))");
   addDemo(demos, 'try-chess', "(import 'scm/apps/chess)");
   addDemo(demos, 'try-ad', "(autodraw)");
@@ -92,20 +93,20 @@ startScheme(WebLibrary webLibrary) async {
      (visualize (fact 5))
 """);
   context.callMethod('hljsRegister', [
-    new JsObject.jsify({
+    JsObject.jsify({
       'builtin-normal':
           normals.union(inter.specialForms.keys.toSet()).join(' '),
       'builtin-special': specials.join(' '),
       'builtin-turtle': turtles.join(' ')
     })
   ]);
-  inter.logger(new MarkdownWidget(motd, env: demos), true);
+  inter.logger(MarkdownWidget(motd, env: demos), true);
 }
 
 addDemo(Frame env, String demoName, String code) {
-  addPrimitive(env, new SchemeSymbol.runtime(demoName), (_, __) {
+  addPrimitive(env, SchemeSymbol.runtime(demoName), (_, __) {
     var prompt = "<span class='repl-prompt'>scm></span> `$code`";
-    env.interpreter.logger(new MarkdownWidget(prompt), true);
+    env.interpreter.logger(MarkdownWidget(prompt), true);
     env.interpreter.run(code);
     return undefined;
   }, 0);
@@ -132,24 +133,24 @@ const String logicMotd = "**61A Logic Web Interpreter**"
 
 startLogic(WebLibrary webLibrary) {
   document.title = 'Logic Interpreter';
-  var inter = new Interpreter(new StaffProjectImplementation());
-  new Repl(inter, document.body, prompt: 'logic> ');
+  var inter = Interpreter(StaffProjectImplementation());
+  Repl(inter, document.body, prompt: 'logic> ');
   inter.globalEnv.bindings.clear();
   inter.specialForms.clear();
-  inter.importLibrary(new LogicLibrary());
+  inter.importLibrary(LogicLibrary());
   var keywords = inter.globalEnv.bindings.keys.toSet();
   context.callMethod('hljsRegister', [
-    new JsObject.jsify({'builtin-special': keywords.join(' ')})
+    JsObject.jsify({'builtin-special': keywords.join(' ')})
   ]);
-  var themeInter = new Interpreter(new StaffProjectImplementation());
-  themeInter.importLibrary(new ExtraLibrary());
+  var themeInter = Interpreter(StaffProjectImplementation());
+  themeInter.importLibrary(ExtraLibrary());
   themeInter.importLibrary(webLibrary);
   addTheme(themeInter, webLibrary, const SchemeSymbol('default'));
   addTheme(themeInter, webLibrary, const SchemeSymbol('solarized'));
   addTheme(themeInter, webLibrary, const SchemeSymbol('monochrome'));
   addTheme(themeInter, webLibrary, const SchemeSymbol('monochrome-dark'));
   addTheme(themeInter, webLibrary, const SchemeSymbol('go-bears'));
-  inter.logger(new MarkdownWidget(logicMotd, env: themeInter.globalEnv), true);
+  inter.logger(MarkdownWidget(logicMotd, env: themeInter.globalEnv), true);
 }
 
 addTheme(Interpreter inter, WebLibrary web, SchemeSymbol themeName) {

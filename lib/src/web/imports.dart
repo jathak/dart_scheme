@@ -25,21 +25,21 @@ class ImportedLibrary extends SelfEvaluating {
   }
 
   static Future<ImportedLibrary> load(String code, Frame parent) async {
-    ImportedLibrary library = new ImportedLibrary._internal();
-    await library._init(code, new Frame(parent, parent.interpreter));
+    ImportedLibrary library = ImportedLibrary._internal();
+    await library._init(code, Frame(parent, parent.interpreter));
     library.env.tag = '#imported';
     return library;
   }
 
   static Future<ImportedLibrary> loadInline(String code, Frame env) async {
-    ImportedLibrary library = new ImportedLibrary._internal();
+    ImportedLibrary library = ImportedLibrary._internal();
     await library._init(code, env);
     return library;
   }
 
   Expression reference(SchemeSymbol symbol) {
     if (!env.bindings.containsKey(symbol)) {
-      throw new SchemeException("Cannot find $symbol in library");
+      throw SchemeException("Cannot find $symbol in library");
     }
     return env.bindings[symbol];
   }
@@ -64,7 +64,7 @@ Future<ImportedLibrary> import(String id, List<SchemeSymbol> imports, Frame env,
   } else {
     html.Storage storage = html.window.localStorage;
     if (!storage.containsKey('scm-file://$id')) {
-      throw new SchemeException("User file '$id' does not exist!");
+      throw SchemeException("User file '$id' does not exist!");
     }
     code = storage['scm-file://$id'];
   }

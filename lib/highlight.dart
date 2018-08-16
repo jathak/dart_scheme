@@ -6,15 +6,14 @@ import 'dart:js';
 
 JsObject hljs = context['hljs'];
 
-String highlight(String code) {
-  return hljs.callMethod('highlight', ['scheme', code, true])['value'];
-}
+String highlight(String code) =>
+    hljs.callMethod('highlight', ['scheme', code, true])['value'];
 
 Future highlightAtEnd(Element input, String code) async {
   input.innerHtml = highlight(code);
-  await new Future.delayed(const Duration(milliseconds: 0));
+  await Future.delayed(const Duration(milliseconds: 0));
   var selection = window.getSelection();
-  var range = new Range();
+  var range = Range();
   range.selectNodeContents(input);
   range.collapse(false);
   selection.removeAllRanges();
@@ -88,7 +87,7 @@ Range _makeRange(Element input, int remaining) {
   }
 
   Node node = findNode(input);
-  Range range = new Range();
+  Range range = Range();
   if (node == null) {
     range.selectNodeContents(input);
     range.collapse(false);

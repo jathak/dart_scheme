@@ -1,5 +1,9 @@
 part of cs61a_scheme.extra.logic_library;
 
+// ignore_for_file: curly_braces_in_flow_control_structures
+// ignore_for_file: unnecessary_this
+// ignore_for_file: prefer_expression_function_bodies
+// ignore_for_file: unnecessary_lambdas
 abstract class _$LogicLibraryMixin {
   void fact(List<Expression> exprs);
   void query(List<Expression> exprs, Frame env);
@@ -31,7 +35,7 @@ abstract class _$LogicLibraryMixin {
       return __value;
     }, 0, -1);
     addPrimitive(__env, const SchemeSymbol('prolog'), (__exprs, __env) {
-      return new SchemeString(this.prolog());
+      return SchemeString(this.prolog());
     }, 0);
   }
 }
