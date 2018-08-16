@@ -35,7 +35,7 @@ class Interpreter {
 
   void Function(Object) logError;
 
-  final Map<SchemeSymbol, List<SchemePrimitive>> _eventListeners = {};
+  final Map<SchemeSymbol, List<SchemeBuiltin>> _eventListeners = {};
 
   void triggerEvent(SchemeSymbol id, List<Expression> data, Frame env) {
     if (_eventListeners.containsKey(id)) {
@@ -45,11 +45,11 @@ class Interpreter {
     }
   }
 
-  void listenFor(SchemeSymbol id, SchemePrimitive callback) {
+  void listenFor(SchemeSymbol id, SchemeBuiltin callback) {
     _eventListeners.putIfAbsent(id, () => []).add(callback);
   }
 
-  bool stopListening(SchemeSymbol id, SchemePrimitive callback) {
+  bool stopListening(SchemeSymbol id, SchemeBuiltin callback) {
     if (_eventListeners.containsKey(id)) {
       return _eventListeners[id].remove(callback);
     }

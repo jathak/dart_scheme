@@ -10,7 +10,7 @@ part 'logic_library.g.dart';
 
 /// Note: When the signatures (including any annotations) of any of theses methods
 /// change, make sure to `pub run grinder` to rebuild the mixin (which registers
-/// the primitives and performs type checking on arguments).
+/// the built-ins and performs type checking on arguments).
 @schemelib
 class LogicLibrary extends SchemeLibrary with _$LogicLibraryMixin {
   List<logic.Fact> facts = [];

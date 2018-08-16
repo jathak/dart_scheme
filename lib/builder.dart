@@ -21,7 +21,7 @@ String generateImportMixin(String sourceCode) {
 }
 
 String _buildMixin(ClassDeclaration decl) {
-  List<String> primitives = [];
+  List<String> builtins = [];
   List<String> abstractMethods = [];
   bool myNeedsTurtle = false;
   for (ClassMember member in decl.members) {
@@ -30,7 +30,7 @@ String _buildMixin(ClassDeclaration decl) {
       if (!name.startsWith('import') && !name.startsWith('_')) {
         needsTurtle = false;
         abstractMethods.add(_buildAbstract(member));
-        primitives.add(_buildPrimitive(member));
+        builtins.add(_buildBuiltin(member));
         myNeedsTurtle = myNeedsTurtle || needsTurtle;
       }
     }
@@ -47,7 +47,7 @@ String _buildMixin(ClassDeclaration decl) {
 abstract class $mixinName {
   ${abstractMethods.join("\n  ")}
   void importAll(Frame __env) {
-    ${primitives.join("\n    ")}
+    ${builtins.join("\n    ")}
   }
 }""";
 }
@@ -57,7 +57,7 @@ String _buildAbstract(MethodDeclaration method) =>
 
 bool needsTurtle = false;
 
-String _buildPrimitive(MethodDeclaration method) {
+String _buildBuiltin(MethodDeclaration method) {
   String name = json.encode(method.name.toSource().toLowerCase());
   bool setName = false;
   List<String> extraNames = [];
@@ -128,7 +128,7 @@ String _buildPrimitive(MethodDeclaration method) {
         variable = true;
       }
     } else {
-      throw Exception("Primitives may not have optional parameters.");
+      throw Exception("Built-in procedures may not have optional parameters.");
     }
   }
   String symb = "const SchemeSymbol($name)";
@@ -150,17 +150,17 @@ String _buildPrimitive(MethodDeclaration method) {
     } else if (paramCount == 1) {
       fn = "(__exprs, __env) {$before$returning $fn(__exprs)$after}";
     }
-    return "addVariable${op}Primitive(__env, $symb, $fn, $minArgs, $maxArgs);$extra";
+    return "addVariable${op}Builtin(__env, $symb, $fn, $minArgs, $maxArgs);$extra";
   } else {
     List<String> types = [];
     for (FormalParameter param in method.parameters.parameters) {
       if (param is SimpleFormalParameter) {
         if (param.type == null) {
-          throw Exception("Primitive parameters must be typed.");
+          throw Exception("Built-in procedure parameters must be typed.");
         }
         types.add(param.type.toSource());
       } else {
-        throw Exception("Primitives may not have optional parameters.");
+        throw Exception("Built-in procedures may not have optional parameters");
       }
     }
     bool takesFrame = types.isNotEmpty && types.last == "Frame";
@@ -198,6 +198,6 @@ String _buildPrimitive(MethodDeclaration method) {
     var passStr = passes.join(",");
     var m = "this." + method.name.toSource();
     var fn = "(__exprs, __env){$checks $before $returning $m($passStr)$after }";
-    return "add${op}Primitive(__env, $symb, $fn, ${types.length});$extra";
+    return "add${op}Builtin(__env, $symb, $fn, ${types.length});$extra";
   }
 }

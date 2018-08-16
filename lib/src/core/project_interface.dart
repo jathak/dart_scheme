@@ -33,9 +33,15 @@ abstract class ProjectInterface {
   void defineInFrame(SchemeSymbol symbol, Expression value, Frame env);
   Expression lookupInFrame(SchemeSymbol symbol, Frame env);
 
-  /// Analagous to PrimitiveProcedure.apply in Problem 4
+  /// Analagous to BuiltinProcedure.apply in Problem 4
+  Expression builtinApply(
+          BuiltinProcedure procedure, PairOrEmpty args, Frame env) =>
+      // ignore: deprecated_member_use
+      primitiveApply(procedure, args, env);
+
+  @deprecated
   Expression primitiveApply(
-      PrimitiveProcedure procedure, PairOrEmpty args, Frame env);
+      BuiltinProcedure procedure, PairOrEmpty args, Frame env);
 
   /// Analagous to part of scheme_eval implemented in Problem 5
   Expression evalProcedureCall(Expression first, Expression rest, Frame env);

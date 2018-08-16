@@ -33,7 +33,7 @@ class Repl {
       var decoded = json.decode(window.localStorage['#repl-history']);
       if (decoded is List) history = decoded.map((item) => '$item').toList();
     }
-    addPrimitives();
+    addBuiltins();
     container = PreElement()..classes = ['repl'];
     container.onClick.listen((e) async {
       if (activeInput.contains(e.target)) return;
@@ -73,23 +73,23 @@ class Repl {
 
   bool autodraw = false;
 
-  addPrimitives() {
+  addBuiltins() {
     var env = interpreter.globalEnv;
-    addPrimitive(env, const SchemeSymbol('clear'), (_a, _b) {
+    addBuiltin(env, const SchemeSymbol('clear'), (_a, _b) {
       for (Element child in container.children.toList()) {
         if (child == activePrompt) break;
         if (child != status) container.children.remove(child);
       }
       return undefined;
     }, 0);
-    addPrimitive(env, const SchemeSymbol('autodraw'), (_a, _b) {
+    addBuiltin(env, const SchemeSymbol('autodraw'), (_a, _b) {
       logText(
           'When interactive output is a pair, it will automatically be drawn.\n'
           '(disable-autodraw) to disable\n');
       autodraw = true;
       return undefined;
     }, 0);
-    addPrimitive(env, const SchemeSymbol('disable-autodraw'), (_a, _b) {
+    addBuiltin(env, const SchemeSymbol('disable-autodraw'), (_a, _b) {
       logText('Autodraw disabled\n');
       autodraw = false;
       return undefined;

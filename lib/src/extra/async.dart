@@ -57,7 +57,7 @@ class AsyncLambdaProcedure extends LambdaProcedure {
 
 class SchemeEventListener extends SelfEvaluating {
   final SchemeSymbol id;
-  final SchemePrimitive callback;
+  final SchemeBuiltin callback;
   SchemeEventListener(this.id, this.callback);
 
   toString() => '#[event-listener:$id]';

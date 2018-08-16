@@ -11,7 +11,7 @@ main() {
   interpreter.importLibrary(LogicLibrary());
   interpreter.logger = (e, newline) => newline ? print(e) : stdout.write(e);
   interpreter.onExit = () => exit(0);
-  addPrimitive(interpreter.globalEnv, const SchemeSymbol("tco"), (e, env) {
+  addBuiltin(interpreter.globalEnv, const SchemeSymbol("tco"), (e, env) {
     interpreter.tailCallOptimized = e.first.isTruthy;
     return undefined;
   }, 1);
