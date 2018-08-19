@@ -84,7 +84,7 @@ class CodeInput {
       await highlight();
     } else if ((missingParens ?? 0) > 0 && KeyCode.ENTER == event.keyCode) {
       event.preventDefault();
-      int cursor = _currPosition();
+      int cursor = findPosition(element, window.getSelection().getRangeAt(0));
       String newInput = element.text;
       String first = newInput.substring(0, cursor) + "\n";
       String second = "";
@@ -144,10 +144,6 @@ class CodeInput {
     }
     return strIndex + 2;
   }
-
-  /// Returns the location in the input string where the cursor is
-  int _currPosition() =>
-      findPosition(element, window.getSelection().getRangeAt(0));
 
   _keyListener(KeyboardEvent event) async {
     int key = event.keyCode;
