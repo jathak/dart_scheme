@@ -33,19 +33,6 @@ class Repl {
       if (!activeInput.element.contains(document.activeElement)) {
         activeInput.element.focus();
       }
-      /*if (activeInput.contains(e.target)) return;
-      await delay(0);
-      var selection = window.getSelection();
-      if (selection.rangeCount > 0) {
-        var range = window.getSelection().getRangeAt(0);
-        if (range.startOffset != range.endOffset) return;
-      }
-      activeInput.focus();
-      var range = Range();
-      range.selectNodeContents(activeInput);
-      range.collapse(false);
-      selection.removeAllRanges();
-      selection.addRange(range);*/
     });
     parent.append(container);
     status = SpanElement()..classes = ['repl-status'];
