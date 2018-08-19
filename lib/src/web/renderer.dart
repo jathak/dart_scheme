@@ -7,7 +7,7 @@ import 'dart:js';
 import 'package:markdown/markdown.dart' as md;
 
 import 'package:cs61a_scheme/cs61a_scheme_extra.dart';
-import 'package:cs61a_scheme/highlight.dart';
+import '../web_ui/highlight.dart';
 
 import 'web_library.dart';
 
@@ -143,7 +143,7 @@ class _Renderer {
       }
     }
     for (var code in element.querySelectorAll('code')) {
-      var styled = highlight(code.innerHtml);
+      var styled = highlightText(code.innerHtml);
       code.setInnerHtml(styled, validator: NodeValidatorBuilder.common());
     }
     element.classes.add('markdown');

@@ -72,10 +72,6 @@ body {
     @include prompt;
   }
 
-  .repl-input {
-    display: inline-block;
-  }
-
   .repl-async {
     @include async-log;
   }
@@ -103,10 +99,14 @@ body {
   .error {
     @include error;
   }
+}
+
+.code-input {
+  display: inline-block;
+}
   
-  .repl-input:focus {
-    outline: none;
-  }
+.code-input:focus {
+  outline: none;
 }
 
 .hljs-builtin-normal { @include spec-keyword; }

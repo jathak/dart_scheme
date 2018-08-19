@@ -1,5 +1,7 @@
 library cs61a_scheme.core.utils;
 
+import 'dart:async';
+
 import 'expressions.dart';
 import 'logging.dart';
 import 'procedures.dart';
@@ -91,3 +93,6 @@ int countParens(String text) {
       0, (val, token) => val + (token == const SchemeSymbol(')') ? 1 : 0));
   return left - right;
 }
+
+Future delay(int milliseconds) =>
+    Future.delayed(Duration(milliseconds: milliseconds));
