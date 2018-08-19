@@ -12,27 +12,24 @@ abstract class _$LogicLibraryMixin {
   void importAll(Frame __env) {
     addVariableOperandBuiltin(__env, const SchemeSymbol('fact'),
         (__exprs, __env) {
-      var __value = undefined;
       this.fact(__exprs);
-      return __value;
+      return undefined;
     }, 0, -1);
     __env.bindings[const SchemeSymbol('!')] =
         __env.bindings[const SchemeSymbol('fact')];
     __env.hidden[const SchemeSymbol('!')] = true;
     addVariableOperandBuiltin(__env, const SchemeSymbol('query'),
         (__exprs, __env) {
-      var __value = undefined;
       this.query(__exprs, __env);
-      return __value;
+      return undefined;
     }, 0, -1);
     __env.bindings[const SchemeSymbol('?')] =
         __env.bindings[const SchemeSymbol('query')];
     __env.hidden[const SchemeSymbol('?')] = true;
     addVariableOperandBuiltin(__env, const SchemeSymbol('query-one'),
         (__exprs, __env) {
-      var __value = undefined;
       this.queryOne(__exprs, __env);
-      return __value;
+      return undefined;
     }, 0, -1);
     addBuiltin(__env, const SchemeSymbol('prolog'), (__exprs, __env) {
       return SchemeString(this.prolog());
