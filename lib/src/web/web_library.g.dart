@@ -33,14 +33,12 @@ abstract class _$WebLibraryMixin {
       return this.jsContext();
     }, 0);
     addBuiltin(__env, const SchemeSymbol("js-set!"), (__exprs, __env) {
-      if (__exprs[0] is! JsExpression ||
-          __exprs[1] is! Expression ||
-          __exprs[2] is! Expression)
+      if (__exprs[0] is! JsExpression)
         throw SchemeException('Argument of invalid type passed to js-set!.');
       return this.jsSet(__exprs[0], __exprs[1], __exprs[2]);
     }, 3);
     addBuiltin(__env, const SchemeSymbol("js-ref"), (__exprs, __env) {
-      if (__exprs[0] is! JsExpression || __exprs[1] is! Expression)
+      if (__exprs[0] is! JsExpression)
         throw SchemeException('Argument of invalid type passed to js-ref.');
       return this.jsRef(__exprs[0], __exprs[1]);
     }, 2);
@@ -83,14 +81,11 @@ abstract class _$WebLibraryMixin {
       return this.makeTheme();
     }, 0);
     addBuiltin(__env, const SchemeSymbol('theme-set-color!'), (__exprs, __env) {
-      if (__exprs[0] is! Theme ||
-          __exprs[1] is! SchemeSymbol ||
-          __exprs[2] is! Expression)
+      if (__exprs[0] is! Theme || __exprs[1] is! SchemeSymbol)
         throw SchemeException(
             'Argument of invalid type passed to theme-set-color!.');
-      var __value = undefined;
       this.themeSetColor(__exprs[0], __exprs[1], __exprs[2]);
-      return __value;
+      return undefined;
     }, 3);
     addBuiltin(__env, const SchemeSymbol('theme-set-css!'), (__exprs, __env) {
       if (__exprs[0] is! Theme ||
@@ -98,17 +93,15 @@ abstract class _$WebLibraryMixin {
           __exprs[2] is! SchemeString)
         throw SchemeException(
             'Argument of invalid type passed to theme-set-css!.');
-      var __value = undefined;
       this.themeSetCss(__exprs[0], __exprs[1], __exprs[2]);
-      return __value;
+      return undefined;
     }, 3);
     addBuiltin(__env, const SchemeSymbol('apply-theme'), (__exprs, __env) {
       if (__exprs[0] is! Theme)
         throw SchemeException(
             'Argument of invalid type passed to apply-theme.');
-      var __value = undefined;
       this.applyThemeBuiltin(__exprs[0]);
-      return __value;
+      return undefined;
     }, 1);
     addVariableBuiltin(__env, const SchemeSymbol('import'), (__exprs, __env) {
       return AsyncExpression(this.schemeImport(__exprs, __env));

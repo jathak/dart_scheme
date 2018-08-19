@@ -66,9 +66,8 @@ abstract class _$StandardLibraryMixin {
       return this.apply(__exprs[0], __exprs[1], __env);
     }, 2);
     addBuiltin(__env, const SchemeSymbol("display"), (__exprs, __env) {
-      var __value = undefined;
       this.display(__exprs[0], __env);
-      return __value;
+      return undefined;
     }, 1);
     addBuiltin(__env, const SchemeSymbol("error"), (__exprs, __env) {
       return this.error(__exprs[0]);
@@ -86,14 +85,12 @@ abstract class _$StandardLibraryMixin {
       return this.load(__exprs[0], __env);
     }, 1);
     addBuiltin(__env, const SchemeSymbol("newline"), (__exprs, __env) {
-      var __value = undefined;
       this.newline(__env);
-      return __value;
+      return undefined;
     }, 0);
     addBuiltin(__env, const SchemeSymbol("print"), (__exprs, __env) {
-      var __value = undefined;
       this.print(__exprs[0], __env);
-      return __value;
+      return undefined;
     }, 1);
     addBuiltin(__env, const SchemeSymbol("atom?"), (__exprs, __env) {
       return Boolean(this.isAtom(__exprs[0]));
@@ -261,22 +258,20 @@ abstract class _$StandardLibraryMixin {
       return this.cdrStream(__exprs[0]);
     }, 1);
     addBuiltin(__env, const SchemeSymbol("set-car!"), (__exprs, __env) {
-      if (__exprs[0] is! Pair || __exprs[1] is! Expression)
+      if (__exprs[0] is! Pair)
         throw SchemeException('Argument of invalid type passed to set-car!.');
-      var __value = undefined;
       this.setCar(__exprs[0], __exprs[1]);
-      __env.interpreter
-          .triggerEvent(const SchemeSymbol("pair-mutation"), [__value], __env);
-      return __value;
+      __env.interpreter.triggerEvent(
+          const SchemeSymbol("pair-mutation"), [undefined], __env);
+      return undefined;
     }, 2);
     addBuiltin(__env, const SchemeSymbol("set-cdr!"), (__exprs, __env) {
-      if (__exprs[0] is! Pair || __exprs[1] is! Expression)
+      if (__exprs[0] is! Pair)
         throw SchemeException('Argument of invalid type passed to set-cdr!.');
-      var __value = undefined;
       this.setCdr(__exprs[0], __exprs[1]);
-      __env.interpreter
-          .triggerEvent(const SchemeSymbol("pair-mutation"), [__value], __env);
-      return __value;
+      __env.interpreter.triggerEvent(
+          const SchemeSymbol("pair-mutation"), [undefined], __env);
+      return undefined;
     }, 2);
     addBuiltin(__env, const SchemeSymbol("call/cc"), (__exprs, __env) {
       if (__exprs[0] is! Procedure)
