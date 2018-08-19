@@ -4,7 +4,7 @@ import 'dart:js';
 import 'package:cs61a_scheme/cs61a_scheme_web.dart';
 import 'package:cs61a_scheme_impl/impl.dart' show StaffProjectImplementation;
 
-import 'package:cs61a_scheme/web_repl.dart';
+import 'package:cs61a_scheme/web_ui.dart';
 
 const String motd = "**61A Scheme Web Interpreter 2.0.0-beta**"
     "                         <small>"

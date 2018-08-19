@@ -6,11 +6,11 @@ import 'dart:js';
 
 JsObject hljs = context['hljs'];
 
-String highlight(String code) =>
+String highlightText(String code) =>
     hljs.callMethod('highlight', ['scheme', code, true])['value'];
 
 Future highlightAtEnd(Element input, String code) async {
-  input.innerHtml = highlight(code);
+  input.innerHtml = highlightText(code);
   await Future.delayed(const Duration(milliseconds: 0));
   var selection = window.getSelection();
   var range = Range();
@@ -25,7 +25,7 @@ Future highlightSaveCursor(Element input) async {
   Selection selection = window.getSelection();
   Range last = selection.getRangeAt(0);
   int position = findPosition(input, last);
-  String styled = highlight(text);
+  String styled = highlightText(text);
   input.innerHtml = styled;
   Range range = _makeRange(input, position);
   selection.removeAllRanges();
@@ -35,7 +35,7 @@ Future highlightSaveCursor(Element input) async {
 Future highlightCustomCursor(Element input, int position) async {
   String text = input.text;
   Selection selection = window.getSelection();
-  String styled = highlight(text);
+  String styled = highlightText(text);
   input.innerHtml = styled;
   Range range = _makeRange(input, position);
   selection.removeAllRanges();

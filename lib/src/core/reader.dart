@@ -66,9 +66,11 @@ List nextCandidateToken(String line, int k) {
     } else if (_stringDelims.contains(c)) {
       String str = c;
       k++;
+      if (k >= line.length) throw FormatException("Invalid string $str");
       while (line[k] != '"') {
         if (line[k] == "\\") {
           k++;
+          if (k >= line.length) throw FormatException("Invalid string $str");
           str += "\\" + line[k];
         } else {
           str += line[k];

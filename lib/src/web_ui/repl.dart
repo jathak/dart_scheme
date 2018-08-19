@@ -1,18 +1,19 @@
-library web_repl;
+library web_ui.repl;
 
-import 'dart:async';
 import 'dart:convert' show json;
 import 'dart:html';
 
 import 'package:cs61a_scheme/cs61a_scheme_web.dart';
-import 'package:cs61a_scheme/highlight.dart';
+
+import 'code_input.dart';
 
 class Repl {
   Element container;
   Element activeLoggingArea;
   Element activePrompt;
-  Element activeInput;
   Element status;
+
+  CodeInput activeInput;
 
   Interpreter interpreter;
 
@@ -20,13 +21,6 @@ class Repl {
   int historyIndex = -1;
 
   final String prompt;
-
-  List<SchemeSymbol> noIndent = [
-    const SchemeSymbol("let"),
-    const SchemeSymbol("define"),
-    const SchemeSymbol("lambda"),
-    const SchemeSymbol("define-macro")
-  ];
 
   Repl(this.interpreter, Element parent, {this.prompt = 'scm> '}) {
     if (window.localStorage.containsKey('#repl-history')) {
@@ -36,19 +30,9 @@ class Repl {
     addBuiltins();
     container = PreElement()..classes = ['repl'];
     container.onClick.listen((e) async {
-      if (activeInput.contains(e.target)) return;
-      await delay(0);
-      var selection = window.getSelection();
-      if (selection.rangeCount > 0) {
-        var range = window.getSelection().getRangeAt(0);
-        if (range.startOffset != range.endOffset) return;
+      if (!activeInput.element.contains(document.activeElement)) {
+        activeInput.element.focus();
       }
-      activeInput.focus();
-      var range = Range();
-      range.selectNodeContents(activeInput);
-      range.collapse(false);
-      selection.removeAllRanges();
-      selection.addRange(range);
     });
     parent.append(container);
     status = SpanElement()..classes = ['repl-status'];
@@ -80,6 +64,7 @@ class Repl {
         if (child == activePrompt) break;
         if (child != status) container.children.remove(child);
       }
+
       return undefined;
     }, 0);
     addBuiltin(env, const SchemeSymbol('autodraw'), (_a, _b) {
@@ -98,29 +83,19 @@ class Repl {
 
   buildNewInput() {
     activeLoggingArea = SpanElement();
-    if (activeInput != null) {
-      activeInput.contentEditable = 'false';
-      container.append(SpanElement()..text = '\n');
-    }
     container.append(activeLoggingArea);
+    if (activeInput != null) activeLoggingArea.text = "\n";
+    activeInput?.deactivate();
     activePrompt = SpanElement()
       ..text = prompt
       ..classes = ['repl-prompt'];
     container.append(activePrompt);
-    activeInput = SpanElement()
-      ..classes = ['repl-input']
-      ..contentEditable = 'true';
-    activeInput.onKeyPress.listen(onInputKeyPress);
-    activeInput.onKeyDown.listen(keyListener);
-    activeInput.onKeyUp.listen(keyListener);
-    container.append(activeInput);
-    activeInput.focus();
-    updateInputStatus();
+    activeInput =
+        CodeInput(container, runCode, parenListener: updateParenStatus);
     container.scrollTop = container.scrollHeight;
   }
 
-  runActiveCode() async {
-    var code = activeInput.text;
+  runCode(String code) async {
     addToHistory(code);
     buildNewInput();
     var tokens = tokenizeLines(code.split("\n")).toList();
@@ -171,16 +146,16 @@ class Repl {
 
   historyUp() {
     if (historyIndex < history.length - 1) {
-      replaceInput(history[++historyIndex]);
+      activeInput.text = history[++historyIndex];
     }
   }
 
   historyDown() {
     if (historyIndex > 0) {
-      replaceInput(history[--historyIndex]);
+      activeInput.text = history[--historyIndex];
     } else {
       historyIndex = -1;
-      replaceInput("");
+      activeInput.text = "";
     }
   }
 
@@ -196,59 +171,7 @@ class Repl {
     }
   }
 
-  keyListener(KeyboardEvent event) async {
-    int code = event.keyCode;
-    if (code == KeyCode.BACKSPACE) {
-      //this should be changed to call highlightSaveCursor
-      //once the bug with newlines is fixed
-      await delay(0);
-      updateInputStatus();
-    } else if (event.ctrlKey && (code == KeyCode.V || code == KeyCode.X)) {
-      await delay(0);
-      updateInputStatus();
-      await highlightSaveCursor(activeInput);
-    }
-  }
-
-  onInputKeyPress(KeyboardEvent event) async {
-    Element input = activeInput;
-    int missingParens = updateInputStatus();
-    if ((missingParens ?? -1) > 0 &&
-        event.shiftKey &&
-        event.keyCode == KeyCode.ENTER) {
-      event.preventDefault();
-      activeInput.text =
-          activeInput.text.trimRight() + ')' * missingParens + '\n';
-      runActiveCode();
-      await delay(100);
-      input.innerHtml = highlight(input.text);
-    } else if ((missingParens ?? -1) == 0 && event.keyCode == KeyCode.ENTER) {
-      event.preventDefault();
-      activeInput.text = activeInput.text.trimRight() + '\n';
-      runActiveCode();
-      await delay(100);
-      input.innerHtml = highlight(input.text);
-    } else if ((missingParens ?? 0) > 0 && KeyCode.ENTER == event.keyCode) {
-      event.preventDefault();
-      int cursor = _currPosition();
-      String newInput = input.text;
-      String first = newInput.substring(0, cursor) + "\n";
-      String second = "";
-      if (cursor != newInput.length) {
-        second = newInput.substring(cursor);
-      }
-      int spaces = _countSpace(newInput, cursor);
-      input.text = first + " " * spaces + second;
-      await highlightCustomCursor(input, cursor + spaces + 1);
-    } else {
-      await delay(5);
-      await highlightSaveCursor(input);
-    }
-    updateInputStatus();
-  }
-
-  int updateInputStatus() {
-    int missingParens = countParens(activeInput.text);
+  updateParenStatus(int missingParens) {
     if (missingParens == null) {
       status.classes = ['repl-status', 'error'];
       status.text = 'Invalid syntax!';
@@ -263,12 +186,6 @@ class Repl {
       status.classes = ['repl-status'];
       status.text = "";
     }
-    return missingParens;
-  }
-
-  replaceInput(String text) async {
-    await highlightAtEnd(activeInput, text);
-    updateInputStatus();
   }
 
   logInto(Element element, Expression logging, [bool newline = true]) {
@@ -314,59 +231,4 @@ class Repl {
     activeLoggingArea.appendText(text);
     container.scrollTop = container.scrollHeight;
   }
-
-  Future delay(int milliseconds) =>
-      Future.delayed(Duration(milliseconds: milliseconds));
-
-  ///Returns how many spaces the next line must be indented based
-  ///on the line with the last open parentheses
-  int _countSpace(String inputText, int position) {
-    List<String> splitLines = inputText.substring(0, position).split("\n");
-    //if the cursor is at the end of a line but not at the end of the whole input
-    //must find that line and start counting parens from there on
-    String refLine;
-    int totalMissingCount = 0;
-    for (refLine in splitLines.reversed) {
-      //if the cursor is in the middle of the line, truncate to the position of the cursor
-      totalMissingCount += countParens(refLine);
-      //find the first line where there exists an open parens
-      //with no closed parens
-      if (totalMissingCount >= 1) break;
-    }
-    if (totalMissingCount == 0) {
-      return 0;
-    }
-    int strIndex = refLine.indexOf("(");
-    while (strIndex < (refLine.length - 1)) {
-      int nextClose = refLine.indexOf(")", strIndex + 1);
-      int nextOpen = refLine.indexOf("(", strIndex + 1);
-      //find the location of the open parens that
-      //corresponds to the missing closed parnes
-      if (totalMissingCount > 1) {
-        totalMissingCount -= 1;
-      } else if (nextOpen == -1 || nextOpen < nextClose) {
-        Iterable<Expression> tokens = tokenizeLine(refLine.substring(strIndex));
-        Expression symbol = tokens.elementAt(1);
-        //decide whether to align with subexpressions if they exist
-        //otherwise indent by two spaces
-        if (symbol == const SchemeSymbol("(")) {
-          return strIndex + 1;
-        } else if (noIndent.contains(symbol)) {
-          return strIndex + 2;
-        } else if (tokens.length > 2) {
-          return refLine.indexOf(tokens.elementAt(2).toString(), strIndex + 1);
-        } else if (nextOpen == -1) {
-          return strIndex + 2;
-        }
-      } else if (nextClose == -1) {
-        return strIndex + 2;
-      }
-      strIndex = nextOpen;
-    }
-    return strIndex + 2;
-  }
-
-  /// Returns the location in the input string where the cursor is
-  int _currPosition() =>
-      findPosition(activeInput, window.getSelection().getRangeAt(0));
 }
