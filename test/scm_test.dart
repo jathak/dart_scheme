@@ -5,7 +5,7 @@ import 'package:test/test.dart';
 import 'package:cs61a_scheme/cs61a_scheme_extra.dart';
 import 'package:cs61a_scheme_impl/impl.dart' show StaffProjectImplementation;
 
-import 'tests.scm' show tests_scm;
+import 'tests.scm' show tests;
 
 main() {
   /// tests.scm all runs in sequence, so we run it as one test here
@@ -22,7 +22,7 @@ String runSchemeTests() {
   print(text) => output += '$text\n';
   int testCount = 0;
   int failedCount = 0;
-  List<String> lines = tests_scm.split("\n");
+  List<String> lines = tests.split("\n");
   String log = "";
   List<String> run = [];
   bool foundError = false;

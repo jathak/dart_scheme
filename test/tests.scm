@@ -1,7 +1,7 @@
 List list ;/* ; (keeps this readable by both versions of the test runner)
 ;;; The above works because List is both a Scheme built-in and a Dart type
 ;;; (Scheme is case insensitive, so we can capitalize it however we want)
-;;;*/var tests_scm = r""";;;
+;;;*/const tests = r""";;;
 ;;;
 ;;;; Preamble for dart_scheme:
 ;;;; This file consists of the following

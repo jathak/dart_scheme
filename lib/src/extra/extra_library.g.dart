@@ -43,18 +43,15 @@ abstract class _$ExtraLibraryMixin {
     addBuiltin(__env, const SchemeSymbol("diagram"), (__exprs, __env) {
       return this.diagram(__env);
     }, 0);
-    addVariableOperandBuiltin(__env, const SchemeSymbol("visualize"),
-        (__exprs, __env) {
-      return this.visualize(__exprs, __env);
-    }, 0, -1);
+    addVariableOperandBuiltin(
+        __env, const SchemeSymbol("visualize"), this.visualize, 0, -1);
     addBuiltin(__env, const SchemeSymbol("bindings"), (__exprs, __env) {
       return this.bindings(__env);
     }, 0);
     addVariableBuiltin(__env, const SchemeSymbol('trigger-event'),
         (__exprs, __env) {
-      var __value = undefined;
       this.triggerEvent(__exprs, __env);
-      return __value;
+      return undefined;
     }, 1, -1);
     addBuiltin(__env, const SchemeSymbol('listen-for'), (__exprs, __env) {
       if (__exprs[0] is! SchemeSymbol || __exprs[1] is! Procedure)
@@ -65,16 +62,14 @@ abstract class _$ExtraLibraryMixin {
       if (__exprs[0] is! SchemeEventListener)
         throw SchemeException(
             'Argument of invalid type passed to cancel-listener.');
-      var __value = undefined;
       this.cancelListener(__exprs[0], __env);
-      return __value;
+      return undefined;
     }, 1);
     addBuiltin(__env, const SchemeSymbol('cancel-all'), (__exprs, __env) {
       if (__exprs[0] is! SchemeSymbol)
         throw SchemeException('Argument of invalid type passed to cancel-all.');
-      var __value = undefined;
       this.cancelAll(__exprs[0], __env);
-      return __value;
+      return undefined;
     }, 1);
     addVariableBuiltin(__env, const SchemeSymbol('string-append'),
         (__exprs, __env) {
@@ -91,14 +86,11 @@ abstract class _$ExtraLibraryMixin {
             'Argument of invalid type passed to deserialize.');
       return this.deserialize((__exprs[0] as SchemeString).value);
     }, 1);
-    addVariableBuiltin(__env, const SchemeSymbol("formatted"),
-        (__exprs, __env) {
-      return this.formatted(__exprs, __env);
-    }, 0, -1);
+    addVariableBuiltin(
+        __env, const SchemeSymbol("formatted"), this.formatted, 0, -1);
     addBuiltin(__env, const SchemeSymbol('logic'), (__exprs, __env) {
-      var __value = undefined;
       this.logicStart(__env);
-      return __value;
+      return undefined;
     }, 0);
   }
 }
