@@ -15,6 +15,7 @@ part 'logic_library.g.dart';
 class LogicLibrary extends SchemeLibrary with _$LogicLibraryMixin {
   List<logic.Fact> facts = [];
 
+  /// Declares the first relation to be true iff all other relations are true.
   @SchemeSymbol('fact')
   @SchemeSymbol('!')
   @noeval
@@ -22,6 +23,7 @@ class LogicLibrary extends SchemeLibrary with _$LogicLibraryMixin {
     facts.add(logic.Fact(exprs.first, exprs.skip(1)));
   }
 
+  /// Queries all sets of variable assignments that make all relations true.
   @SchemeSymbol('query')
   @SchemeSymbol('?')
   @noeval
@@ -36,6 +38,7 @@ class LogicLibrary extends SchemeLibrary with _$LogicLibraryMixin {
     return null;
   }
 
+  /// Finds the first set of variable assignments that makes all relations true.
   @SchemeSymbol('query-one')
   @noeval
   void queryOne(List<Expression> exprs, Frame env) {
@@ -49,6 +52,7 @@ class LogicLibrary extends SchemeLibrary with _$LogicLibraryMixin {
     return null;
   }
 
+  /// Compiles all declared facts in the current environment into Prolog.
   @SchemeSymbol('prolog')
   String prolog() => facts.map((f) => f.toProlog()).join('\n') + '\n';
 }
