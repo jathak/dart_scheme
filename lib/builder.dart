@@ -333,3 +333,31 @@ bool _isVariableArity(MethodDeclaration method) {
   }
   return false;
 }
+
+String generateDocumentation(String markdownSource) {
+  Map<String, String> docs = {};
+  String current;
+  for (var line in markdownSource.split('\n')) {
+    line = line.trim();
+    if (line.startsWith('#')) {
+      current = line.substring(1).trim();
+      if (docs.containsKey(current)) {
+        throw Exception("Duplicate documentation for '$current'");
+      }
+      docs[current] = "";
+    } else {
+      docs[current] += line + '\n';
+    }
+  }
+  var pairs = docs
+      .map((k, v) => MapEntry(
+          json.encode(k) + ": Docs.markdown(" + json.encode(v.trim()) + ")",
+          null))
+      .keys;
+  return """part of cs61a_scheme.core.documentation;
+
+Map<String, Docs> miscDocumentation = {
+  ${pairs.join(',')}
+};
+""";
+}

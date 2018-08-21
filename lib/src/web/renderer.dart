@@ -280,7 +280,16 @@ class _Renderer {
   }
 
   Element convertDocs(Docs docs, bool spaced) {
-    var frame = PreElement()..classes = ['docs'];
+    var frame = DivElement()..classes = ['docs'];
+    if (docs.isMarkdown) {
+      String html = md.markdownToHtml(docs.comment,
+          extensionSet: md.ExtensionSet.gitHubFlavored, inlineOnly: true);
+      return Element.span()
+        ..classes = ['md-docs']
+        ..appendHtml(html,
+            validator: NodeValidatorBuilder.common()
+              ..allowNavigation(_AnyUriPolicy()));
+    }
     var comment = "<span class='comment'>${docs.comment}</span>";
     var table = TableElement()..classes = ['usage'];
     var names = TableRowElement();

@@ -135,12 +135,29 @@ class ExtraLibrary extends SchemeLibrary with _$ExtraLibraryMixin {
     env.interpreter.importLibrary(LogicLibrary());
   }
 
-  /// Returns the documentation for [procedure], if it exists.
-  Docs docs(Procedure procedure) {
-    if (procedure.docs == null) {
-      throw SchemeException(
-          "No documentation for ${procedure.name} exists", false);
+  /// Returns the documentation for [topic], if it exists.
+  @noeval
+  Docs docs(SchemeSymbol topic, Frame env) {
+    if (miscDocumentation.containsKey(topic.toString())) {
+      return miscDocumentation[topic.toString()];
+    } else if (env.interpreter.globalEnv.bindings.containsKey(topic)) {
+      var value = env.interpreter.globalEnv.bindings[topic];
+      if (value is Procedure && value.docs != null) {
+        return value.docs;
+      }
     }
-    return procedure.docs;
+    throw SchemeException('No documentation for "$topic" available.');
+  }
+
+  /// Logs all documentation available to the interpreter.
+  @SchemeSymbol('all-docs')
+  void allDocs(Frame env) {
+    for (var docs in miscDocumentation.values) {
+      env.interpreter.logger(docs, true);
+    }
+    var all = env.interpreter.globalEnv.bindings.values.whereType<Procedure>();
+    for (var proc in all.toSet().where((proc) => proc.docs != null)) {
+      env.interpreter.logger(proc.docs, true);
+    }
   }
 }

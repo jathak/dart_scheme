@@ -14,7 +14,10 @@ abstract class _$LogicLibraryMixin {
         (__exprs, __env) {
       this.fact(__exprs);
       return undefined;
-    }, 0, maxArgs: -1);
+    }, 0,
+        maxArgs: -1,
+        docs: Docs.variable('fact',
+            "Declares the first relation to be true iff all other relations are true.\n"));
     __env.bindings[const SchemeSymbol('!')] =
         __env.bindings[const SchemeSymbol('fact')];
     __env.hidden[const SchemeSymbol('!')] = true;
@@ -22,7 +25,10 @@ abstract class _$LogicLibraryMixin {
         (__exprs, __env) {
       this.query(__exprs, __env);
       return undefined;
-    }, 0, maxArgs: -1);
+    }, 0,
+        maxArgs: -1,
+        docs: Docs.variable('query',
+            "Queries all sets of variable assignments that make all relations true.\n"));
     __env.bindings[const SchemeSymbol('?')] =
         __env.bindings[const SchemeSymbol('query')];
     __env.hidden[const SchemeSymbol('?')] = true;
@@ -30,9 +36,17 @@ abstract class _$LogicLibraryMixin {
         (__exprs, __env) {
       this.queryOne(__exprs, __env);
       return undefined;
-    }, 0, maxArgs: -1);
+    }, 0,
+        maxArgs: -1,
+        docs: Docs.variable('query-one',
+            "Finds the first set of variable assignments that makes all relations true.\n"));
     addBuiltin(__env, const SchemeSymbol('prolog'), (__exprs, __env) {
       return SchemeString(this.prolog());
-    }, 0);
+    }, 0,
+        docs: Docs(
+            'prolog',
+            "Compiles all declared facts in the current environment into Prolog.\n",
+            [],
+            returnType: "string"));
   }
 }

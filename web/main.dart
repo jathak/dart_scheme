@@ -17,6 +17,7 @@ const String motd = "**61A Scheme Web Interpreter 2.0.0-beta**"
 `(visualize some-code)` to create an environment diagram [Try It](:try-viz)
 
 **Other Useful Commands**
+`(docs symbol)` to display documentation for some built-in or special form
 `(clear)` to clear all output on the screen
 `(theme 'id)` to change the interpreter's theme
 [default](:try-default) [solarized](:try-solarized) """
