@@ -38,14 +38,21 @@ class WebLibrary extends SchemeLibrary with _$WebLibraryMixin {
     Procedure.jsProcedure = (procedure) => SchemeFunction(procedure, env);
   }
 
+  /// Evaluates a piece of JavaScript code and returns the result.
+  ///
+  /// Compatible types will automatically be converted between the languages.
   Expression js(List<Expression> exprs) {
     String code = exprs.map((e) => e.display).join("");
     return jsEval(code);
   }
 
+  /// Returns the global JavaScript context.
+  ///
+  /// In a browser, this is the window object.
   @SchemeSymbol("js-context")
-  Expression jsContext() => JsExpression(context);
+  JsExpression jsContext() => JsExpression(context);
 
+  /// Sets [property] of [obj] to be [value].
   @SchemeSymbol("js-set!")
   Expression jsSet(JsExpression obj, Expression property, Expression value) {
     if (property is! SchemeSymbol && property is! SchemeString) {
@@ -55,6 +62,7 @@ class WebLibrary extends SchemeLibrary with _$WebLibraryMixin {
     return obj;
   }
 
+  /// Returns [property] of [obj].
   @SchemeSymbol("js-ref")
   Expression jsRef(JsExpression obj, Expression property) {
     if (property is! SchemeSymbol && property is! SchemeString) {
@@ -63,6 +71,7 @@ class WebLibrary extends SchemeLibrary with _$WebLibraryMixin {
     return jsToScheme(obj.obj[property.display]);
   }
 
+  /// Calls a method (second arg) on a JS object (first arg) with some args.
   @SchemeSymbol("js-call")
   @MinArgs(2)
   Expression jsCall(List<Expression> expressions) {
@@ -77,6 +86,7 @@ class WebLibrary extends SchemeLibrary with _$WebLibraryMixin {
     return jsToScheme(jsObj.callMethod(method.toString(), args));
   }
 
+  /// Constructs a new JS object of a type (first arg) with some arguments.
   @SchemeSymbol("js-object")
   Expression jsObject(List<Expression> expressions) {
     if (expressions[0] is! SchemeSymbol && expressions[0] is! SchemeString) {
@@ -86,34 +96,46 @@ class WebLibrary extends SchemeLibrary with _$WebLibraryMixin {
     return jsToScheme(JsObject(context[expressions.first.display], args));
   }
 
+  /// Returns true if [expression] is a JS object.
   @SchemeSymbol("js-object?")
   bool isJsObject(Expression expression) => expression is JsExpression;
 
+  /// Returns true if [expression] is a JS function.
   @SchemeSymbol("js-procedure?")
   bool isJsProcedure(Expression expression) => expression is JsProcedure;
 
+  /// Constructs a color from values [r], [g], and [b].
   Color rgb(int r, int g, int b) => Color(r, g, b);
 
+  /// Constructs a color from values [r], [g], [b], and [a].
   Color rgba(int r, int g, int b, num a) => Color(r, g, b, a.toDouble());
 
+  /// Constructs a color from [hex].
   Color hex(String hex) => Color.fromHexString(hex);
 
+  /// Creates a new theme.
   @SchemeSymbol("make-theme")
   Theme makeTheme() => Theme();
 
+  /// For [theme], sets the color for [property] to be [color].
   @SchemeSymbol('theme-set-color!')
   void themeSetColor(Theme theme, SchemeSymbol property, Expression color) {
     theme.colors[property] = Color.fromAnything(color);
   }
 
+  /// For [theme], sets the extra CSS for [property] to be [code].
   @SchemeSymbol('theme-set-css!')
   void themeSetCss(Theme theme, SchemeSymbol property, SchemeString code) {
     theme.cssProps[property] = code;
   }
 
+  /// Applies [theme] to the current interface.
   @SchemeSymbol('apply-theme')
   void applyThemeBuiltin(Theme theme) => applyTheme(theme, css, styleElement);
 
+  /// Imports a library (first arg) as a module (returned asynchronously)
+  ///
+  /// Remaining args should be symbols in the library to be bound directly.
   @SchemeSymbol('import')
   Future<Expression> schemeImport(List<Expression> args, Frame env) async {
     if (args[0] is! SchemeSymbol && args[0] is! SchemeString) {
@@ -131,6 +153,7 @@ class WebLibrary extends SchemeLibrary with _$WebLibraryMixin {
     return import(id, symbols, env);
   }
 
+  /// Imports a library at [id] directly into the current environment.
   @SchemeSymbol('import-inline')
   Future<Expression> schemeImportInline(Expression id, Frame env) async {
     if (id is! SchemeSymbol && id is! SchemeString) {
@@ -140,10 +163,12 @@ class WebLibrary extends SchemeLibrary with _$WebLibraryMixin {
     return undefined;
   }
 
+  /// References an [id] bound within [imported].
   @SchemeSymbol('lib-ref')
   Expression libraryReference(ImportedLibrary imported, SchemeSymbol id) =>
       imported.reference(id);
 
+  /// Loads and applies a [theme].
   Future<Expression> theme(SchemeSymbol theme, Frame env) async {
     ImportedLibrary lib = await import('scm/theme/$theme', [], env);
     Expression myTheme = lib.reference(const SchemeSymbol('imported-theme'));
@@ -152,6 +177,7 @@ class WebLibrary extends SchemeLibrary with _$WebLibraryMixin {
     return undefined;
   }
 
+  /// Converts [color] to a string of CSS.
   @SchemeSymbol("color->css")
   String colorToCss(Color color) => color.toCSS();
 }
