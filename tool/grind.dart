@@ -70,7 +70,7 @@ checkBuilt(String name) async {
 
 checkDocs() async {
   String source = await File("lib/src/core/documentation.md").readAsString();
-  String code = generateDocumentation(source);
+  String code = DartFormatter().format(generateDocumentation(source));
   String exist = await File('lib/src/core/documentation.g.dart').readAsString();
   if (code != exist) {
     print('Generated documentation is out of sync!');
