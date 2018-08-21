@@ -23,7 +23,7 @@ class _Renderer {
   static int anchorCount = 0;
 
   _Renderer(this.container, JsObject masterJsPlumb) {
-    jsPlumb = masterJsPlumb.callMethod('getInstance');
+    jsPlumb = masterJsPlumb?.callMethod('getInstance');
     container.classes.add('render');
   }
 
@@ -110,6 +110,7 @@ class _Renderer {
   }
 
   Element _convertRaw(Widget widget, [bool spaced = false]) {
+    if (widget is Docs) return convertDocs(widget, spaced);
     if (widget is MarkdownWidget) return convertMarkdown(widget, spaced);
     if (widget is Visualization) return convertVisualization(widget, spaced);
     if (widget is Button) return convertButton(widget, spaced);
@@ -276,6 +277,52 @@ class _Renderer {
     if (dir == Direction.topRight) return [1, 0, 1, 0, 0, 0];
     if (dir == Direction.bottomRight) return [1, 1, 1, 0, 0, 0];
     return [0.5, 0.5, 1, 0, 0, 0];
+  }
+
+  Element convertDocs(Docs docs, bool spaced) {
+    var frame = PreElement()..classes = ['docs'];
+    var comment = "<span class='comment'>${docs.comment}</span>";
+    var table = TableElement()..classes = ['usage'];
+    var names = TableRowElement();
+    var types = TableRowElement();
+    if (docs.params == null) {
+      names.append(Element.th()
+        ..text = '(${docs.canonicalName} ...)'
+        ..classes = ['no-padding']);
+      types.addCell();
+    } else if (docs.params.isNotEmpty) {
+      names.append(Element.th()
+        ..text = '(' + docs.canonicalName
+        ..classes = ['no-padding']);
+      types.addCell();
+      for (var param in docs.params) {
+        names.append(Element.th()..text = param.name);
+        if (param.type == null) {
+          types.addCell();
+        } else {
+          types.addCell().text = param.type;
+        }
+        comment = comment.replaceAll('[${param.name}]', '<b>${param.name}</b>');
+      }
+      names.append(Element.th()
+        ..text = ')'
+        ..classes = ['no-padding']);
+      types.addCell();
+    } else {
+      names.append(Element.th()
+        ..text = '(${docs.canonicalName})'
+        ..classes = ['no-padding']);
+    }
+    if (docs.returnType != null) {
+      names.append(Element.th()
+        ..innerHtml = docs.returnType
+        ..classes = ['ret-type']);
+    }
+    table.append(names);
+    table.append(types);
+    frame.append(table);
+    frame.appendHtml(comment);
+    return frame;
   }
 
   makeConnection(Arrow arrow) {

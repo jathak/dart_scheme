@@ -21,6 +21,7 @@ abstract class _$ExtraLibraryMixin {
   Expression deserialize(String json);
   MarkdownWidget formatted(List<Expression> expressions, Frame env);
   void logicStart(Frame env);
+  Expression docs(Procedure proc);
   void importAll(Frame __env) {
     addBuiltin(__env, const SchemeSymbol("run-async"), (__exprs, __env) {
       if (__exprs[0] is! Procedure)
@@ -44,7 +45,8 @@ abstract class _$ExtraLibraryMixin {
       return this.diagram(__env);
     }, 0);
     addVariableOperandBuiltin(
-        __env, const SchemeSymbol("visualize"), this.visualize, 0, -1);
+        __env, const SchemeSymbol("visualize"), this.visualize, 0,
+        maxArgs: -1);
     addBuiltin(__env, const SchemeSymbol("bindings"), (__exprs, __env) {
       return this.bindings(__env);
     }, 0);
@@ -52,7 +54,7 @@ abstract class _$ExtraLibraryMixin {
         (__exprs, __env) {
       this.triggerEvent(__exprs, __env);
       return undefined;
-    }, 1, -1);
+    }, 1, maxArgs: -1);
     addBuiltin(__env, const SchemeSymbol('listen-for'), (__exprs, __env) {
       if (__exprs[0] is! SchemeSymbol || __exprs[1] is! Procedure)
         throw SchemeException('Argument of invalid type passed to listen-for.');
@@ -74,7 +76,7 @@ abstract class _$ExtraLibraryMixin {
     addVariableBuiltin(__env, const SchemeSymbol('string-append'),
         (__exprs, __env) {
       return SchemeString(this.stringAppend(__exprs));
-    }, 0, -1);
+    }, 0, maxArgs: -1);
     addBuiltin(__env, const SchemeSymbol("serialize"), (__exprs, __env) {
       if (__exprs[0] is! Serializable)
         throw SchemeException('Argument of invalid type passed to serialize.');
@@ -87,10 +89,16 @@ abstract class _$ExtraLibraryMixin {
       return this.deserialize((__exprs[0] as SchemeString).value);
     }, 1);
     addVariableBuiltin(
-        __env, const SchemeSymbol("formatted"), this.formatted, 0, -1);
+        __env, const SchemeSymbol("formatted"), this.formatted, 0,
+        maxArgs: -1);
     addBuiltin(__env, const SchemeSymbol('logic'), (__exprs, __env) {
       this.logicStart(__env);
       return undefined;
     }, 0);
+    addBuiltin(__env, const SchemeSymbol("docs"), (__exprs, __env) {
+      if (__exprs[0] is! Procedure)
+        throw SchemeException('Argument of invalid type passed to docs.');
+      return this.docs(__exprs[0]);
+    }, 1);
   }
 }

@@ -1,5 +1,6 @@
 library cs61a_scheme.core.procedures;
 
+import 'documentation.dart';
 import 'expressions.dart';
 import 'logging.dart';
 import 'widgets.dart';
@@ -13,6 +14,9 @@ abstract class Procedure extends SelfEvaluating {
 
   /// Intrinsic name of this procedure. `null` if none.
   SchemeSymbol get name;
+
+  /// Documentation associated with this procedure. `null` if none.
+  Docs docs;
 
   /// Calls the procedure in [env] with a list of unevaluated [operands].
   Expression call(PairOrEmpty operands, Frame env) =>

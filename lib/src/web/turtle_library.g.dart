@@ -79,7 +79,7 @@ abstract class _$TurtleLibraryMixin {
       turtle.show();
       this.circle(__exprs);
       return undefined;
-    }, 1, 2);
+    }, 1, maxArgs: 2);
     addBuiltin(__env, const SchemeSymbol('setposition'), (__exprs, __env) {
       if (__exprs[0] is! Number || __exprs[1] is! Number)
         throw SchemeException(
@@ -213,7 +213,7 @@ abstract class _$TurtleLibraryMixin {
         (__exprs, __env) {
       this.unsupported(__exprs, __env);
       return undefined;
-    }, 0, -1);
+    }, 0, maxArgs: -1);
     __env.bindings[const SchemeSymbol('speed')] =
         __env.bindings[const SchemeSymbol('unsupported')];
     __env.hidden[const SchemeSymbol('speed')] = true;

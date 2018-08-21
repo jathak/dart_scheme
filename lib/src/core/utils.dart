@@ -2,6 +2,7 @@ library cs61a_scheme.core.utils;
 
 import 'dart:async';
 
+import 'documentation.dart';
 import 'expressions.dart';
 import 'logging.dart';
 import 'procedures.dart';
@@ -70,13 +71,15 @@ Expression evalCallExpression(Pair expr, Frame env) {
 
 Expression completeEval(val) => val is Thunk ? val.evaluate(null) : val;
 
-addBuiltin(Frame env, SchemeSymbol name, SchemeBuiltin fn, int args) {
-  env.define(name, BuiltinProcedure.fixed(name, fn, args), true);
+addBuiltin(Frame env, SchemeSymbol name, SchemeBuiltin fn, int args,
+    {Docs docs}) {
+  env.define(name, BuiltinProcedure.fixed(name, fn, args)..docs = docs, true);
 }
 
 addVariableBuiltin(Frame env, SchemeSymbol name, SchemeBuiltin fn, int minArgs,
-    [int maxArgs = -1]) {
+    {int maxArgs = -1, Docs docs}) {
   var p = BuiltinProcedure.variable(name, fn, minArgs, maxArgs);
+  p.docs = docs;
   env.define(name, p, true);
 }
 

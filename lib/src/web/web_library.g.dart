@@ -28,7 +28,7 @@ abstract class _$WebLibraryMixin {
   void importAll(Frame __env) {
     addVariableBuiltin(__env, const SchemeSymbol("js"), (__exprs, __env) {
       return this.js(__exprs);
-    }, 0, -1);
+    }, 0, maxArgs: -1);
     addBuiltin(__env, const SchemeSymbol("js-context"), (__exprs, __env) {
       return this.jsContext();
     }, 0);
@@ -44,11 +44,11 @@ abstract class _$WebLibraryMixin {
     }, 2);
     addVariableBuiltin(__env, const SchemeSymbol("js-call"), (__exprs, __env) {
       return this.jsCall(__exprs);
-    }, 2, -1);
+    }, 2, maxArgs: -1);
     addVariableBuiltin(__env, const SchemeSymbol("js-object"),
         (__exprs, __env) {
       return this.jsObject(__exprs);
-    }, 0, -1);
+    }, 0, maxArgs: -1);
     addBuiltin(__env, const SchemeSymbol("js-object?"), (__exprs, __env) {
       return Boolean(this.isJsObject(__exprs[0]));
     }, 1);
@@ -105,7 +105,7 @@ abstract class _$WebLibraryMixin {
     }, 1);
     addVariableBuiltin(__env, const SchemeSymbol('import'), (__exprs, __env) {
       return AsyncExpression(this.schemeImport(__exprs, __env));
-    }, 0, -1);
+    }, 0, maxArgs: -1);
     addBuiltin(__env, const SchemeSymbol('import-inline'), (__exprs, __env) {
       return AsyncExpression(this.schemeImportInline(__exprs[0], __env));
     }, 1);

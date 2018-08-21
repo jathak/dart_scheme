@@ -6,6 +6,7 @@
 /// framework used for diagramming).
 library cs61a_scheme.core;
 
+export 'src/core/documentation.dart';
 export 'src/core/expressions.dart';
 export 'src/core/interpreter.dart';
 export 'src/core/logging.dart';

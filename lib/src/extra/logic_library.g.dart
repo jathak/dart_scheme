@@ -14,7 +14,7 @@ abstract class _$LogicLibraryMixin {
         (__exprs, __env) {
       this.fact(__exprs);
       return undefined;
-    }, 0, -1);
+    }, 0, maxArgs: -1);
     __env.bindings[const SchemeSymbol('!')] =
         __env.bindings[const SchemeSymbol('fact')];
     __env.hidden[const SchemeSymbol('!')] = true;
@@ -22,7 +22,7 @@ abstract class _$LogicLibraryMixin {
         (__exprs, __env) {
       this.query(__exprs, __env);
       return undefined;
-    }, 0, -1);
+    }, 0, maxArgs: -1);
     __env.bindings[const SchemeSymbol('?')] =
         __env.bindings[const SchemeSymbol('query')];
     __env.hidden[const SchemeSymbol('?')] = true;
@@ -30,7 +30,7 @@ abstract class _$LogicLibraryMixin {
         (__exprs, __env) {
       this.queryOne(__exprs, __env);
       return undefined;
-    }, 0, -1);
+    }, 0, maxArgs: -1);
     addBuiltin(__env, const SchemeSymbol('prolog'), (__exprs, __env) {
       return SchemeString(this.prolog());
     }, 0);

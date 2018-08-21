@@ -123,4 +123,12 @@ class ExtraLibrary extends SchemeLibrary with _$ExtraLibraryMixin {
   void logicStart(Frame env) {
     env.interpreter.importLibrary(LogicLibrary());
   }
+
+  Expression docs(Procedure proc) {
+    if (proc.docs == null) {
+      return undefined;
+      throw SchemeException("No documentation for ${proc.name} exists", false);
+    }
+    return proc.docs;
+  }
 }
