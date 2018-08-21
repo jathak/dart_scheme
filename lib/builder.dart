@@ -64,7 +64,10 @@ class BuiltinStub {
 
   String returnType;
   List<String> paramTypes;
+  List<String> paramNames;
   bool needsEnvironment = false;
+
+  String comment;
 
   String get symbol => 'const SchemeSymbol($name)';
 
@@ -77,8 +80,33 @@ class BuiltinStub {
         .join('');
     var op = operandProcedure ? "Operand" : "";
     var arity = variableArity ? "Variable" : "";
-    var args = variableArity ? "$minArgs, $maxArgs" : "$minArgs";
-    return "add$arity${op}Builtin(__env, $symbol, $fn, $args);$extra";
+    var args = variableArity ? "$minArgs, maxArgs: $maxArgs" : "$minArgs";
+    var docs = variableArity ? _makeVariableDocs() : _makeDocs();
+    return "add$arity${op}Builtin(__env, $symbol, $fn, $args $docs);$extra";
+  }
+
+  String _makeVariableDocs() {
+    if (comment == null) return "";
+    var ret = docTypes.containsKey(returnType)
+        ? ', returnType:' + json.encode(docTypes[returnType])
+        : '';
+    return ", docs: Docs.variable($name, ${json.encode(comment)} $ret)";
+  }
+
+  String _makeDocs() {
+    if (comment == null) return "";
+    var commentStr = json.encode(comment);
+    var params = [];
+    for (int i = 0; i < paramTypes.length; i++) {
+      var type = docTypes.containsKey(paramTypes[i])
+          ? json.encode(docTypes[paramTypes[i]])
+          : 'null';
+      params.add('Param($type, ${json.encode(paramNames[i])})');
+    }
+    var ret = docTypes.containsKey(returnType)
+        ? ', returnType:' + json.encode(docTypes[returnType])
+        : '';
+    return ", docs: Docs($name, $commentStr, [${params.join(', ')}] $ret)";
   }
 
   String _makeFunction() {
@@ -158,6 +186,27 @@ class BuiltinStub {
     return call;
   }
 
+  static const Map<String, String> docTypes = {
+    'int': 'int',
+    'Integer': 'int',
+    'double': 'float',
+    'Double': 'float',
+    'num': 'num',
+    'Number': 'num',
+    'bool': 'bool',
+    'Boolean': 'bool',
+    'String': 'string',
+    'SchemeString': 'string',
+    'SchemeSymbol': 'symbol',
+    'Procedure': 'procedure',
+    'Pair': 'pair',
+    'SchemeEventListener': 'event listener',
+    'JsExpression': 'js object',
+    'JsProcedure': 'js function',
+    'Color': 'color',
+    'ImportedLibrary': 'library'
+  };
+
   static const Map<String, String> typeChecks = {
     'int': 'Integer',
     'double': 'Double',
@@ -178,9 +227,22 @@ class BuiltinStub {
   };
 }
 
+String _parseComment(Comment comment) {
+  if (comment == null) return null;
+  var result = "";
+  var current = comment.beginToken;
+  while (current != null) {
+    result += current.lexeme.substring(3).trim() + '\n';
+    current = current.next;
+  }
+  return result;
+}
+
 BuiltinStub _buildStub(MethodDeclaration method) {
   var stub = BuiltinStub();
   stub.methodName = method.name.toSource();
+
+  stub.comment = _parseComment(method.documentationComment);
   String arg(Annotation ant) => ant.arguments.arguments[0].toSource();
   for (Annotation ant in method.metadata) {
     switch (ant.name.toSource()) {
@@ -225,6 +287,7 @@ BuiltinStub _buildStub(MethodDeclaration method) {
     stub.needsEnvironment = paramCount == 2;
   } else {
     stub.paramTypes = _paramTypes(method);
+    stub.paramNames = _paramNames(method);
     stub.needsEnvironment =
         stub.paramTypes.isNotEmpty && stub.paramTypes.last == "Frame";
     if (stub.needsEnvironment) stub.paramTypes.removeLast();
@@ -249,6 +312,14 @@ List<String> _paramTypes(MethodDeclaration method) {
   return types;
 }
 
+List<String> _paramNames(MethodDeclaration method) {
+  List<String> names = [];
+  for (FormalParameter param in method.parameters.parameters) {
+    names.add(param.identifier.toSource());
+  }
+  return names;
+}
+
 bool _isVariableArity(MethodDeclaration method) {
   if (method.parameters.parameters.isNotEmpty) {
     FormalParameter param = method.parameters.parameters[0];
@@ -261,4 +332,32 @@ bool _isVariableArity(MethodDeclaration method) {
     }
   }
   return false;
+}
+
+String generateDocumentation(String markdownSource) {
+  Map<String, String> docs = {};
+  String current;
+  for (var line in markdownSource.split('\n')) {
+    line = line.trim();
+    if (line.startsWith('#')) {
+      current = line.substring(1).trim();
+      if (docs.containsKey(current)) {
+        throw Exception("Duplicate documentation for '$current'");
+      }
+      docs[current] = "";
+    } else {
+      docs[current] += line + '\n';
+    }
+  }
+  var pairs = docs
+      .map((k, v) => MapEntry(
+          json.encode(k) + ": Docs.markdown(" + json.encode(v.trim()) + ")",
+          null))
+      .keys;
+  return """part of cs61a_scheme.core.documentation;
+
+Map<String, Docs> miscDocumentation = {
+  ${pairs.join(',')}
+};
+""";
 }

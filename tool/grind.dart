@@ -19,6 +19,7 @@ build() async {
   for (var lib in libraries) {
     await buildLibrary(lib);
   }
+  await buildDocs();
 }
 
 @Task('Check that generated code is in sync.')
@@ -27,10 +28,18 @@ check() async {
   for (var lib in libraries) {
     good = await checkBuilt(lib) && good;
   }
+  good = await checkDocs();
   if (!good) {
     print('Run `pub run grinder` to keep generated code in sync.');
     exit(1);
   }
+}
+
+buildDocs() async {
+  String source = await File("lib/src/core/documentation.md").readAsString();
+  String code = generateDocumentation(source);
+  await File('lib/src/core/documentation.g.dart')
+      .writeAsString(DartFormatter().format(code));
 }
 
 buildLibrary(String name) async {
@@ -54,6 +63,17 @@ checkBuilt(String name) async {
   String existing = await output.readAsString();
   if (code != existing) {
     print('Generated code for $name out of sync!');
+    return false;
+  }
+  return true;
+}
+
+checkDocs() async {
+  String source = await File("lib/src/core/documentation.md").readAsString();
+  String code = DartFormatter().format(generateDocumentation(source));
+  String exist = await File('lib/src/core/documentation.g.dart').readAsString();
+  if (code != exist) {
+    print('Generated documentation is out of sync!');
     return false;
   }
   return true;

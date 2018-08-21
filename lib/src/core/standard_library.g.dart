@@ -53,10 +53,10 @@ abstract class _$StandardLibraryMixin {
   bool isEven(Number x);
   bool isOdd(Number x);
   bool isZero(Number x);
-  Expression force(Promise p);
-  Expression cdrStream(Pair p);
-  void setCar(Pair p, Expression val);
-  void setCdr(Pair p, Expression val);
+  Expression force(Promise promise);
+  Expression cdrStream(Pair stream);
+  void setCar(Pair pair, Expression val);
+  void setCdr(Pair pair, Expression val);
   Expression callWithCurrentContinuation(Procedure procedure, Frame env);
   String getRuntimeType(Expression expression);
   void importAll(Frame __env) {
@@ -64,199 +64,353 @@ abstract class _$StandardLibraryMixin {
       if (__exprs[0] is! Procedure || __exprs[1] is! PairOrEmpty)
         throw SchemeException('Argument of invalid type passed to apply.');
       return this.apply(__exprs[0], __exprs[1], __env);
-    }, 2);
+    }, 2,
+        docs: Docs("apply", "Applies [procedure] to the given [args]\n",
+            [Param("procedure", "procedure"), Param(null, "args")]));
     addBuiltin(__env, const SchemeSymbol("display"), (__exprs, __env) {
       this.display(__exprs[0], __env);
       return undefined;
-    }, 1);
+    }, 1,
+        docs: Docs(
+            "display",
+            "Displays [message] without a line break at the end\n",
+            [Param(null, "message")]));
     addBuiltin(__env, const SchemeSymbol("error"), (__exprs, __env) {
       return this.error(__exprs[0]);
-    }, 1);
+    }, 1,
+        docs: Docs("error", "Raises an error with the given [message].\n",
+            [Param(null, "message")]));
     addBuiltin(__env, const SchemeSymbol('error-notrace'), (__exprs, __env) {
       return this.errorNoTrace(__exprs[0]);
-    }, 1);
+    }, 1,
+        docs: Docs(
+            'error-notrace',
+            "Raises an error with the given [message] and no traceback.\n",
+            [Param(null, "message")]));
     addBuiltin(__env, const SchemeSymbol("eval"), (__exprs, __env) {
       return this.eval(__exprs[0], __env);
-    }, 1);
+    }, 1,
+        docs: Docs("eval", "Evaluates [expr] in the current environment\n",
+            [Param(null, "expr")]));
     addBuiltin(__env, const SchemeSymbol("exit"), (__exprs, __env) {
       return this.exit();
-    }, 0);
+    }, 0,
+        docs: Docs("exit", "Exits the interpreter (behavior may vary)\n", []));
     addBuiltin(__env, const SchemeSymbol("load"), (__exprs, __env) {
       return this.load(__exprs[0], __env);
     }, 1);
     addBuiltin(__env, const SchemeSymbol("newline"), (__exprs, __env) {
       this.newline(__env);
       return undefined;
-    }, 0);
+    }, 0, docs: Docs("newline", "Displays a line break\n", []));
     addBuiltin(__env, const SchemeSymbol("print"), (__exprs, __env) {
       this.print(__exprs[0], __env);
       return undefined;
-    }, 1);
+    }, 1,
+        docs: Docs("print", "Logs [message] to the interpreter.\n",
+            [Param(null, "message")]));
     addBuiltin(__env, const SchemeSymbol("atom?"), (__exprs, __env) {
       return Boolean(this.isAtom(__exprs[0]));
-    }, 1);
+    }, 1,
+        docs: Docs("atom?", "Returns true if [val] is an atomic expression.\n",
+            [Param(null, "val")],
+            returnType: "bool"));
     addBuiltin(__env, const SchemeSymbol("integer?"), (__exprs, __env) {
       return Boolean(this.isInteger(__exprs[0]));
-    }, 1);
+    }, 1,
+        docs: Docs("integer?", "Returns true if [val] is an integer.\n",
+            [Param(null, "val")],
+            returnType: "bool"));
     addBuiltin(__env, const SchemeSymbol("list?"), (__exprs, __env) {
       return Boolean(this.isList(__exprs[0]));
-    }, 1);
+    }, 1,
+        docs: Docs("list?", "Returns true if [val] is a well-formed list.\n",
+            [Param(null, "val")],
+            returnType: "bool"));
     addBuiltin(__env, const SchemeSymbol("number?"), (__exprs, __env) {
       return Boolean(this.isNumber(__exprs[0]));
-    }, 1);
+    }, 1,
+        docs: Docs("number?", "Returns true if [val] is an number.\n",
+            [Param(null, "val")],
+            returnType: "bool"));
     addBuiltin(__env, const SchemeSymbol("null?"), (__exprs, __env) {
       return Boolean(this.isNull(__exprs[0]));
-    }, 1);
+    }, 1,
+        docs: Docs("null?", "Returns true if [val] is the empty list.\n",
+            [Param(null, "val")],
+            returnType: "bool"));
     addBuiltin(__env, const SchemeSymbol("pair?"), (__exprs, __env) {
       return Boolean(this.isPair(__exprs[0]));
-    }, 1);
+    }, 1,
+        docs: Docs(
+            "pair?", "Returns true if [val] is a pair.\n", [Param(null, "val")],
+            returnType: "bool"));
     addBuiltin(__env, const SchemeSymbol("procedure?"), (__exprs, __env) {
       return Boolean(this.isProcedure(__exprs[0]));
-    }, 1);
+    }, 1,
+        docs: Docs("procedure?", "Returns true if [val] is a procedure.\n",
+            [Param(null, "val")],
+            returnType: "bool"));
     addBuiltin(__env, const SchemeSymbol("promise?"), (__exprs, __env) {
       return Boolean(this.isPromise(__exprs[0]));
-    }, 1);
+    }, 1,
+        docs: Docs("promise?", "Returns true if [val] is a promise.\n",
+            [Param(null, "val")],
+            returnType: "bool"));
     addBuiltin(__env, const SchemeSymbol("string?"), (__exprs, __env) {
       return Boolean(this.isString(__exprs[0]));
-    }, 1);
+    }, 1,
+        docs: Docs("string?", "Returns true if [val] is a string.\n",
+            [Param(null, "val")],
+            returnType: "bool"));
     addBuiltin(__env, const SchemeSymbol("symbol?"), (__exprs, __env) {
       return Boolean(this.isSymbol(__exprs[0]));
-    }, 1);
+    }, 1,
+        docs: Docs("symbol?", "Returns true if [val] is a symbol.\n",
+            [Param(null, "val")],
+            returnType: "bool"));
     addVariableBuiltin(__env, const SchemeSymbol("append"), (__exprs, __env) {
       return this.append(__exprs);
-    }, 0, -1);
+    }, 0,
+        maxArgs: -1,
+        docs: Docs.variable("append",
+            "Appends zero or more lists together into a single list.\n"));
     addBuiltin(__env, const SchemeSymbol("car"), (__exprs, __env) {
       if (__exprs[0] is! Pair)
         throw SchemeException('Argument of invalid type passed to car.');
       return this.car(__exprs[0]);
-    }, 1);
+    }, 1,
+        docs: Docs(
+            "car", "Gets the first item in [val].\n", [Param("pair", "val")]));
     addBuiltin(__env, const SchemeSymbol("cdr"), (__exprs, __env) {
       if (__exprs[0] is! Pair)
         throw SchemeException('Argument of invalid type passed to cdr.');
       return this.cdr(__exprs[0]);
-    }, 1);
+    }, 1,
+        docs: Docs(
+            "cdr",
+            "Gets the second item in [val] (typically the rest of a well-formed list).\n",
+            [Param("pair", "val")]));
     addBuiltin(__env, const SchemeSymbol("cons"), (__exprs, __env) {
       return this.cons(__exprs[0], __exprs[1]);
-    }, 2);
+    }, 2,
+        docs: Docs("cons", "Constructs a pair from values [car] and [cdr].\n",
+            [Param(null, "car"), Param(null, "cdr")],
+            returnType: "pair"));
     addBuiltin(__env, const SchemeSymbol("length"), (__exprs, __env) {
       if (__exprs[0] is! PairOrEmpty)
         throw SchemeException('Argument of invalid type passed to length.');
       return Number.fromNum(this.length(__exprs[0]));
-    }, 1);
+    }, 1,
+        docs: Docs("length", "Finds the length of a well-formed Scheme list.\n",
+            [Param(null, "lst")],
+            returnType: "num"));
     addVariableBuiltin(__env, const SchemeSymbol("list"), (__exprs, __env) {
       return this.list(__exprs);
-    }, 0, -1);
+    }, 0,
+        maxArgs: -1,
+        docs: Docs.variable(
+            "list", "Constructs a list from zero or more arguments.\n"));
     addBuiltin(__env, const SchemeSymbol("map"), (__exprs, __env) {
       if (__exprs[0] is! Procedure || __exprs[1] is! PairOrEmpty)
         throw SchemeException('Argument of invalid type passed to map.');
       return this.map(__exprs[0], __exprs[1], __env);
-    }, 2);
+    }, 2,
+        docs: Docs(
+            "map",
+            "Constructs a new list from calling [fn] on each item in [lst].\n",
+            [Param("procedure", "fn"), Param(null, "lst")]));
     addBuiltin(__env, const SchemeSymbol("filter"), (__exprs, __env) {
       if (__exprs[0] is! Procedure || __exprs[1] is! PairOrEmpty)
         throw SchemeException('Argument of invalid type passed to filter.');
       return this.filter(__exprs[0], __exprs[1], __env);
-    }, 2);
+    }, 2,
+        docs: Docs(
+            "filter",
+            "Constructs a new list of all items in [lst] that return true when passed\nto [pred].\n",
+            [Param("procedure", "pred"), Param(null, "lst")]));
     addBuiltin(__env, const SchemeSymbol("reduce"), (__exprs, __env) {
       if (__exprs[0] is! Procedure || __exprs[1] is! PairOrEmpty)
         throw SchemeException('Argument of invalid type passed to reduce.');
       return this.reduce(__exprs[0], __exprs[1], __env);
-    }, 2);
+    }, 2,
+        docs: Docs(
+            "reduce",
+            "Reduces [lst] into a single expression by combining items with [combiner].\n",
+            [Param("procedure", "combiner"), Param(null, "lst")]));
     addVariableBuiltin(__env, const SchemeSymbol("+"), (__exprs, __env) {
       return this.add(__exprs);
-    }, 0, -1);
+    }, 0,
+        maxArgs: -1,
+        docs: Docs.variable("+", "Adds 0 or more numbers together.\n",
+            returnType: "num"));
     addVariableBuiltin(__env, const SchemeSymbol("-"), (__exprs, __env) {
       return this.sub(__exprs);
-    }, 1, -1);
+    }, 1,
+        maxArgs: -1,
+        docs: Docs.variable("-",
+            "If called with one number, negates it.\nOtherwise, subtracts the sum of all remaining arguments from the first.\n",
+            returnType: "num"));
     addVariableBuiltin(__env, const SchemeSymbol("*"), (__exprs, __env) {
       return this.mul(__exprs);
-    }, 0, -1);
+    }, 0,
+        maxArgs: -1,
+        docs: Docs.variable("*", "Multiples 0 or more numbers together.\n",
+            returnType: "num"));
     addVariableBuiltin(__env, const SchemeSymbol("/"), (__exprs, __env) {
       return this.truediv(__exprs);
-    }, 1, -1);
+    }, 1,
+        maxArgs: -1,
+        docs: Docs.variable("/",
+            "If called with one number, finds its reciprocal.\nOtherwise, divides the first argument by the product of the rest.\n",
+            returnType: "num"));
     addBuiltin(__env, const SchemeSymbol("abs"), (__exprs, __env) {
       if (__exprs[0] is! Number)
         throw SchemeException('Argument of invalid type passed to abs.');
       return this.abs(__exprs[0]);
-    }, 1);
+    }, 1,
+        docs: Docs("abs", "Finds the absolute value of [arg].\n",
+            [Param("num", "arg")],
+            returnType: "num"));
     addBuiltin(__env, const SchemeSymbol("expt"), (__exprs, __env) {
       if (__exprs[0] is! Number || __exprs[1] is! Number)
         throw SchemeException('Argument of invalid type passed to expt.');
       return this.expt(__exprs[0], __exprs[1]);
-    }, 2);
+    }, 2,
+        docs: Docs("expt", "Raises [base] to [power].\n",
+            [Param("num", "base"), Param("num", "power")],
+            returnType: "num"));
     addBuiltin(__env, const SchemeSymbol("modulo"), (__exprs, __env) {
       if (__exprs[0] is! Number || __exprs[1] is! Number)
         throw SchemeException('Argument of invalid type passed to modulo.');
       return this.modulo(__exprs[0], __exprs[1]);
-    }, 2);
+    }, 2,
+        docs: Docs(
+            "modulo", "Finds a % b.\n", [Param("num", "a"), Param("num", "b")],
+            returnType: "num"));
     addBuiltin(__env, const SchemeSymbol("quotient"), (__exprs, __env) {
       if (__exprs[0] is! Number || __exprs[1] is! Number)
         throw SchemeException('Argument of invalid type passed to quotient.');
       return this.quotient(__exprs[0], __exprs[1]);
-    }, 2);
+    }, 2,
+        docs: Docs(
+            "quotient",
+            "Divides [a] by [b] using truncating division.\n",
+            [Param("num", "a"), Param("num", "b")],
+            returnType: "num"));
     addBuiltin(__env, const SchemeSymbol("remainder"), (__exprs, __env) {
       if (__exprs[0] is! Number || __exprs[1] is! Number)
         throw SchemeException('Argument of invalid type passed to remainder.');
       return this.remainder(__exprs[0], __exprs[1]);
-    }, 2);
+    }, 2,
+        docs: Docs(
+            "remainder",
+            "Finds the remainder when dividing [a] by [b].\n",
+            [Param("num", "a"), Param("num", "b")],
+            returnType: "num"));
     addBuiltin(__env, const SchemeSymbol("eq?"), (__exprs, __env) {
       return Boolean(this.isEq(__exprs[0], __exprs[1]));
-    }, 2);
+    }, 2,
+        docs: Docs(
+            "eq?",
+            "Determines if [x] and [y] are the same object.\n\nFor the purposes of this procedure, equivalent numbers, symbols, and\nstrings are considered the same object.\n",
+            [Param(null, "x"), Param(null, "y")],
+            returnType: "bool"));
     addBuiltin(__env, const SchemeSymbol("equal?"), (__exprs, __env) {
       return Boolean(this.isEqual(__exprs[0], __exprs[1]));
-    }, 2);
+    }, 2,
+        docs: Docs(
+            "equal?",
+            "Determines if [x] and [y] hold equivalent values.\n",
+            [Param(null, "x"), Param(null, "y")],
+            returnType: "bool"));
     addBuiltin(__env, const SchemeSymbol("not"), (__exprs, __env) {
       return Boolean(this.not(__exprs[0]));
-    }, 1);
+    }, 1,
+        docs: Docs(
+            "not", "Negates the truthiness of [arg].\n", [Param(null, "arg")],
+            returnType: "bool"));
     addBuiltin(__env, const SchemeSymbol("="), (__exprs, __env) {
       if (__exprs[0] is! Number || __exprs[1] is! Number)
         throw SchemeException('Argument of invalid type passed to =.');
       return Boolean(this.eqNumbers(__exprs[0], __exprs[1]));
-    }, 2);
+    }, 2,
+        docs: Docs("=", "Compares [x] and [y] for equality.\n",
+            [Param("num", "x"), Param("num", "y")],
+            returnType: "bool"));
     addBuiltin(__env, const SchemeSymbol("<"), (__exprs, __env) {
       if (__exprs[0] is! Number || __exprs[1] is! Number)
         throw SchemeException('Argument of invalid type passed to <.');
       return Boolean(this.lt(__exprs[0], __exprs[1]));
-    }, 2);
+    }, 2,
+        docs: Docs("<", "Returns true if [x] is less than [y].\n",
+            [Param("num", "x"), Param("num", "y")],
+            returnType: "bool"));
     addBuiltin(__env, const SchemeSymbol(">"), (__exprs, __env) {
       if (__exprs[0] is! Number || __exprs[1] is! Number)
         throw SchemeException('Argument of invalid type passed to >.');
       return Boolean(this.gt(__exprs[0], __exprs[1]));
-    }, 2);
+    }, 2,
+        docs: Docs(">", "Returns true if [x] is greater than [y].\n",
+            [Param("num", "x"), Param("num", "y")],
+            returnType: "bool"));
     addBuiltin(__env, const SchemeSymbol("<="), (__exprs, __env) {
       if (__exprs[0] is! Number || __exprs[1] is! Number)
         throw SchemeException('Argument of invalid type passed to <=.');
       return Boolean(this.le(__exprs[0], __exprs[1]));
-    }, 2);
+    }, 2,
+        docs: Docs("<=", "Returns true if [x] is less than or equal to [y].\n",
+            [Param("num", "x"), Param("num", "y")],
+            returnType: "bool"));
     addBuiltin(__env, const SchemeSymbol(">="), (__exprs, __env) {
       if (__exprs[0] is! Number || __exprs[1] is! Number)
         throw SchemeException('Argument of invalid type passed to >=.');
       return Boolean(this.ge(__exprs[0], __exprs[1]));
-    }, 2);
+    }, 2,
+        docs: Docs(
+            ">=",
+            "Returns true if [x] is greater than or equal to [y].\n",
+            [Param("num", "x"), Param("num", "y")],
+            returnType: "bool"));
     addBuiltin(__env, const SchemeSymbol("even?"), (__exprs, __env) {
       if (__exprs[0] is! Number)
         throw SchemeException('Argument of invalid type passed to even?.');
       return Boolean(this.isEven(__exprs[0]));
-    }, 1);
+    }, 1,
+        docs: Docs(
+            "even?", "Returns true if [x] is even.\n", [Param("num", "x")],
+            returnType: "bool"));
     addBuiltin(__env, const SchemeSymbol("odd?"), (__exprs, __env) {
       if (__exprs[0] is! Number)
         throw SchemeException('Argument of invalid type passed to odd?.');
       return Boolean(this.isOdd(__exprs[0]));
-    }, 1);
+    }, 1,
+        docs: Docs("odd?", "Returns true if [x] is odd.\n", [Param("num", "x")],
+            returnType: "bool"));
     addBuiltin(__env, const SchemeSymbol("zero?"), (__exprs, __env) {
       if (__exprs[0] is! Number)
         throw SchemeException('Argument of invalid type passed to zero?.');
       return Boolean(this.isZero(__exprs[0]));
-    }, 1);
+    }, 1,
+        docs: Docs(
+            "zero?", "Returns true if [x] is zero.\n", [Param("num", "x")],
+            returnType: "bool"));
     addBuiltin(__env, const SchemeSymbol("force"), (__exprs, __env) {
       if (__exprs[0] is! Promise)
         throw SchemeException('Argument of invalid type passed to force.');
       return this.force(__exprs[0]);
-    }, 1);
+    }, 1,
+        docs: Docs("force", "Forces [promise], evaluating it if necessary.\n",
+            [Param(null, "promise")]));
     addBuiltin(__env, const SchemeSymbol("cdr-stream"), (__exprs, __env) {
       if (__exprs[0] is! Pair)
         throw SchemeException('Argument of invalid type passed to cdr-stream.');
       return this.cdrStream(__exprs[0]);
-    }, 1);
+    }, 1,
+        docs: Docs(
+            "cdr-stream",
+            "Finds the rest of [stream].\n\nEquivalent to (force (cdr [stream]))\n",
+            [Param("pair", "stream")]));
     addBuiltin(__env, const SchemeSymbol("set-car!"), (__exprs, __env) {
       if (__exprs[0] is! Pair)
         throw SchemeException('Argument of invalid type passed to set-car!.');
@@ -264,7 +418,9 @@ abstract class _$StandardLibraryMixin {
       __env.interpreter.triggerEvent(
           const SchemeSymbol("pair-mutation"), [undefined], __env);
       return undefined;
-    }, 2);
+    }, 2,
+        docs: Docs("set-car!", "Mutates the car of [pair] to be [val].\n",
+            [Param("pair", "pair"), Param(null, "val")]));
     addBuiltin(__env, const SchemeSymbol("set-cdr!"), (__exprs, __env) {
       if (__exprs[0] is! Pair)
         throw SchemeException('Argument of invalid type passed to set-cdr!.');
@@ -272,7 +428,9 @@ abstract class _$StandardLibraryMixin {
       __env.interpreter.triggerEvent(
           const SchemeSymbol("pair-mutation"), [undefined], __env);
       return undefined;
-    }, 2);
+    }, 2,
+        docs: Docs("set-cdr!", "Mutates the cdr of [pair] to be [val].\n",
+            [Param("pair", "pair"), Param(null, "val")]));
     addBuiltin(__env, const SchemeSymbol("call/cc"), (__exprs, __env) {
       if (__exprs[0] is! Procedure)
         throw SchemeException('Argument of invalid type passed to call/cc.');

@@ -70,8 +70,6 @@ of this directory can be imported outside the project.
 - `cs61a_scheme_web.dart` defines the web interpreter library.
 - `builder.dart` defines the code generator, which is used to build helpers for
   libraries of Scheme built-ins.
-- `highlight.dart` defines helpers for highlighting code (using highlight.js)
-- `web_repl.dart` defines the REPL used by the web app
 
 The actual implementation of each of the first three libraries is in
 `lib/src/core`, `lib/src/extra`, and `lib/src/web` respectively. Any files that
@@ -82,8 +80,12 @@ mixins.
 
 Tests are contained in the `test` directory.
 
-The web frontend is contained in the `web` directory (though it depends heavily
-on the libraries).
+Miscellanous documentation (for special forms and other topics) lives in
+`lib/src/core/documentation.md` and is compiled into a form that allows users
+to reference it from the interpreter (`(docs &lt;topic>)`).
+
+The web frontend is contained in the `web` directory and the `lib/web_ui`
+directory.
 
 A simple CLI repl is contained in `tool/repl.dart`. Dart package layout
 conventions would usually include this in `bin`, but since it depends on the
@@ -181,6 +183,18 @@ Note that the Dart `int` type is of limited size when running on the web (64-bit
 floating point), or on all platforms starting in Dart 2 (64-bit integer). The
 conversion from `Integer` to `int` is unspecified for large values.
 
+### Documentation
+
+The code generator will also embed the doc comments on a library into the
+library itself, so they can be referenced from the interpreter. Any built-in
+intended for general use should have a doc comment.
+
+Doc comments must not exceed 80 characters of width, since they will not be
+wrapped when viewed within the interpreter.
+
+You can reference parameter names within your comment by putting the name in
+square brackets. This only works for explicitly named parameters.
+
 ### Importing a `SchemeLibrary`
 
 Only the `StandardLibrary` is included automatically in a new `Interpreter`.
@@ -203,7 +217,7 @@ Before creating a PR, please make sure you have done the following:
 * Run `dartfmt -w .` to format your code (or, even better, configure your editor 
   to do this for you when you save).
 
-* Run `dartanalyzer --fatal-warnings --strong .` to make sure you code doesn't
+* Run `dartanalyzer --fatal-warnings .` to make sure you code doesn't
   cause any analysis errors or warnings. Most editors with Dart support should
   do this automatically.
 

@@ -98,6 +98,70 @@
     }
   }
 
+  .docs {
+    padding: 0.375em;
+    margin: 0.5em;
+    border-radius: 0.185em;
+    width: 80ch;
+    font-size: 90%;
+    display: block;
+    @include other-frame;
+
+    .comment {
+      padding-left: 0.125em;
+      padding-right: 0.125em;
+      display: inline-block;
+    }
+
+    .usage {
+      margin-bottom: 8px;
+      border-collapse: collapse;
+    }
+
+    td {
+      vertical-align: super;
+      font-size: xx-small;
+      text-align: center;
+      font-style: italic;
+    }
+
+    .ret-type {
+      font-style: italic;
+      opacity: 0.7;
+    }
+
+    .ret-type::before {
+      content: ' -> ';
+    }
+
+    td::before {
+      content: ' ';
+    }
+
+    th {
+      text-align: center;
+      vertical-align: top;
+    }
+
+    th::before {
+      content: ' ';
+    }
+
+    .no-padding {
+      text-align: left;
+    }
+
+    .no-padding::before {
+      content: '';
+    }
+  }
+
+  .md-docs {
+    @extend .docs;
+    padding-left: 0.5em;
+    padding-right: 0.25em;
+  }
+
   .diagram {
 
     .frames{
