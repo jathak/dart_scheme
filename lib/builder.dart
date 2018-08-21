@@ -200,6 +200,7 @@ class BuiltinStub {
     'SchemeSymbol': 'symbol',
     'Procedure': 'procedure',
     'Pair': 'pair',
+    'SchemeEventListener': 'event listener'
   };
 
   static const Map<String, String> typeChecks = {

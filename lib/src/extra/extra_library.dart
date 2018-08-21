@@ -56,17 +56,22 @@ class ExtraLibrary extends SchemeLibrary with _$ExtraLibraryMixin {
   Boolean isCompleted(AsyncExpression expr) =>
       expr.complete ? schemeTrue : schemeFalse;
 
+  /// Creates a diagram of [expression].
   Diagram draw(Expression expression) => Diagram(expression);
 
+  /// Create a diagram of the current environment.
   Diagram diagram(Frame env) => Diagram(env);
 
+  /// Visualizes the execution of a piece of code.
   @noeval
   Visualization visualize(List<Expression> code, Frame env) =>
       Visualization(code, env);
 
+  /// Returns a list of all bindings in the current environment.
   PairOrEmpty bindings(Frame env) =>
       PairOrEmpty.fromIterable(env.bindings.keys);
 
+  /// Triggers an event with a given name (first arg) and arguments.
   @SchemeSymbol('trigger-event')
   @MinArgs(1)
   void triggerEvent(List<Expression> exprs, Frame env) {
@@ -76,6 +81,7 @@ class ExtraLibrary extends SchemeLibrary with _$ExtraLibraryMixin {
     env.interpreter.triggerEvent(exprs[0], exprs.skip(1).toList(), env);
   }
 
+  /// Sets up an listener to call [onEvent] when an event with [id] occurs.
   @SchemeSymbol('listen-for')
   SchemeEventListener listenFor(SchemeSymbol id, Procedure onEvent, Frame env) {
     var callback = (exprs, env) {
@@ -95,16 +101,19 @@ class ExtraLibrary extends SchemeLibrary with _$ExtraLibraryMixin {
     return SchemeEventListener(id, callback);
   }
 
+  /// Cancels [listener] from triggering on new events.
   @SchemeSymbol('cancel-listener')
   void cancelListener(SchemeEventListener listener, Frame env) {
     env.interpreter.stopListening(listener.id, listener.callback);
   }
 
+  /// Cancels all listeners for event [id].
   @SchemeSymbol('cancel-all')
   void cancelAll(SchemeSymbol id, Frame env) {
     env.interpreter.stopAllListeners(id);
   }
 
+  /// Constructs a string from the display values of any number of expressions.
   @SchemeSymbol('string-append')
   String stringAppend(List<Expression> exprs) =>
       exprs.map((e) => e.display).join('');
@@ -114,21 +123,24 @@ class ExtraLibrary extends SchemeLibrary with _$ExtraLibraryMixin {
   Expression deserialize(String json) =>
       Serialization.deserializeFromJson(json);
 
+  /// Renders all provided text as a block of Markdown.
   MarkdownWidget formatted(List<Expression> expressions, Frame env) {
     String text = expressions.map((expr) => expr.display).join('');
     return MarkdownWidget(text, inline: true, env: env);
   }
 
+  /// Loads procedures to run Logic code within the interpreter.
   @SchemeSymbol('logic')
   void logicStart(Frame env) {
     env.interpreter.importLibrary(LogicLibrary());
   }
 
-  Expression docs(Procedure proc) {
-    if (proc.docs == null) {
-      return undefined;
-      throw SchemeException("No documentation for ${proc.name} exists", false);
+  /// Returns the documentation for [procedure], if it exists.
+  Docs docs(Procedure procedure) {
+    if (procedure.docs == null) {
+      throw SchemeException(
+          "No documentation for ${procedure.name} exists", false);
     }
-    return proc.docs;
+    return procedure.docs;
   }
 }
