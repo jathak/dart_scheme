@@ -14,9 +14,12 @@ const List<SchemeSymbol> noIndentForms = [
   SchemeSymbol("define-macro")
 ];
 
+const List<String> autcompleteList = ["cons", "car", "cdr", "define"];
+
 class CodeInput {
   Element element;
-  Element autoBox;
+  //Create an element that contains possible autcomplete options
+  Element _autoBox;
   bool _active = true;
   final List<StreamSubscription> _subs = [];
 
@@ -27,12 +30,14 @@ class CodeInput {
     element = SpanElement()
       ..classes = ['code-input']
       ..contentEditable = 'true';
-    autoBox = DivElement()..classes = ["autoBox"];
+    _autoBox = DivElement()
+      ..classes = ["autoBox"]
+      ..style.visibility = "hidden";
     _subs.add(element.onKeyPress.listen(_onInputKeyPress));
     _subs.add(element.onKeyDown.listen(_keyListener));
     _subs.add(element.onKeyUp.listen(_keyListener));
     log.append(element);
-    log.append(autoBox);
+    log.append(_autoBox);
     element.focus();
     parenListener ??= (_) => null;
     parenListener(missingParens);
@@ -52,7 +57,7 @@ class CodeInput {
   void deactivate() {
     _active = false;
     element.contentEditable = 'false';
-    autoBox.remove();
+    _autoBox.remove();
     for (var sub in _subs) {
       sub.cancel();
     }
@@ -149,8 +154,35 @@ class CodeInput {
     return strIndex + 2;
   }
 
+  ///Find the list of words that contain the same prefix as currWord
+  List<String> _wordMatches(String currWord) {
+    List<String> matchingWords = [];
+    int currLength = currWord.length;
+    for (String schemeWord in autcompleteList) {
+      if (schemeWord.length >= currWord.length) {
+        if (schemeWord.substring(0, currLength) == currWord) {
+          matchingWords.add(schemeWord);
+        }
+      }
+    }
+    return matchingWords;
+  }
+
+  void _autocomplete() {
+    List<String> inputText = element.text.split(RegExp("[ \n()]+"));
+    String findMatch = inputText.last;
+    List<String> matchingWords =
+        findMatch.isNotEmpty ? _wordMatches(inputText.last) : [];
+    if (matchingWords.isEmpty) {
+      _autoBox.style.visibility = "hidden";
+    } else {
+      _autoBox.style.visibility = "visible";
+    }
+  }
+
   _keyListener(KeyboardEvent event) async {
     int key = event.keyCode;
+    _autocomplete();
     if (key == KeyCode.BACKSPACE) {
       await delay(0);
       parenListener(missingParens);
