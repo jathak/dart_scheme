@@ -16,6 +16,7 @@ const List<SchemeSymbol> noIndentForms = [
 
 class CodeInput {
   Element element;
+  Element autoBox;
   bool _active = true;
   final List<StreamSubscription> _subs = [];
 
@@ -26,10 +27,12 @@ class CodeInput {
     element = SpanElement()
       ..classes = ['code-input']
       ..contentEditable = 'true';
+    autoBox = DivElement()..classes = ["autoBox"];
     _subs.add(element.onKeyPress.listen(_onInputKeyPress));
     _subs.add(element.onKeyDown.listen(_keyListener));
     _subs.add(element.onKeyUp.listen(_keyListener));
     log.append(element);
+    log.append(autoBox);
     element.focus();
     parenListener ??= (_) => null;
     parenListener(missingParens);
@@ -49,6 +52,7 @@ class CodeInput {
   void deactivate() {
     _active = false;
     element.contentEditable = 'false';
+    autoBox.remove();
     for (var sub in _subs) {
       sub.cancel();
     }

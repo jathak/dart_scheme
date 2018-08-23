@@ -101,6 +101,11 @@ body {
   }
 }
 
+.autoBox {
+  height: 40px;
+  @include other-frame;
+}
+
 .code-input {
   display: inline-block;
 }
