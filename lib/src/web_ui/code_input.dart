@@ -168,14 +168,21 @@ class CodeInput {
     return matchingWords;
   }
 
+  ///Finds the last words
   void _autocomplete() {
     List<String> inputText = element.text.split(RegExp("[ \n()]+"));
     String findMatch = inputText.last;
     List<String> matchingWords =
-        findMatch.isNotEmpty ? _wordMatches(inputText.last) : [];
+        findMatch.isNotEmpty ? _wordMatches(findMatch) : [];
     if (matchingWords.isEmpty) {
+      _autoBox.text = "";
       _autoBox.style.visibility = "hidden";
     } else {
+      String autoText = "";
+      for (String match in matchingWords) {
+        autoText += "$match          ";
+      }
+      _autoBox.text = autoText;
       _autoBox.style.visibility = "visible";
     }
   }
