@@ -168,19 +168,28 @@ class CodeInput {
     return matchingWords;
   }
 
-  ///Finds the last words
+  ///Finds and displays the possible words that the user may be typing
   void _autocomplete() {
-    List<String> inputText = element.text.split(RegExp("[ \n()]+"));
-    String findMatch = inputText.last;
-    List<String> matchingWords =
-        findMatch.isNotEmpty ? _wordMatches(findMatch) : [];
+    int cursorPos = findPosition(element, window.getSelection().getRangeAt(0));
+    List<String> inputText =
+        element.text.substring(0, cursorPos).split(RegExp("[()]+"));
+    List<String> matchingWords = [];
+    //Find the last word that was being typed, ignoring any empty strings
+    for (String findMatch in inputText.reversed) {
+      if (findMatch.isNotEmpty) {
+        matchingWords = _wordMatches(findMatch);
+        break;
+      }
+    }
     if (matchingWords.isEmpty) {
+      //If there are no matching words, hide the autocomplete box
       _autoBox.text = "";
       _autoBox.style.visibility = "hidden";
     } else {
       String autoText = "";
+      //TODO: Improve the formatting here
       for (String match in matchingWords) {
-        autoText += "$match          ";
+        autoText += " $match         ";
       }
       _autoBox.text = autoText;
       _autoBox.style.visibility = "visible";
