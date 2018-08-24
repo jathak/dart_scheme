@@ -161,7 +161,8 @@ class CodeInput {
     for (String schemeWord in autcompleteList) {
       if (schemeWord.length >= currWord.length) {
         if (schemeWord.substring(0, currLength) == currWord) {
-          matchingWords.add(schemeWord);
+          matchingWords.add(
+              "<strong>${schemeWord.substring(0, currLength)}</strong>${schemeWord.substring(currLength)}");
         }
       }
     }
@@ -170,6 +171,7 @@ class CodeInput {
 
   ///Finds and displays the possible words that the user may be typing
   void _autocomplete() {
+    //Find the text to the left of where the typing cursor currently is
     int cursorPos = findPosition(element, window.getSelection().getRangeAt(0));
     List<String> inputText =
         element.text.substring(0, cursorPos).split(RegExp("[()]+"));
@@ -183,7 +185,7 @@ class CodeInput {
     }
     if (matchingWords.isEmpty) {
       //If there are no matching words, hide the autocomplete box
-      _autoBox.text = "";
+      _autoBox.innerHtml = "";
       _autoBox.style.visibility = "hidden";
     } else {
       String autoText = "";
@@ -191,7 +193,7 @@ class CodeInput {
       for (String match in matchingWords) {
         autoText += " $match         ";
       }
-      _autoBox.text = autoText;
+      _autoBox.innerHtml = autoText;
       _autoBox.style.visibility = "visible";
     }
   }
