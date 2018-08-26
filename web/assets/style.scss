@@ -101,8 +101,16 @@ body {
   }
 }
 
-.autoBox {
-  height: 40px;
+.autobox {
+  min-height: 40px;
+  width: 80ch;
+  padding: 5px;
+  @include other-frame;
+}
+
+.autobox-word {
+  margin: 10px;
+  display: inline-block;
   @include other-frame;
 }
 

@@ -30,7 +30,7 @@ class CodeInput {
       ..classes = ['code-input']
       ..contentEditable = 'true';
     _autoBox = DivElement()
-      ..classes = ["autoBox"]
+      ..classes = ["autobox"]
       ..style.visibility = "hidden";
     _subs.add(element.onKeyPress.listen(_onInputKeyPress));
     _subs.add(element.onKeyDown.listen(_keyListener));
@@ -187,12 +187,13 @@ class CodeInput {
       _autoBox.innerHtml = "";
       _autoBox.style.visibility = "hidden";
     } else {
-      String autoText = "";
-      //TODO: Improve the formatting here
+      _autoBox.children = [];
       for (String match in matchingWords) {
-        autoText += " $match         ";
+        _autoBox.append(SpanElement()
+          ..classes = ["autobox-word"]
+          ..innerHtml = match);
       }
-      _autoBox.innerHtml = autoText;
+      // _autoBox.innerHtml = autoText;
       _autoBox.style.visibility = "visible";
     }
   }
