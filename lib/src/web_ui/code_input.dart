@@ -164,6 +164,9 @@ class CodeInput {
         if (schemeWord.substring(0, currLength) == currWord) {
           matchingWords.add(schemeWord);
         }
+      } else if (currWord.endsWith(" ") &&
+          schemeWord == currWord.substring(0, currWord.length - 1)) {
+        matchingWords.add(schemeWord);
       }
     }
     return matchingWords;
@@ -176,14 +179,12 @@ class CodeInput {
     List<String> inputText =
         element.text.substring(0, cursorPos).split(RegExp("[(]+"));
     List<String> matchingWords = [];
-    //Find the last word that was being typed, ignoring any empty strings
+    //Find the last word that was being typed
     int currLength = 0;
-    for (String findMatch in inputText.reversed) {
-      if (findMatch.isNotEmpty) {
-        matchingWords = _wordMatches(findMatch);
-        currLength = findMatch.length;
-        break;
-      }
+    String findMatch = inputText.last;
+    if (findMatch.isNotEmpty && inputText.length > 1) {
+      matchingWords = _wordMatches(findMatch);
+      currLength = findMatch.length;
     }
     //Clear whatever is currently in the box
     _autoBox.children = [];
