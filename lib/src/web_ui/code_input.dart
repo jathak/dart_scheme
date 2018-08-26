@@ -4,6 +4,7 @@ import 'dart:async';
 import 'dart:html';
 
 import 'package:cs61a_scheme/cs61a_scheme.dart';
+import 'package:cs61a_scheme/cs61a_scheme_web.dart';
 
 import 'highlight.dart';
 
@@ -161,8 +162,7 @@ class CodeInput {
     for (String schemeWord in wordToDocs.keys) {
       if (schemeWord.length >= currWord.length) {
         if (schemeWord.substring(0, currLength) == currWord) {
-          matchingWords.add(
-              "<strong>${schemeWord.substring(0, currLength)}</strong>${schemeWord.substring(currLength)}");
+          matchingWords.add(schemeWord);
         }
       }
     }
@@ -177,23 +177,33 @@ class CodeInput {
         element.text.substring(0, cursorPos).split(RegExp("[(]+"));
     List<String> matchingWords = [];
     //Find the last word that was being typed, ignoring any empty strings
+    int currLength = 0;
     for (String findMatch in inputText.reversed) {
       if (findMatch.isNotEmpty) {
         matchingWords = _wordMatches(findMatch);
+        currLength = findMatch.length;
         break;
       }
     }
+    //Clear whatever is currently in the box
+    _autoBox.children = [];
+    _autoBox.classes = ["autobox"];
     if (matchingWords.isEmpty) {
       //If there are no matching words, hide the autocomplete box
-      _autoBox.innerHtml = "";
       _autoBox.style.visibility = "hidden";
+    } else if (matchingWords.length == 1) {
+      //If there is only one matching word, display the docs for that word
+      render(wordToDocs[matchingWords.first], _autoBox);
+      _autoBox.style.visibility = "hidden";
+      _autoBox.children.last.style.visibility = "visible";
     } else {
       //Add each matching word as its own element for formatting purposes
-      _autoBox.children = [];
       for (String match in matchingWords) {
         _autoBox.append(SpanElement()
           ..classes = ["autobox-word"]
-          ..innerHtml = match);
+          //Bold the matching characters
+          ..innerHtml =
+              "<strong>${match.substring(0, currLength)}</strong>${match.substring(currLength)}");
       }
       _autoBox.style.visibility = "visible";
     }

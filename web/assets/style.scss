@@ -102,9 +102,11 @@ body {
 }
 
 .autobox {
-  min-height: 40px;
-  width: 80ch;
+  min-height: 80px;
+  width: 72ch;
   padding: 5px;
+  margin: 0.5em;
+  border-radius: 0.185em;
   @include other-frame;
 }
 
