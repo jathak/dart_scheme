@@ -18,14 +18,14 @@ class CodeInput {
   Element element;
   //Create an element that contains possible autcomplete options
   Element _autoBox;
-  Frame env;
+  Map<String, Docs> wordToDocs;
   bool _active = true;
   final List<StreamSubscription> _subs = [];
 
   Function(String code) runCode;
   Function(int parens) parenListener;
 
-  CodeInput(Element log, this.runCode, this.env, {this.parenListener}) {
+  CodeInput(Element log, this.runCode, Frame env, {this.parenListener}) {
     element = SpanElement()
       ..classes = ['code-input']
       ..contentEditable = 'true';
@@ -40,6 +40,7 @@ class CodeInput {
     element.focus();
     parenListener ??= (_) => null;
     parenListener(missingParens);
+    wordToDocs = allDocumentedForms(env);
   }
 
   String get text => element.text;
@@ -157,7 +158,7 @@ class CodeInput {
   List<String> _wordMatches(String currWord) {
     List<String> matchingWords = [];
     int currLength = currWord.length;
-    for (String schemeWord in allDocumentedForms(env).keys) {
+    for (String schemeWord in wordToDocs.keys) {
       if (schemeWord.length >= currWord.length) {
         if (schemeWord.substring(0, currLength) == currWord) {
           matchingWords.add(
@@ -187,13 +188,13 @@ class CodeInput {
       _autoBox.innerHtml = "";
       _autoBox.style.visibility = "hidden";
     } else {
+      //Add each matching word as its own element for formatting purposes
       _autoBox.children = [];
       for (String match in matchingWords) {
         _autoBox.append(SpanElement()
           ..classes = ["autobox-word"]
           ..innerHtml = match);
       }
-      // _autoBox.innerHtml = autoText;
       _autoBox.style.visibility = "visible";
     }
   }
