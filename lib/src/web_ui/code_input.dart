@@ -14,19 +14,18 @@ const List<SchemeSymbol> noIndentForms = [
   SchemeSymbol("define-macro")
 ];
 
-const List<String> autcompleteList = ["cons", "car", "cdr", "define"];
-
 class CodeInput {
   Element element;
   //Create an element that contains possible autcomplete options
   Element _autoBox;
+  Frame env;
   bool _active = true;
   final List<StreamSubscription> _subs = [];
 
   Function(String code) runCode;
   Function(int parens) parenListener;
 
-  CodeInput(Element log, this.runCode, {this.parenListener}) {
+  CodeInput(Element log, this.runCode, this.env, {this.parenListener}) {
     element = SpanElement()
       ..classes = ['code-input']
       ..contentEditable = 'true';
@@ -158,7 +157,7 @@ class CodeInput {
   List<String> _wordMatches(String currWord) {
     List<String> matchingWords = [];
     int currLength = currWord.length;
-    for (String schemeWord in autcompleteList) {
+    for (String schemeWord in allDocumentedForms(env).keys) {
       if (schemeWord.length >= currWord.length) {
         if (schemeWord.substring(0, currLength) == currWord) {
           matchingWords.add(
@@ -174,7 +173,7 @@ class CodeInput {
     //Find the text to the left of where the typing cursor currently is
     int cursorPos = findPosition(element, window.getSelection().getRangeAt(0));
     List<String> inputText =
-        element.text.substring(0, cursorPos).split(RegExp("[()]+"));
+        element.text.substring(0, cursorPos).split(RegExp("[(]+"));
     List<String> matchingWords = [];
     //Find the last word that was being typed, ignoring any empty strings
     for (String findMatch in inputText.reversed) {
