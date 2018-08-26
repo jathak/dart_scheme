@@ -99,3 +99,18 @@ int countParens(String text) {
 
 Future delay(int milliseconds) =>
     Future.delayed(Duration(milliseconds: milliseconds));
+
+Map<String, Docs> allDocumentedForms(Frame env) {
+  var forms = <String, Docs>{};
+  for (var value in env.bindings.values) {
+    if (value is Procedure && value.docs != null) {
+      forms[value.name.value] = value.docs;
+    }
+  }
+  for (var special in env.interpreter.specialForms.keys) {
+    if (miscDocumentation.containsKey(special.value)) {
+      forms[special.value] = miscDocumentation[special.value];
+    }
+  }
+  return forms;
+}
