@@ -1,6 +1,5 @@
 library cs61a_scheme.core.expressions;
 
-import 'dart:collection' show IterableMixin, IterableBase;
 import 'dart:convert' show json;
 
 import 'package:quiver/core.dart';
@@ -11,6 +10,7 @@ import 'serialization.dart';
 import 'utils.dart';
 import 'values.dart';
 import 'widgets.dart';
+import 'wrappers.dart';
 
 /// Base class for all Scheme values that can be evaluated.
 abstract class Expression extends Value {
@@ -91,44 +91,12 @@ class SchemeString extends Expression implements Serializable<SchemeString> {
   SchemeString deserialize(Map data) => SchemeString(data['value']);
 }
 
-class _SchemeListIterator extends Iterator<Value> {
-  Value current;
-  Pair pair;
-  _SchemeListIterator(this.pair) {
-    if (!pair.wellFormed) throw TypeError();
-  }
-  bool moveNext() {
-    if (pair != null) {
-      current = pair.first;
-      pair = pair.second is Pair ? pair.second : null;
-      return true;
-    }
-    return false;
-  }
-}
-
-class _NilIterator extends Iterator<Value> {
-  get current => null;
-  moveNext() => false;
-}
-
 /// Implemented by both [Pair] and the empty list, [nil].
 ///
 /// Since many pieces of the interpreter take in expressions that could either
 /// be a pair or the empty list, we need some way to define the type. Since Dart
 /// doesn't have union types, we instead use this interface.
-///
-/// Iterating over this class will fail if [wellFormed] is false.
-abstract class PairOrEmpty extends Expression implements Iterable<Value> {
-  /// Creates a Scheme list from the given Dart iterable.
-  factory PairOrEmpty.fromIterable(Iterable<Value> iterable) {
-    PairOrEmpty result = nil;
-    for (Value item in iterable.toList().reversed) {
-      result = Pair(item, result);
-    }
-    return result;
-  }
-
+abstract class PairOrEmpty extends Expression {
   /// Returns true iff this is a well-formed Scheme list.
   bool get wellFormed;
 
@@ -140,11 +108,7 @@ abstract class PairOrEmpty extends Expression implements Iterable<Value> {
 }
 
 /// Singleton class for the empty Scheme list, [nil].
-///
-/// This can't use [IterableMixin] because we need it to have a constant
-/// constructor, so we have to implement all the [Iterable] methods ourselves.
-class _EmptyList extends IterableBase<Value>
-    implements Expression, PairOrEmpty {
+class _EmptyList extends Expression implements PairOrEmpty {
   const _EmptyList();
   bool get inlineInDiagram => true;
   bool get wellFormed => true;
@@ -152,16 +116,9 @@ class _EmptyList extends IterableBase<Value>
   bool isWellFormedList() => true;
   bool get isNil => true;
   toString() => "()";
-  get iterator => _NilIterator();
+  Value evaluate(Frame env) => this;
 
   num get lengthOrCycle => 0;
-
-  get display => toString();
-  draw(DiagramInterface diagram) => TextWidget('()');
-  Value evaluate(Frame env) => this;
-  get isTruthy => true;
-  get pair => this as Pair;
-  toJS() => this;
 }
 
 /// The empty Scheme list.
@@ -174,7 +131,6 @@ const nil = _EmptyList();
 ///
 /// [first] is the `car`. [second] is the `cdr`.
 class Pair<A extends Value, B extends Value> extends Expression
-    with IterableMixin<Value>
     implements PairOrEmpty {
   A first;
   B second;
@@ -205,7 +161,7 @@ class Pair<A extends Value, B extends Value> extends Expression
     return length + (fast is Pair ? 1 : 0);
   }
 
-  Iterator<Value> get iterator => _SchemeListIterator(this);
+  Iterator<Value> get iterator => SchemeList(this).iterator;
 
   Value evaluate(Frame env) => evalCallExpression(this, env);
 
@@ -249,7 +205,7 @@ class Pair<A extends Value, B extends Value> extends Expression
     for (Value arg in args.take(args.length - 1)) {
       if (arg.isNil) continue;
       if (arg is Pair && arg.wellFormed) {
-        lst.addAll(arg);
+        lst.addAll(SchemeList(arg));
       } else {
         throw SchemeException("Argument is not a well-formed list.");
       }
@@ -257,7 +213,7 @@ class Pair<A extends Value, B extends Value> extends Expression
     PairOrEmpty result = nil;
     Value lastArg = args.last;
     if (lastArg is PairOrEmpty && lastArg.wellFormed) {
-      lst.addAll(lastArg);
+      lst.addAll(SchemeList(lastArg));
     } else {
       result = lastArg;
     }

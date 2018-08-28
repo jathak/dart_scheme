@@ -11,7 +11,8 @@ class OperandBuiltinProcedure extends BuiltinProcedure {
       : super.variable(name, fn, minArgs, maxArgs);
 
   @override
-  Value call(PairOrEmpty operands, Frame env) => apply(operands, env);
+  Value call(SchemeList<Expression> operands, Frame env) =>
+      apply(operands, env);
 }
 
 addOperandBuiltin(Frame env, SchemeSymbol name, SchemeBuiltin fn, int args,

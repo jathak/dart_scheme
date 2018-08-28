@@ -10,6 +10,7 @@ import 'logging.dart';
 import 'procedures.dart' show Procedure;
 import 'utils.dart' show schemeApply;
 import 'values.dart';
+import 'wrappers.dart';
 
 class Direction extends Value {
   final String _id;
@@ -98,7 +99,7 @@ class MarkdownWidget extends TextWidget {
     if (env == null) return;
     var proc = env.lookup(SchemeSymbol.runtime(name));
     if (proc is Procedure) {
-      schemeApply(proc, nil, env);
+      schemeApply(proc, SchemeList(nil), env);
     }
   }
 }

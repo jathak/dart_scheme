@@ -11,7 +11,7 @@ abstract class _$ExtraLibraryMixin {
   Diagram draw(Value value);
   Diagram diagram(Frame env);
   Visualization visualize(List<Expression> code, Frame env);
-  PairOrEmpty bindings(Frame env);
+  SchemeList bindings(Frame env);
   void triggerEvent(List<Value> args, Frame env);
   SchemeEventListener listenFor(SchemeSymbol id, Procedure onEvent, Frame env);
   void cancelListener(SchemeEventListener listener, Frame env);
@@ -59,7 +59,7 @@ abstract class _$ExtraLibraryMixin {
         docs: Docs.variable(
             "visualize", "Visualizes the execution of a piece of code.\n"));
     addBuiltin(__env, const SchemeSymbol("bindings"), (__exprs, __env) {
-      return this.bindings(__env);
+      return (this.bindings(__env)).list;
     }, 0,
         docs: Docs(
             "bindings",

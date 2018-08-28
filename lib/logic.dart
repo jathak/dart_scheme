@@ -195,7 +195,8 @@ class _LogicRun {
     if (depth > depthLimit) return;
     Pair clause = clauses.first;
     if (clause.first == not) {
-      var grounded = ground(clause.second, env).pair.map((expr) => expr.pair);
+      var grounded = SchemeList.fromValue(ground(clause.second, env))
+          .map((expr) => expr.pair);
       if (search(grounded, env, depth).isEmpty) {
         var envHead = LogicEnv(env);
         yield* search(clauses.skip(1), envHead, depth + 1);

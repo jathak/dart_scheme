@@ -9,7 +9,7 @@ class JsProcedure extends Procedure {
   final SchemeSymbol name = null;
   final JsFunction fn;
   JsProcedure(this.fn);
-  Expression apply(PairOrEmpty args, Frame env) {
+  Expression apply(SchemeList args, Frame env) {
     var result = fn.apply(args.map((arg) => arg.toJS()).toList());
     return jsToScheme(result);
   }
@@ -80,11 +80,11 @@ class SchemeFunction {
   Procedure procedure;
   Frame env;
   SchemeFunction(this.procedure, this.env);
-  call() => schemeApply(procedure, nil, null).toJS();
+  call() => schemeApply(procedure, SchemeList(nil), null).toJS();
   noSuchMethod(Invocation invocation) {
     if (invocation.memberName == const Symbol("call")) {
       var args = invocation.positionalArguments.map(jsToScheme);
-      return schemeApply(procedure, PairOrEmpty.fromIterable(args), env).toJS();
+      return schemeApply(procedure, SchemeList.fromIterable(args), env).toJS();
     }
     throw SchemeException(
         "Something has gone horribly wrong with wrapped procedures");

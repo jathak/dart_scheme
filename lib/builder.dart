@@ -143,6 +143,8 @@ class BuiltinStub {
       var type = variableType;
       if (typeChecks.containsKey(type)) {
         type = typeChecks[type];
+      } else if (type.startsWith('SchemeList')) {
+        type = 'PairOrEmpty';
       }
       if (type != 'Value') checks.add("__exprs.any((x) => x is! $type)");
     } else {
@@ -150,6 +152,8 @@ class BuiltinStub {
         var type = paramTypes[i];
         if (typeChecks.containsKey(type)) {
           type = typeChecks[type];
+        } else if (type.startsWith('SchemeList')) {
+          type = 'PairOrEmpty';
         }
         if (type != 'Value') checks.add("__exprs[$i] is! $type");
       }
@@ -202,12 +206,18 @@ class BuiltinStub {
         param = '($param as SchemeString).value';
         break;
     }
+    if (type.startsWith('SchemeList')) {
+      param = '$type($param)';
+    }
     return param;
   }
 
   String _wrapReturn(String call) {
     if (returnConversions.containsKey(returnType)) {
       return '${returnConversions[returnType]}($call)';
+    }
+    if (returnType.startsWith('SchemeList')) {
+      return '($call).list';
     }
     return call;
   }

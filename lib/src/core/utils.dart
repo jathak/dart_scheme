@@ -9,19 +9,17 @@ import 'logging.dart';
 import 'procedures.dart';
 import 'reader.dart';
 import 'values.dart';
+import 'wrappers.dart';
 
-void checkForm(Expression expressions, int min, [int max = -1]) {
-  if (expressions is PairOrEmpty && expressions.wellFormed) {
-    int length = expressions.length;
-    if (length < min) {
-      throw SchemeException("$expressions must contain at least $min items.");
-    }
-    if (max > -1 && length > max) {
-      throw SchemeException("$expressions may contain at most $max items.");
-    }
-    return;
+void checkForm(SchemeList expressions, int min, [int max = -1]) {
+  int length = expressions.length;
+  if (length < min) {
+    throw SchemeException("$expressions must contain at least $min items.");
   }
-  throw SchemeException("$expressions is not a valid list.");
+  if (max > -1 && length > max) {
+    throw SchemeException("$expressions may contain at most $max items.");
+  }
+  return;
 }
 
 void checkFormals(Expression formals) {
@@ -51,7 +49,7 @@ Value schemeEval(Expression expr, Frame env) {
   }
 }
 
-Value schemeApply(Procedure procedure, PairOrEmpty args, Frame env) =>
+Value schemeApply(Procedure procedure, SchemeList args, Frame env) =>
     completeEval(procedure.apply(args, env));
 
 Value evalCallExpression(Pair expr, Frame env) {
@@ -62,7 +60,8 @@ Value evalCallExpression(Pair expr, Frame env) {
   Expression rest = expr.second;
   if (first is SchemeSymbol &&
       env.interpreter.specialForms.containsKey(first)) {
-    var result = env.interpreter.specialForms[first](rest, env);
+    var result =
+        env.interpreter.specialForms[first](SchemeList<Expression>(rest), env);
     env.interpreter.triggerEvent(first, [rest], env);
     return result;
   }

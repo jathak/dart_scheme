@@ -4,6 +4,7 @@ import 'expressions.dart';
 import 'interpreter.dart';
 import 'logging.dart';
 import 'values.dart';
+import 'wrappers.dart';
 
 /// A Scheme environment.
 ///
@@ -74,6 +75,6 @@ class Frame {
   }
 
   /// Creates a frame with this as its parent and all [formals] bound to [vals].
-  Frame makeChildFrame(Expression formals, Value vals) =>
+  Frame makeChildFrame(Expression formals, SchemeList vals) =>
       interpreter.impl.makeChildOf(formals, vals, this);
 }

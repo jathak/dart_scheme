@@ -6,6 +6,7 @@ import 'expressions.dart';
 import 'frame.dart';
 import 'procedures.dart';
 import 'values.dart';
+import 'wrappers.dart';
 
 /// Interface for the Scheme project implementation.
 ///
@@ -36,77 +37,81 @@ abstract class ProjectInterface {
   Value lookupInFrame(SchemeSymbol symbol, Frame env);
 
   /// Analagous to BuiltinProcedure.apply in Problem 4
-  Value builtinApply(BuiltinProcedure procedure, PairOrEmpty args, Frame env);
+  Value builtinApply(BuiltinProcedure procedure, SchemeList args, Frame env);
 
   /// Analagous to part of scheme_eval implemented in Problem 5
   Value evalProcedureCall(Expression first, Expression rest, Frame env);
 
   /// Analagous to Procedure.eval_call in Problem 5
-  Value procedureCall(Procedure procedure, PairOrEmpty operands, Frame env);
+  Value procedureCall(
+      Procedure procedure, SchemeList<Expression> operands, Frame env);
 
   /// Analagous to do_define_form in Problems 6 and 10
-  Value doDefineForm(PairOrEmpty expressions, Frame env);
+  Value doDefineForm(SchemeList<Expression> expressions, Frame env);
 
   /// Analagous to do_quote_form in Problem 7
-  Value doQuoteForm(PairOrEmpty expressions, Frame env);
+  Value doQuoteForm(SchemeList<Expression> expressions, Frame env);
 
   /// Analagous to eval_all in Problem 8
-  Value evalAll(PairOrEmpty expressions, Frame env);
+  Value evalAll(SchemeList<Expression> expressions, Frame env);
 
   /// Analagous to do_lambda_form in Problem 9
-  LambdaProcedure doLambdaForm(PairOrEmpty expressions, Frame env);
+  LambdaProcedure doLambdaForm(SchemeList<Expression> expressions, Frame env);
 
   /// Analagous to Frame.make_child_frame in Problem 11
-  Frame makeChildOf(Expression formals, Expression vals, Frame parent);
+  Frame makeChildOf(Expression formals, SchemeList vals, Frame parent);
 
   /// Analagous to LambdaProcedure.make_call_frame in Problem 12
-  Frame makeLambdaFrame(LambdaProcedure procedure, PairOrEmpty args, Frame env);
+  Frame makeLambdaFrame(LambdaProcedure procedure, SchemeList args, Frame env);
 
   /// Analagous to do_and_form and do_or_form in Problem 13
-  Value doAndForm(PairOrEmpty expressions, Frame env);
-  Value doOrForm(PairOrEmpty expressions, Frame env);
+  Value doAndForm(SchemeList<Expression> expressions, Frame env);
+  Value doOrForm(SchemeList<Expression> expressions, Frame env);
 
   /// Analagous to part of do_cond_form in Problem 14
-  Value evalCondResult(PairOrEmpty clause, Frame env, Expression test);
+  Value evalCondResult(
+      SchemeList<Expression> clause, Frame env, Expression test);
 
   /// Analagous to make_let_frame in Problem 15
-  Frame makeLetFrame(PairOrEmpty bindings, Frame env);
+  Frame makeLetFrame(SchemeList<Expression> bindings, Frame env);
 
   /// Analagous to MuProcedure.make_call_frame in Problem 16
-  Frame makeMuFrame(MuProcedure procedure, PairOrEmpty args, Frame env);
+  Frame makeMuFrame(MuProcedure procedure, SchemeList args, Frame env);
 
   /// Analagous to do_mu_form in Problem 16
-  MuProcedure doMuForm(PairOrEmpty expressions, Frame env);
+  MuProcedure doMuForm(SchemeList<Expression> expressions, Frame env);
 
   /// Analagous to do_if_form, but with some changes from the spec
-  Value doIfForm(PairOrEmpty expressions, Frame env);
+  Value doIfForm(SchemeList<Expression> expressions, Frame env);
 
   /// Analagous to scheme_optimized_eval with tail=True in Problem 20 (EC)
   Value tailEval(Expression expression, Frame env);
 
   /// Analagous to MacroProcedure.eval_call in Problem 21 (EC)
-  Value macroCall(MacroProcedure procedure, PairOrEmpty operands, Frame env);
+  Value macroCall(
+      MacroProcedure procedure, SchemeList<Expression> operands, Frame env);
 
   /// Analagous to do_define_macro in Problem 21
-  Value doDefineMacro(PairOrEmpty expressions, Frame env);
+  Value doDefineMacro(SchemeList<Expression> expressions, Frame env);
 
   /// Async version of doDefineForm
-  Future<Value> asyncDefineForm(PairOrEmpty expressions, Frame env);
+  Future<Value> asyncDefineForm(SchemeList<Expression> expressions, Frame env);
 
   /// Async version of doAndForm
-  Future<Value> asyncAndForm(PairOrEmpty expressions, Frame env);
+  Future<Value> asyncAndForm(SchemeList<Expression> expressions, Frame env);
 
   /// Async version of doOrForm
-  Future<Value> asyncOrForm(PairOrEmpty expressions, Frame env);
+  Future<Value> asyncOrForm(SchemeList<Expression> expressions, Frame env);
 
   /// Async version of evalCondResult
-  Future<Value> asyncCondResult(PairOrEmpty clause, Frame env, Expression test);
+  Future<Value> asyncCondResult(
+      SchemeList<Expression> clause, Frame env, Expression test);
 
   /// Async version of evalAll
-  Future<Value> asyncEvalAll(PairOrEmpty expressions, Frame env);
+  Future<Value> asyncEvalAll(SchemeList<Expression> expressions, Frame env);
 
   /// Async version of makeLetFrame
-  Future<Frame> asyncLetFrame(PairOrEmpty bindings, Frame env);
+  Future<Frame> asyncLetFrame(SchemeList<Expression> bindings, Frame env);
 
   /// Async version of evalProcedureCall
   Future<Value> asyncEvalProcedureCall(
@@ -114,13 +119,13 @@ abstract class ProjectInterface {
 
   /// Async version of procedureCall
   Future<Value> asyncProcedureCall(
-      Procedure procedure, PairOrEmpty operands, Frame env);
+      Procedure procedure, SchemeList<Expression> operands, Frame env);
 
   /// Implements define-async. Similar to a regular procedure define.
-  Value doDefineAsync(PairOrEmpty expressions, Frame env);
+  Value doDefineAsync(SchemeList<Expression> expressions, Frame env);
 
   /// Implements lambda-async. Similar to a regular lambda.
-  LambdaProcedure doAsyncLambda(PairOrEmpty expressions, Frame env);
+  LambdaProcedure doAsyncLambda(SchemeList<Expression> expressions, Frame env);
 }
 
 /// Use this as a mixin when not implementing tail call optimization
@@ -133,39 +138,40 @@ abstract class UnimplementedTailCalls {
 
 /// Use this as a mixin when not implementing macros
 abstract class UnimplementedMacros {
-  Value macroCall(MacroProcedure procedure, PairOrEmpty operands, Frame env) {
+  Value macroCall(
+      MacroProcedure procedure, SchemeList<Expression> operands, Frame env) {
     throw UnimplementedError("Macros not supported");
   }
 
-  Value doDefineMacro(PairOrEmpty expressions, Frame env) {
+  Value doDefineMacro(SchemeList<Expression> expressions, Frame env) {
     throw UnimplementedError("Macros not supported");
   }
 }
 
 /// Use this as a mixin when not implementing the async-await.
 abstract class UnimplementedAsync {
-  Future<Value> asyncDefineForm(PairOrEmpty expressions, Frame env) {
+  Future<Value> asyncDefineForm(SchemeList<Expression> expressions, Frame env) {
     throw UnimplementedError("Async/await not supported");
   }
 
-  Future<Value> asyncAndForm(PairOrEmpty expressions, Frame env) {
+  Future<Value> asyncAndForm(SchemeList<Expression> expressions, Frame env) {
     throw UnimplementedError("Async/await not supported");
   }
 
-  Future<Value> asyncOrForm(PairOrEmpty expressions, Frame env) {
+  Future<Value> asyncOrForm(SchemeList<Expression> expressions, Frame env) {
     throw UnimplementedError("Async/await not supported");
   }
 
   Future<Value> asyncCondResult(
-      PairOrEmpty clause, Frame env, Expression test) {
+      SchemeList<Expression> clause, Frame env, Expression test) {
     throw UnimplementedError("Async/await not supported");
   }
 
-  Future<Value> asyncEvalAll(PairOrEmpty expressions, Frame env) {
+  Future<Value> asyncEvalAll(SchemeList<Expression> expressions, Frame env) {
     throw UnimplementedError("Async/await not supported");
   }
 
-  Future<Frame> asyncLetFrame(PairOrEmpty bindings, Frame env) {
+  Future<Frame> asyncLetFrame(SchemeList<Expression> bindings, Frame env) {
     throw UnimplementedError("Async/await not supported");
   }
 
@@ -175,15 +181,15 @@ abstract class UnimplementedAsync {
   }
 
   Future<Value> asyncProcedureCall(
-      Procedure procedure, PairOrEmpty operands, Frame env) {
+      Procedure procedure, SchemeList<Expression> operands, Frame env) {
     throw UnimplementedError("Async/await not supported");
   }
 
-  Value doDefineAsync(PairOrEmpty expressions, Frame env) {
+  Value doDefineAsync(SchemeList<Expression> expressions, Frame env) {
     throw UnimplementedError("Async/await not supported");
   }
 
-  LambdaProcedure doAsyncLambda(PairOrEmpty expressions, Frame env) {
+  LambdaProcedure doAsyncLambda(SchemeList<Expression> expressions, Frame env) {
     throw UnimplementedError("Async/await not supported");
   }
 }

@@ -41,7 +41,7 @@ class ExtraLibrary extends SchemeLibrary with _$ExtraLibraryMixin {
         const SchemeSymbol("async:resolve"), resolver, 1);
     var reject =
         BuiltinProcedure.fixed(const SchemeSymbol("async:reject"), rejecter, 1);
-    var operands = PairOrEmpty.fromIterable([resolve, reject]);
+    var operands = SchemeList.fromIterable([resolve, reject]);
     Future.microtask(() => completeEval(proc.apply(operands, env)));
     return completer.future;
   }
@@ -49,7 +49,8 @@ class ExtraLibrary extends SchemeLibrary with _$ExtraLibraryMixin {
   @SchemeSymbol("run-after")
   Future<Value> runAfter(Number millis, Procedure proc, Frame env) {
     var duration = Duration(milliseconds: millis.toJS());
-    return Future.delayed(duration, () => completeEval(proc.apply(nil, env)));
+    return Future.delayed(
+        duration, () => completeEval(proc.apply(SchemeList(nil), env)));
   }
 
   @SchemeSymbol("completed?")
@@ -68,8 +69,7 @@ class ExtraLibrary extends SchemeLibrary with _$ExtraLibraryMixin {
       Visualization(code, env);
 
   /// Returns a list of all bindings in the current environment.
-  PairOrEmpty bindings(Frame env) =>
-      PairOrEmpty.fromIterable(env.bindings.keys);
+  SchemeList bindings(Frame env) => SchemeList.fromIterable(env.bindings.keys);
 
   /// Triggers an event with a given name (first arg) and arguments.
   @SchemeSymbol('trigger-event')
@@ -86,13 +86,13 @@ class ExtraLibrary extends SchemeLibrary with _$ExtraLibraryMixin {
   SchemeEventListener listenFor(SchemeSymbol id, Procedure onEvent, Frame env) {
     var callback = (exprs, env) {
       try {
-        schemeApply(onEvent, PairOrEmpty.fromIterable(exprs), env);
+        schemeApply(onEvent, SchemeList.fromIterable(exprs), env);
         // ignore: avoid_catches_without_on_clauses
       } catch (e) {
         if (e is SchemeException) {
           e.addCall(onEvent);
-          var eventPair = Pair(id, PairOrEmpty.fromIterable(exprs));
-          e.addCall(TextMessage('<event $eventPair>'));
+          var eventList = SchemeList.fromIterable([id] + exprs);
+          e.addCall(TextMessage('<event $eventList>'));
         }
         env.interpreter.logError(e);
       }

@@ -5,7 +5,7 @@ part of cs61a_scheme.core.standard_library;
 // ignore_for_file: prefer_expression_function_bodies
 // ignore_for_file: unnecessary_lambdas
 abstract class _$StandardLibraryMixin {
-  Value apply(Procedure procedure, PairOrEmpty args, Frame env);
+  Value apply(Procedure procedure, SchemeList args, Frame env);
   void display(Value message, Frame env);
   void error(Value message);
   void errorNoTrace(Value message);
@@ -29,10 +29,10 @@ abstract class _$StandardLibraryMixin {
   Value cdr(Pair val);
   Pair cons(Value car, Value cdr);
   num length(PairOrEmpty lst);
-  PairOrEmpty list(List<Value> args);
-  PairOrEmpty map(Procedure fn, PairOrEmpty lst, Frame env);
-  PairOrEmpty filter(Procedure pred, PairOrEmpty lst, Frame env);
-  Expression reduce(Procedure combiner, PairOrEmpty lst, Frame env);
+  SchemeList list(List<Value> args);
+  SchemeList map(Procedure fn, SchemeList lst, Frame env);
+  SchemeList filter(Procedure pred, SchemeList lst, Frame env);
+  Value reduce(Procedure combiner, SchemeList lst, Frame env);
   Number add(List<Number> nums);
   Number sub(List<Number> nums);
   Number mul(List<Number> nums);
@@ -62,7 +62,7 @@ abstract class _$StandardLibraryMixin {
     addBuiltin(__env, const SchemeSymbol("apply"), (__exprs, __env) {
       if (__exprs[0] is! Procedure || __exprs[1] is! PairOrEmpty)
         throw SchemeException('Argument of invalid type passed to apply.');
-      return this.apply(__exprs[0], __exprs[1], __env);
+      return this.apply(__exprs[0], SchemeList(__exprs[1]), __env);
     }, 2,
         docs: Docs("apply", "Applies [procedure] to the given [args]\n",
             [Param("procedure", "procedure"), Param(null, "args")],
@@ -216,7 +216,7 @@ abstract class _$StandardLibraryMixin {
             [Param(null, "lst")],
             returnType: "num"));
     addVariableBuiltin(__env, const SchemeSymbol("list"), (__exprs, __env) {
-      return this.list(__exprs);
+      return (this.list(__exprs)).list;
     }, 0,
         maxArgs: -1,
         docs: Docs.variable(
@@ -224,7 +224,7 @@ abstract class _$StandardLibraryMixin {
     addBuiltin(__env, const SchemeSymbol("map"), (__exprs, __env) {
       if (__exprs[0] is! Procedure || __exprs[1] is! PairOrEmpty)
         throw SchemeException('Argument of invalid type passed to map.');
-      return this.map(__exprs[0], __exprs[1], __env);
+      return (this.map(__exprs[0], SchemeList(__exprs[1]), __env)).list;
     }, 2,
         docs: Docs(
             "map",
@@ -233,7 +233,7 @@ abstract class _$StandardLibraryMixin {
     addBuiltin(__env, const SchemeSymbol("filter"), (__exprs, __env) {
       if (__exprs[0] is! Procedure || __exprs[1] is! PairOrEmpty)
         throw SchemeException('Argument of invalid type passed to filter.');
-      return this.filter(__exprs[0], __exprs[1], __env);
+      return (this.filter(__exprs[0], SchemeList(__exprs[1]), __env)).list;
     }, 2,
         docs: Docs(
             "filter",
@@ -242,13 +242,13 @@ abstract class _$StandardLibraryMixin {
     addBuiltin(__env, const SchemeSymbol("reduce"), (__exprs, __env) {
       if (__exprs[0] is! Procedure || __exprs[1] is! PairOrEmpty)
         throw SchemeException('Argument of invalid type passed to reduce.');
-      return this.reduce(__exprs[0], __exprs[1], __env);
+      return this.reduce(__exprs[0], SchemeList(__exprs[1]), __env);
     }, 2,
         docs: Docs(
             "reduce",
             "Reduces [lst] into a single expression by combining items with [combiner].\n",
             [Param("procedure", "combiner"), Param(null, "lst")],
-            returnType: "expression"));
+            returnType: "value"));
     addVariableBuiltin(__env, const SchemeSymbol("+"), (__exprs, __env) {
       if (__exprs.any((x) => x is! Number))
         throw SchemeException('Argument of invalid type passed to +.');

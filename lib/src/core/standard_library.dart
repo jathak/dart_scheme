@@ -11,6 +11,7 @@ import 'procedures.dart';
 import 'scheme_library.dart';
 import 'utils.dart';
 import 'values.dart';
+import 'wrappers.dart';
 
 part 'standard_library.g.dart';
 
@@ -20,7 +21,7 @@ part 'standard_library.g.dart';
 @schemelib
 class StandardLibrary extends SchemeLibrary with _$StandardLibraryMixin {
   /// Applies [procedure] to the given [args]
-  Value apply(Procedure procedure, PairOrEmpty args, Frame env) =>
+  Value apply(Procedure procedure, SchemeList args, Frame env) =>
       schemeApply(procedure, args, env);
 
   /// Displays [message] without a line break at the end
@@ -118,21 +119,21 @@ class StandardLibrary extends SchemeLibrary with _$StandardLibraryMixin {
   num length(PairOrEmpty lst) => lst.lengthOrCycle;
 
   /// Constructs a list from zero or more arguments.
-  PairOrEmpty list(List<Value> args) => PairOrEmpty.fromIterable(args);
+  SchemeList list(List<Value> args) => SchemeList.fromIterable(args);
 
   /// Constructs a new list from calling [fn] on each item in [lst].
-  PairOrEmpty map(Procedure fn, PairOrEmpty lst, Frame env) =>
-      PairOrEmpty.fromIterable(
-          lst.map((item) => completeEval(fn.apply(Pair(item, nil), env))));
+  SchemeList map(Procedure fn, SchemeList lst, Frame env) =>
+      SchemeList.fromIterable(lst.map(
+          (item) => completeEval(fn.apply(SchemeList(Pair(item, nil)), env))));
 
   /// Constructs a new list of all items in [lst] that return true when passed
   /// to [pred].
-  PairOrEmpty filter(Procedure pred, PairOrEmpty lst, Frame env) =>
-      PairOrEmpty.fromIterable(lst.where(
-          (item) => completeEval(pred.apply(Pair(item, nil), env)).isTruthy));
+  SchemeList filter(Procedure pred, SchemeList lst, Frame env) =>
+      SchemeList.fromIterable(lst.where((item) =>
+          completeEval(pred.apply(SchemeList(Pair(item, nil)), env)).isTruthy));
 
   /// Reduces [lst] into a single expression by combining items with [combiner].
-  Expression reduce(Procedure combiner, PairOrEmpty lst, Frame env) =>
+  Value reduce(Procedure combiner, SchemeList lst, Frame env) =>
       lst.reduce((a, b) => combiner.apply(list([a, b]), env));
 
   /// Adds 0 or more numbers together.
