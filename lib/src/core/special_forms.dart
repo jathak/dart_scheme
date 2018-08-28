@@ -1,23 +1,25 @@
 library cs61a_scheme.core.special_forms;
 
 import 'expressions.dart';
+import 'frame.dart';
 import 'logging.dart';
 import 'procedures.dart';
 import 'utils.dart' show checkForm, schemeEval;
+import 'values.dart';
 
-typedef SpecialForm = Expression Function(PairOrEmpty expressions, Frame env);
+typedef SpecialForm = Value Function(PairOrEmpty expressions, Frame env);
 
-Expression doDefineForm(PairOrEmpty expressions, Frame env) =>
+Value doDefineForm(PairOrEmpty expressions, Frame env) =>
     env.interpreter.impl.doDefineForm(expressions, env);
 
-Expression doIfForm(PairOrEmpty expressions, Frame env) =>
+Value doIfForm(PairOrEmpty expressions, Frame env) =>
     env.interpreter.impl.doIfForm(expressions, env);
 
-Expression doCondForm(PairOrEmpty expressions, Frame env) {
+Value doCondForm(PairOrEmpty expressions, Frame env) {
   while (!expressions.isNil) {
     Expression clause = expressions.pair.first;
     checkForm(clause, 1);
-    Expression test;
+    Value test;
     if (clause.pair.first == const SchemeSymbol('else')) {
       test = schemeTrue;
     } else {
@@ -31,24 +33,24 @@ Expression doCondForm(PairOrEmpty expressions, Frame env) {
   return undefined;
 }
 
-Expression doAndForm(PairOrEmpty expressions, Frame env) =>
+Value doAndForm(PairOrEmpty expressions, Frame env) =>
     env.interpreter.impl.doAndForm(expressions, env);
 
-Expression doOrForm(PairOrEmpty expressions, Frame env) =>
+Value doOrForm(PairOrEmpty expressions, Frame env) =>
     env.interpreter.impl.doOrForm(expressions, env);
 
-Expression doLetForm(PairOrEmpty expressions, Frame env) {
+Value doLetForm(PairOrEmpty expressions, Frame env) {
   checkForm(expressions, 2);
   Expression bindings = expressions.pair.first;
   Expression body = expressions.pair.second;
   Frame letEnv = env.interpreter.impl.makeLetFrame(bindings, env);
   env.interpreter.triggerEvent(const SchemeSymbol('new-frame'), [], letEnv);
-  Expression result = env.interpreter.impl.evalAll(body, letEnv);
+  Value result = env.interpreter.impl.evalAll(body, letEnv);
   env.interpreter.triggerEvent(const SchemeSymbol('return'), [result], letEnv);
   return result;
 }
 
-Expression doBeginForm(PairOrEmpty expressions, Frame env) {
+Value doBeginForm(PairOrEmpty expressions, Frame env) {
   checkForm(expressions, 1);
   return env.interpreter.impl.evalAll(expressions, env);
 }
@@ -67,16 +69,16 @@ Promise doDelayForm(PairOrEmpty expressions, Frame env) {
   return Promise(expressions.pair.first, env);
 }
 
-Pair<Expression, Promise> doConsStreamForm(PairOrEmpty expressions, Frame env) {
+Pair<Value, Promise> doConsStreamForm(PairOrEmpty expressions, Frame env) {
   checkForm(expressions, 2, 2);
   Promise promise = doDelayForm(expressions.pair.second, env);
   return Pair(schemeEval(expressions.pair.first, env), promise);
 }
 
-Expression doDefineMacroForm(PairOrEmpty expressions, Frame env) =>
+Value doDefineMacroForm(PairOrEmpty expressions, Frame env) =>
     env.interpreter.impl.doDefineMacro(expressions, env);
 
-Expression doSetForm(PairOrEmpty expressions, Frame env) {
+Undefined doSetForm(PairOrEmpty expressions, Frame env) {
   checkForm(expressions, 2, 2);
   Expression name = expressions.first;
   if (name is! SchemeSymbol) throw SchemeException("$name is not a symbol");

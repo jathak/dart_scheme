@@ -12,7 +12,9 @@ abstract class _$LogicLibraryMixin {
   void importAll(Frame __env) {
     addVariableOperandBuiltin(__env, const SchemeSymbol('fact'),
         (__exprs, __env) {
-      this.fact(__exprs);
+      if (__exprs.any((x) => x is! Expression))
+        throw SchemeException('Argument of invalid type passed to fact.');
+      this.fact(__exprs.cast<Expression>());
       return undefined;
     }, 0,
         maxArgs: -1,
@@ -23,7 +25,9 @@ abstract class _$LogicLibraryMixin {
     __env.hidden[const SchemeSymbol('!')] = true;
     addVariableOperandBuiltin(__env, const SchemeSymbol('query'),
         (__exprs, __env) {
-      this.query(__exprs, __env);
+      if (__exprs.any((x) => x is! Expression))
+        throw SchemeException('Argument of invalid type passed to query.');
+      this.query(__exprs.cast<Expression>(), __env);
       return undefined;
     }, 0,
         maxArgs: -1,
@@ -34,7 +38,9 @@ abstract class _$LogicLibraryMixin {
     __env.hidden[const SchemeSymbol('?')] = true;
     addVariableOperandBuiltin(__env, const SchemeSymbol('query-one'),
         (__exprs, __env) {
-      this.queryOne(__exprs, __env);
+      if (__exprs.any((x) => x is! Expression))
+        throw SchemeException('Argument of invalid type passed to query-one.');
+      this.queryOne(__exprs.cast<Expression>(), __env);
       return undefined;
     }, 0,
         maxArgs: -1,

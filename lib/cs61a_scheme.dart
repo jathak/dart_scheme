@@ -8,6 +8,7 @@ library cs61a_scheme.core;
 
 export 'src/core/documentation.dart';
 export 'src/core/expressions.dart';
+export 'src/core/frame.dart';
 export 'src/core/interpreter.dart';
 export 'src/core/logging.dart';
 export 'src/core/numbers.dart';
@@ -18,4 +19,5 @@ export 'src/core/scheme_library.dart';
 export 'src/core/serialization.dart';
 export 'src/core/standard_library.dart';
 export 'src/core/utils.dart';
+export 'src/core/values.dart';
 export 'src/core/widgets.dart';

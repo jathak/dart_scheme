@@ -101,7 +101,7 @@ class Repl {
     var tokens = tokenizeLines(code.split("\n")).toList();
     var loggingArea = activeLoggingArea;
     while (tokens.isNotEmpty) {
-      Expression result;
+      Value result;
       try {
         Expression expr = schemeRead(tokens, interpreter.impl);
         result = schemeEval(expr, interpreter.globalEnv);
@@ -188,8 +188,8 @@ class Repl {
     }
   }
 
-  logInto(Element element, Expression logging, [bool newline = true]) {
-    if (logging is AsyncExpression) {
+  logInto(Element element, Value logging, [bool newline = true]) {
+    if (logging is AsyncValue) {
       var box = SpanElement()
         ..text = '$logging\n'
         ..classes = ['repl-async'];

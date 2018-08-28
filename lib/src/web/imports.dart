@@ -5,7 +5,7 @@ import 'dart:html' as html;
 
 import 'package:cs61a_scheme/cs61a_scheme_extra.dart';
 
-class ImportedLibrary extends SelfEvaluating {
+class ImportedLibrary extends Value {
   Frame env;
   String code;
 
@@ -17,8 +17,8 @@ class ImportedLibrary extends SelfEvaluating {
     List<Expression> tokens = tokenizeLines(code.split('\n')).toList();
     while (tokens.isNotEmpty) {
       Expression expr = schemeRead(tokens, env.interpreter.impl);
-      Expression result = schemeEval(expr, env);
-      if (result is AsyncExpression) {
+      Value result = schemeEval(expr, env);
+      if (result is AsyncValue) {
         await result.future;
       }
     }

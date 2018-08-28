@@ -22,7 +22,7 @@ class WebLibrary extends SchemeLibrary with _$WebLibraryMixin {
 
   WebLibrary(this.jsPlumb, this.css, this.styleElement) {
     Undefined.jsUndefined = context['undefined'];
-    AsyncExpression.makePromise = (expr) => JsObject(context['Promise'], [
+    AsyncValue.makePromise = (expr) => JsObject(context['Promise'], [
           (resolve, reject) {
             expr.future.then((result) => resolve.apply([result.toJS()]),
                 onError: (error) =>
@@ -41,7 +41,7 @@ class WebLibrary extends SchemeLibrary with _$WebLibraryMixin {
   /// Evaluates a piece of JavaScript code and returns the result.
   ///
   /// Compatible types will automatically be converted between the languages.
-  Expression js(List<Expression> exprs) {
+  Value js(List<Value> exprs) {
     String code = exprs.map((e) => e.display).join("");
     return jsEval(code);
   }
@@ -50,11 +50,11 @@ class WebLibrary extends SchemeLibrary with _$WebLibraryMixin {
   ///
   /// In a browser, this is the window object.
   @SchemeSymbol("js-context")
-  JsExpression jsContext() => JsExpression(context);
+  JsValue jsContext() => JsValue(context);
 
   /// Sets [property] of [obj] to be [value].
   @SchemeSymbol("js-set!")
-  Expression jsSet(JsExpression obj, Expression property, Expression value) {
+  Value jsSet(JsValue obj, Value property, Value value) {
     if (property is! SchemeSymbol && property is! SchemeString) {
       throw SchemeException("JS property name must be a string or symbol");
     }
@@ -64,7 +64,7 @@ class WebLibrary extends SchemeLibrary with _$WebLibraryMixin {
 
   /// Returns [property] of [obj].
   @SchemeSymbol("js-ref")
-  Expression jsRef(JsExpression obj, Expression property) {
+  Value jsRef(JsValue obj, Value property) {
     if (property is! SchemeSymbol && property is! SchemeString) {
       throw SchemeException("JS property name must be a string or symbol");
     }
@@ -74,35 +74,35 @@ class WebLibrary extends SchemeLibrary with _$WebLibraryMixin {
   /// Calls a method (second arg) on a JS object (first arg) with some args.
   @SchemeSymbol("js-call")
   @MinArgs(2)
-  Expression jsCall(List<Expression> expressions) {
-    Expression obj = expressions.removeAt(0);
-    Expression method = expressions.removeAt(0);
-    if (obj is! JsExpression) throw Exception("$obj is not a JS object");
+  Value jsCall(List<Value> vals) {
+    Expression obj = vals.removeAt(0);
+    Expression method = vals.removeAt(0);
+    if (obj is! JsValue) throw Exception("$obj is not a JS object");
     if (method is! SchemeSymbol && method is! SchemeString) {
       throw SchemeException("JS method name must be a string or symbol");
     }
-    JsObject jsObj = (obj as JsExpression).obj;
-    var args = expressions.map((e) => e.toJS()).toList();
+    JsObject jsObj = (obj as JsValue).obj;
+    var args = vals.map((e) => e.toJS()).toList();
     return jsToScheme(jsObj.callMethod(method.toString(), args));
   }
 
   /// Constructs a new JS object of a type (first arg) with some arguments.
   @SchemeSymbol("js-object")
-  Expression jsObject(List<Expression> expressions) {
-    if (expressions[0] is! SchemeSymbol && expressions[0] is! SchemeString) {
+  Value jsObject(List<Value> vals) {
+    if (vals[0] is! SchemeSymbol && vals[0] is! SchemeString) {
       throw SchemeException("JS constructor name must be a string or symbol");
     }
-    var args = expressions.skip(1).map((e) => e.toJS()).toList();
-    return jsToScheme(JsObject(context[expressions.first.display], args));
+    var args = vals.skip(1).map((e) => e.toJS()).toList();
+    return jsToScheme(JsObject(context[vals.first.display], args));
   }
 
-  /// Returns true if [expression] is a JS object.
+  /// Returns true if [value] is a JS object.
   @SchemeSymbol("js-object?")
-  bool isJsObject(Expression expression) => expression is JsExpression;
+  bool isJsObject(Value value) => value is JsValue;
 
-  /// Returns true if [expression] is a JS function.
+  /// Returns true if [value] is a JS function.
   @SchemeSymbol("js-procedure?")
-  bool isJsProcedure(Expression expression) => expression is JsProcedure;
+  bool isJsProcedure(Value value) => value is JsProcedure;
 
   /// Constructs a color from values [r], [g], and [b].
   Color rgb(int r, int g, int b) => Color(r, g, b);
@@ -119,7 +119,7 @@ class WebLibrary extends SchemeLibrary with _$WebLibraryMixin {
 
   /// For [theme], sets the color for [property] to be [color].
   @SchemeSymbol('theme-set-color!')
-  void themeSetColor(Theme theme, SchemeSymbol property, Expression color) {
+  void themeSetColor(Theme theme, SchemeSymbol property, Value color) {
     theme.colors[property] = Color.fromAnything(color);
   }
 
@@ -137,7 +137,7 @@ class WebLibrary extends SchemeLibrary with _$WebLibraryMixin {
   ///
   /// Remaining args should be symbols in the library to be bound directly.
   @SchemeSymbol('import')
-  Future<Expression> schemeImport(List<Expression> args, Frame env) async {
+  Future<Value> schemeImport(List<Value> args, Frame env) async {
     if (args[0] is! SchemeSymbol && args[0] is! SchemeString) {
       throw SchemeException("${args[0]} is not a string or symbol");
     }
@@ -155,7 +155,7 @@ class WebLibrary extends SchemeLibrary with _$WebLibraryMixin {
 
   /// Imports a library at [id] directly into the current environment.
   @SchemeSymbol('import-inline')
-  Future<Expression> schemeImportInline(Expression id, Frame env) async {
+  Future<Value> schemeImportInline(Value id, Frame env) async {
     if (id is! SchemeSymbol && id is! SchemeString) {
       throw SchemeException("$id is not a string or symbol");
     }
@@ -165,13 +165,13 @@ class WebLibrary extends SchemeLibrary with _$WebLibraryMixin {
 
   /// References an [id] bound within [imported].
   @SchemeSymbol('lib-ref')
-  Expression libraryReference(ImportedLibrary imported, SchemeSymbol id) =>
+  Value libraryReference(ImportedLibrary imported, SchemeSymbol id) =>
       imported.reference(id);
 
   /// Loads and applies a [theme].
-  Future<Expression> theme(SchemeSymbol theme, Frame env) async {
+  Future<Value> theme(SchemeSymbol theme, Frame env) async {
     ImportedLibrary lib = await import('scm/theme/$theme', [], env);
-    Expression myTheme = lib.reference(const SchemeSymbol('imported-theme'));
+    Value myTheme = lib.reference(const SchemeSymbol('imported-theme'));
     if (myTheme is! Theme) throw SchemeException("No theme exists");
     applyThemeBuiltin(myTheme);
     return undefined;

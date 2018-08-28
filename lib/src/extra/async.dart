@@ -4,11 +4,11 @@ import 'dart:async';
 
 import 'package:cs61a_scheme/cs61a_scheme.dart';
 
-class AsyncExpression<T extends Expression> extends Expression {
-  AsyncExpression(Future<T> future) {
+class AsyncValue<T extends Value> extends Value {
+  AsyncValue(Future<T> future) {
     _future = future.then((e) async {
-      while (e is AsyncExpression) {
-        e = await (e as AsyncExpression).future;
+      while (e is AsyncValue) {
+        e = await (e as AsyncValue).future;
       }
       _result = e;
       _complete = true;
@@ -24,17 +24,11 @@ class AsyncExpression<T extends Expression> extends Expression {
   T get result => _result;
   Object jsPromise;
 
-  Expression evaluate(Frame env) {
-    if (complete) return result;
-    return this;
-  }
-
-  AsyncExpression chain(Expression Function(T) fn) =>
-      AsyncExpression(_future.then(fn));
+  AsyncValue chain(Expression Function(T) fn) => AsyncValue(_future.then(fn));
 
   toString() => complete ? "#[async:$result]" : "#[async]";
-  toJS() => jsPromise ?? AsyncExpression.makePromise(this);
-  static dynamic Function(AsyncExpression) makePromise = (expr) {
+  toJS() => jsPromise ?? AsyncValue.makePromise(this);
+  static dynamic Function(AsyncValue) makePromise = (expr) {
     throw UnimplementedError(
         "JS interop must be loaded for AsyncExpression.toJS() to work.");
   };
@@ -47,15 +41,15 @@ class AsyncExpression<T extends Expression> extends Expression {
 class AsyncLambdaProcedure extends LambdaProcedure {
   AsyncLambdaProcedure(formals, body, env) : super(formals, body, env);
 
-  AsyncExpression apply(PairOrEmpty arguments, Frame env) {
+  AsyncValue apply(PairOrEmpty arguments, Frame env) {
     Frame frame = makeCallFrame(arguments, env);
-    FutureOr<Expression> expr = env.interpreter.impl.asyncEvalAll(body, frame);
-    if (expr is Expression) return expr;
-    return AsyncExpression(expr);
+    FutureOr<Value> value = env.interpreter.impl.asyncEvalAll(body, frame);
+    if (value is Value) return value;
+    return AsyncValue(value);
   }
 }
 
-class SchemeEventListener extends SelfEvaluating {
+class SchemeEventListener extends Value {
   final SchemeSymbol id;
   final SchemeBuiltin callback;
   SchemeEventListener(this.id, this.callback);
@@ -73,18 +67,18 @@ Expression doDefineAsync(PairOrEmpty expressions, Frame env) =>
 LambdaProcedure doAsyncLambda(PairOrEmpty expressions, Frame env) =>
     env.interpreter.impl.doAsyncLambda(expressions, env);
 
-typedef AsyncSpecialForm = Future<Expression> Function(
+typedef AsyncSpecialForm = Future<Value> Function(
     PairOrEmpty expressions, Frame env);
 
-FutureOr<Expression> asyncEval(Expression exprs, Frame env) {
+FutureOr<Value> asyncEval(Expression exprs, Frame env) {
   if (exprs is Pair) {
     Expression first = exprs.first, rest = exprs.second;
     if (first == const SchemeSymbol("await")) {
       checkForm(rest, 1, 1);
-      FutureOr<Expression> result = asyncEval(rest.pair.first, env);
-      if (result is AsyncExpression) {
+      FutureOr<Value> result = asyncEval(rest.pair.first, env);
+      if (result is AsyncValue) {
         return result.future;
-      } else if (result is Future<AsyncExpression>) {
+      } else if (result is Future<AsyncValue>) {
         return result.then((expr) => expr.future);
       } else {
         return result;
@@ -116,10 +110,10 @@ Map<SchemeSymbol, AsyncSpecialForm> asyncSpecialForms = {
   const SchemeSymbol('unquote-splicing') : asyncUnquoteSplicingForm*/
 };
 
-Future<Expression> asyncDefineForm(PairOrEmpty expressions, Frame env) =>
+Future<Value> asyncDefineForm(PairOrEmpty expressions, Frame env) =>
     env.interpreter.impl.asyncDefineForm(expressions, env);
 
-Future<Expression> asyncIfForm(PairOrEmpty expressions, Frame env) async {
+Future<Value> asyncIfForm(PairOrEmpty expressions, Frame env) async {
   checkForm(expressions, 2, 3);
   Expression predicate = expressions.first;
   if ((await asyncEval(predicate, env)).isTruthy) {
@@ -132,11 +126,11 @@ Future<Expression> asyncIfForm(PairOrEmpty expressions, Frame env) async {
   return undefined;
 }
 
-Future<Expression> asyncCondForm(PairOrEmpty expressions, Frame env) async {
+Future<Value> asyncCondForm(PairOrEmpty expressions, Frame env) async {
   while (!expressions.isNil) {
     Expression clause = expressions.pair.first;
     checkForm(clause, 1);
-    Expression test;
+    Value test;
     if ((clause.pair.first as SchemeSymbol).value == 'else') {
       test = schemeTrue;
     } else {
@@ -150,13 +144,13 @@ Future<Expression> asyncCondForm(PairOrEmpty expressions, Frame env) async {
   return undefined;
 }
 
-Future<Expression> asyncAndForm(PairOrEmpty expressions, Frame env) =>
+Future<Value> asyncAndForm(PairOrEmpty expressions, Frame env) =>
     env.interpreter.impl.asyncAndForm(expressions, env);
 
-Future<Expression> asyncOrForm(PairOrEmpty expressions, Frame env) =>
+Future<Value> asyncOrForm(PairOrEmpty expressions, Frame env) =>
     env.interpreter.impl.asyncOrForm(expressions, env);
 
-Future<Expression> asyncLetForm(PairOrEmpty expressions, Frame env) async {
+Future<Value> asyncLetForm(PairOrEmpty expressions, Frame env) async {
   checkForm(expressions, 2);
   Expression bindings = expressions.pair.first;
   Expression body = expressions.pair.second;
@@ -164,12 +158,12 @@ Future<Expression> asyncLetForm(PairOrEmpty expressions, Frame env) async {
   return await env.interpreter.impl.asyncEvalAll(body, letEnv);
 }
 
-Future<Expression> asyncBeginForm(PairOrEmpty expressions, Frame env) async {
+Future<Value> asyncBeginForm(PairOrEmpty expressions, Frame env) async {
   checkForm(expressions, 1);
   return await env.interpreter.impl.asyncEvalAll(expressions, env);
 }
 
-Future<Pair<Expression, Promise>> asyncConsStreamForm(
+Future<Pair<Value, Promise>> asyncConsStreamForm(
     PairOrEmpty expressions, Frame env) async {
   checkForm(expressions, 2, 2);
   checkForm(expressions.pair.second, 1, 1);

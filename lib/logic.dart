@@ -15,7 +15,7 @@ class LogicException extends SchemeException {
 
 int _globalCounter = 0;
 
-class Variable extends SelfEvaluating {
+class Variable extends Value {
   final String value;
   int tag;
   Variable(this.value);
@@ -28,7 +28,7 @@ class Variable extends SelfEvaluating {
   }
 
   /// Finds all variables in a given input
-  static Iterable<Variable> findIn(Expression input) sync* {
+  static Iterable<Variable> findIn(Value input) sync* {
     if (input is Query) {
       for (Pair relation in input.clauses) {
         yield* findIn(relation);
@@ -51,7 +51,7 @@ class Variable extends SelfEvaluating {
   int get hashCode => hash2(value, tag);
 
   /// Converts so all symbols starting with '?' are converted to variables
-  static Expression convert(Expression expr, [int tag]) {
+  static Value convert(Value expr, [int tag]) {
     if (expr is Pair) {
       return Pair(convert(expr.first, tag), convert(expr.second, tag));
     } else if (expr is SchemeSymbol && expr.value.startsWith('?')) {
@@ -69,7 +69,7 @@ class Variable extends SelfEvaluating {
   String toProlog() => 'V_' + value.replaceAll('-', '_');
 }
 
-class _Negation extends SelfEvaluating {
+class _Negation extends Value {
   const _Negation();
 
   toString() => 'not';
@@ -77,7 +77,7 @@ class _Negation extends SelfEvaluating {
 
 const not = _Negation();
 
-class Fact extends SelfEvaluating {
+class Fact extends Value {
   final Pair conclusion;
   final Iterable<Pair> hypotheses;
 
@@ -105,7 +105,7 @@ class Fact extends SelfEvaluating {
     return '${_exprToProlog(p.first)}(${_exprToProlog(p.second)})';
   }
 
-  static String _exprToProlog(Expression expr, [bool inPair = false]) {
+  static String _exprToProlog(Value expr, [bool inPair = false]) {
     if (expr is Pair) {
       var first = _exprToProlog(expr.first);
       var second = _exprToProlog(expr.second, true);
@@ -128,7 +128,7 @@ class Fact extends SelfEvaluating {
   }
 }
 
-class Query extends SelfEvaluating {
+class Query extends Value {
   final Iterable<Pair> clauses;
 
   factory Query(Iterable<Expression> clauses) =>
@@ -137,23 +137,23 @@ class Query extends SelfEvaluating {
   Query._(this.clauses);
 }
 
-class Solution extends SelfEvaluating {
-  final Map<Variable, Expression> assignments = {};
+class Solution extends Value {
+  final Map<Variable, Value> assignments = {};
 
   toString() =>
       assignments.keys.map((v) => '${v.value}: ${assignments[v]}').join('\t');
 }
 
-class LogicEnv extends SelfEvaluating {
+class LogicEnv extends Value {
   final Solution partial = Solution();
   final LogicEnv parent;
 
   LogicEnv(this.parent);
 
-  Expression lookup(Variable variable) =>
+  Value lookup(Variable variable) =>
       partial.assignments[variable] ?? parent?.lookup(variable);
 
-  Expression completeLookup(Expression expr) {
+  Value completeLookup(Value expr) {
     if (expr is Variable) {
       var result = lookup(expr);
       if (result == null) return expr;
@@ -213,21 +213,21 @@ class _LogicRun {
     }
   }
 
-  Expression ground(Expression expr, LogicEnv env) {
-    if (expr is Variable) {
-      var resolved = env.lookup(expr);
-      if (resolved == null || expr == resolved) {
-        return expr;
+  Value ground(Value value, LogicEnv env) {
+    if (value is Variable) {
+      var resolved = env.lookup(value);
+      if (resolved == null || value == resolved) {
+        return value;
       }
       return ground(resolved, env);
     }
-    if (expr is Pair) {
-      return Pair(ground(expr.first, env), ground(expr.second, env));
+    if (value is Pair) {
+      return Pair(ground(value.first, env), ground(value.second, env));
     }
-    return expr;
+    return value;
   }
 
-  unify(Expression a, Expression b, LogicEnv env) {
+  unify(Value a, Value b, LogicEnv env) {
     a = env.completeLookup(a);
     b = env.completeLookup(b);
     if (a == b) {

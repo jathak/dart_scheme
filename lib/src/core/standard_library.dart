@@ -4,11 +4,13 @@ import 'dart:math' show pow;
 
 import 'documentation.dart';
 import 'expressions.dart';
+import 'frame.dart';
 import 'logging.dart';
 import 'numbers.dart';
 import 'procedures.dart';
 import 'scheme_library.dart';
 import 'utils.dart';
+import 'values.dart';
 
 part 'standard_library.g.dart';
 
@@ -18,34 +20,34 @@ part 'standard_library.g.dart';
 @schemelib
 class StandardLibrary extends SchemeLibrary with _$StandardLibraryMixin {
   /// Applies [procedure] to the given [args]
-  Expression apply(Procedure procedure, PairOrEmpty args, Frame env) =>
+  Value apply(Procedure procedure, PairOrEmpty args, Frame env) =>
       schemeApply(procedure, args, env);
 
   /// Displays [message] without a line break at the end
-  void display(Expression message, Frame env) {
+  void display(Value message, Frame env) {
     env.interpreter.logger(DisplayOutput(message), false);
   }
 
   /// Raises an error with the given [message].
-  Expression error(Expression message) {
+  void error(Value message) {
     throw SchemeException(message.toString(), true, message);
   }
 
   /// Raises an error with the given [message] and no traceback.
   @SchemeSymbol('error-notrace')
-  Expression errorNoTrace(Expression message) {
+  void errorNoTrace(Value message) {
     throw SchemeException(message.toString(), false, message);
   }
 
   /// Evaluates [expr] in the current environment
-  Expression eval(Expression expr, Frame env) => schemeEval(expr, env);
+  Value eval(Expression expr, Frame env) => schemeEval(expr, env);
 
   /// Exits the interpreter (behavior may vary)
-  Expression exit() {
+  void exit() {
     throw const ExitException();
   }
 
-  Expression load(Expression file, Frame env) {
+  void load(Value file, Frame env) {
     throw UnimplementedError("load has not yet been implemented");
   }
 
@@ -55,68 +57,68 @@ class StandardLibrary extends SchemeLibrary with _$StandardLibraryMixin {
   }
 
   /// Logs [message] to the interpreter.
-  void print(Expression message, Frame env) {
+  void print(Value message, Frame env) {
     env.interpreter.logger(message, true);
   }
 
   /// Returns true if [val] is an atomic expression.
   @SchemeSymbol("atom?")
-  bool isAtom(Expression val) =>
+  bool isAtom(Value val) =>
       val is Boolean || val is Number || val is SchemeSymbol || val.isNil;
 
   /// Returns true if [val] is an integer.
   @SchemeSymbol("integer?")
-  bool isInteger(Expression val) => val is Integer;
+  bool isInteger(Value val) => val is Integer;
 
   /// Returns true if [val] is a well-formed list.
   @SchemeSymbol("list?")
-  bool isList(Expression val) => val is PairOrEmpty && val.wellFormed;
+  bool isList(Value val) => val is PairOrEmpty && val.wellFormed;
 
   /// Returns true if [val] is an number.
   @SchemeSymbol("number?")
-  bool isNumber(Expression val) => val is Number;
+  bool isNumber(Value val) => val is Number;
 
   /// Returns true if [val] is the empty list.
   @SchemeSymbol("null?")
-  bool isNull(Expression val) => val.isNil;
+  bool isNull(Value val) => val.isNil;
 
   /// Returns true if [val] is a pair.
   @SchemeSymbol("pair?")
-  bool isPair(Expression val) => val is Pair;
+  bool isPair(Value val) => val is Pair;
 
   /// Returns true if [val] is a procedure.
   @SchemeSymbol("procedure?")
-  bool isProcedure(Expression val) => val is Procedure;
+  bool isProcedure(Value val) => val is Procedure;
 
   /// Returns true if [val] is a promise.
   @SchemeSymbol("promise?")
-  bool isPromise(Expression val) => val is Promise;
+  bool isPromise(Value val) => val is Promise;
 
   /// Returns true if [val] is a string.
   @SchemeSymbol("string?")
-  bool isString(Expression val) => val is SchemeString;
+  bool isString(Value val) => val is SchemeString;
 
   /// Returns true if [val] is a symbol.
   @SchemeSymbol("symbol?")
-  bool isSymbol(Expression val) => val is SchemeSymbol;
+  bool isSymbol(Value val) => val is SchemeSymbol;
 
   /// Appends zero or more lists together into a single list.
-  Expression append(List<Expression> args) => Pair.append(args);
+  Value append(List<Value> args) => Pair.append(args);
 
   /// Gets the first item in [val].
-  Expression car(Pair val) => val.first;
+  Value car(Pair val) => val.first;
 
   /// Gets the second item in [val] (typically the rest of a well-formed list).
-  Expression cdr(Pair val) => val.second;
+  Value cdr(Pair val) => val.second;
 
   /// Constructs a pair from values [car] and [cdr].
-  Pair cons(Expression car, Expression cdr) => Pair(car, cdr);
+  Pair cons(Value car, Value cdr) => Pair(car, cdr);
 
   /// Finds the length of a well-formed Scheme list.
   num length(PairOrEmpty lst) => lst.lengthOrCycle;
 
   /// Constructs a list from zero or more arguments.
-  PairOrEmpty list(List<Expression> args) => PairOrEmpty.fromIterable(args);
+  PairOrEmpty list(List<Value> args) => PairOrEmpty.fromIterable(args);
 
   /// Constructs a new list from calling [fn] on each item in [lst].
   PairOrEmpty map(Procedure fn, PairOrEmpty lst, Frame env) =>
@@ -135,33 +137,27 @@ class StandardLibrary extends SchemeLibrary with _$StandardLibraryMixin {
 
   /// Adds 0 or more numbers together.
   @SchemeSymbol("+")
-  Number add(List<Expression> args) =>
-      allNumbers(args).fold(Number.zero, (a, b) => a + b);
+  Number add(List<Number> nums) => nums.fold(Number.zero, (a, b) => a + b);
 
   /// If called with one number, negates it.
   /// Otherwise, subtracts the sum of all remaining arguments from the first.
   @SchemeSymbol("-")
   @MinArgs(1)
-  Number sub(List<Expression> args) {
-    Iterable<Number> numbers = allNumbers(args);
-    if (numbers.length == 1) return -numbers.first;
-    return numbers.skip(1).fold(numbers.first, (a, b) => a - b);
-  }
+  Number sub(List<Number> nums) => nums.length == 1
+      ? -nums.first
+      : nums.skip(1).fold(nums.first, (a, b) => a - b);
 
   /// Multiples 0 or more numbers together.
   @SchemeSymbol("*")
-  Number mul(List<Expression> args) =>
-      allNumbers(args).fold(Number.one, (a, b) => a * b);
+  Number mul(List<Number> nums) => nums.fold(Number.one, (a, b) => a * b);
 
   /// If called with one number, finds its reciprocal.
   /// Otherwise, divides the first argument by the product of the rest.
   @SchemeSymbol("/")
   @MinArgs(1)
-  Number truediv(List<Expression> args) {
-    Iterable<Number> numbers = allNumbers(args);
-    if (numbers.length == 1) return Number.one / (numbers.first);
-    return numbers.skip(1).fold(numbers.first, (a, b) => a / b);
-  }
+  Number truediv(List<Number> nums) => nums.length == 1
+      ? Number.one / nums.first
+      : nums.skip(1).fold(nums.first, (a, b) => a / b);
 
   /// Finds the absolute value of [arg].
   Number abs(Number arg) => arg < Number.zero ? -arg : arg;
@@ -198,7 +194,7 @@ class StandardLibrary extends SchemeLibrary with _$StandardLibraryMixin {
   /// For the purposes of this procedure, equivalent numbers, symbols, and
   /// strings are considered the same object.
   @SchemeSymbol("eq?")
-  bool isEq(Expression x, Expression y) {
+  bool isEq(Value x, Value y) {
     if (x is Number && y is Number) return x == y;
     if (x is SchemeSymbol && y is SchemeSymbol) return x == y;
     if (x is SchemeString && y is SchemeString) return x == y;
@@ -207,11 +203,11 @@ class StandardLibrary extends SchemeLibrary with _$StandardLibraryMixin {
 
   /// Determines if [x] and [y] hold equivalent values.
   @SchemeSymbol("equal?")
-  bool isEqual(Expression x, Expression y) => x == y;
+  bool isEqual(Value x, Value y) => x == y;
 
   /// Negates the truthiness of [arg].
   @SchemeSymbol("not")
-  bool not(Expression arg) => !arg.isTruthy;
+  bool not(Value arg) => !arg.isTruthy;
 
   /// Compares [x] and [y] for equality.
   @SchemeSymbol("=")
@@ -257,20 +253,16 @@ class StandardLibrary extends SchemeLibrary with _$StandardLibraryMixin {
   /// Mutates the car of [pair] to be [val].
   @SchemeSymbol("set-car!")
   @TriggerEventAfter(const SchemeSymbol("pair-mutation"))
-  void setCar(Pair pair, Expression val) {
+  void setCar(Pair pair, Value val) {
     pair.first = val;
   }
 
   /// Mutates the cdr of [pair] to be [val].
   @SchemeSymbol("set-cdr!")
   @TriggerEventAfter(const SchemeSymbol("pair-mutation"))
-  void setCdr(Pair pair, Expression val) {
+  void setCdr(Pair pair, Value val) {
     pair.second = val;
   }
-
-  @SchemeSymbol("call/cc")
-  Expression callWithCurrentContinuation(Procedure procedure, Frame env) =>
-      env.interpreter.impl.callWithCurrentContinuation(procedure, env);
 
   @SchemeSymbol("runtime-type")
   String getRuntimeType(Expression expression) =>

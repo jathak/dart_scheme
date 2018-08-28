@@ -1,6 +1,7 @@
 library cs61a_scheme.core.scheme_library;
 
 import 'expressions.dart';
+import 'frame.dart';
 
 /// An interface for defining a collection of built-in Scheme procedures.
 ///

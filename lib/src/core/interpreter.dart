@@ -1,6 +1,7 @@
 library cs61a_scheme.core.interpreter;
 
 import 'expressions.dart';
+import 'frame.dart';
 import 'logging.dart';
 import 'procedures.dart';
 import 'project_interface.dart';
@@ -9,6 +10,7 @@ import 'scheme_library.dart';
 import 'special_forms.dart';
 import 'standard_library.dart';
 import 'utils.dart' show schemeEval;
+import 'values.dart';
 
 class Interpreter {
   final ProjectInterface impl;
@@ -37,7 +39,7 @@ class Interpreter {
 
   final Map<SchemeSymbol, List<SchemeBuiltin>> _eventListeners = {};
 
-  void triggerEvent(SchemeSymbol id, List<Expression> data, Frame env) {
+  void triggerEvent(SchemeSymbol id, List<Value> data, Frame env) {
     if (_eventListeners.containsKey(id)) {
       for (var blocker in _eventListeners[id]) {
         blocker(data.toList(), env);
@@ -69,7 +71,7 @@ class Interpreter {
     while (_tokens.isNotEmpty) {
       try {
         Expression expr = schemeRead(_tokens, impl);
-        Expression result = schemeEval(expr, globalEnv);
+        Value result = schemeEval(expr, globalEnv);
         if (!identical(result, undefined)) logger(result, true);
       } on SchemeException catch (e) {
         logger(e, true);

@@ -2,7 +2,7 @@ library cs61a_scheme.extra.theming;
 
 import 'package:cs61a_scheme/cs61a_scheme.dart';
 
-class Theme extends SelfEvaluating implements Serializable<Theme> {
+class Theme extends Value implements Serializable<Theme> {
   Map<SchemeSymbol, Color> colors = {};
   Map<SchemeSymbol, SchemeString> cssProps = {};
 
@@ -66,7 +66,7 @@ class Theme extends SelfEvaluating implements Serializable<Theme> {
   }
 }
 
-class Color extends SelfEvaluating implements Serializable<Color> {
+class Color extends Value implements Serializable<Color> {
   final int red, green, blue;
   final double alpha;
 

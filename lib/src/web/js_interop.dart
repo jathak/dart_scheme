@@ -17,9 +17,9 @@ class JsProcedure extends Procedure {
   toJS() => fn;
 }
 
-class JsExpression extends SelfEvaluating {
+class JsValue extends Value {
   final JsObject obj;
-  JsExpression(this.obj);
+  JsValue(this.obj);
   toString() {
     var objString = obj.toString();
     if (objString.length > 20) objString = objString.substring(0, 17) + "...";
@@ -29,9 +29,9 @@ class JsExpression extends SelfEvaluating {
   toJS() => obj;
 }
 
-class NativeExpression extends SelfEvaluating {
+class NativeValue extends Value {
   final Object obj;
-  NativeExpression(this.obj);
+  NativeValue(this.obj);
   toString() {
     var objString = obj.toString();
     if (objString.length > 20) objString = objString.substring(0, 17) + "...";
@@ -41,7 +41,7 @@ class NativeExpression extends SelfEvaluating {
   toJS() => obj;
 }
 
-Expression jsToScheme(obj) {
+Value jsToScheme(obj) {
   if (obj is Expression) return obj;
   if (obj is num) return Number.fromNum(obj);
   if (obj is bool) return obj ? schemeTrue : schemeFalse;
@@ -51,19 +51,19 @@ Expression jsToScheme(obj) {
   if (obj is JsObject) return jsObjectToScheme(obj);
   if (obj == null) return undefined;
   if (obj == context['undefined']) return undefined;
-  return NativeExpression(obj);
+  return NativeValue(obj);
 }
 
-Expression jsObjectToScheme(JsObject obj) {
+Value jsObjectToScheme(JsObject obj) {
   var type =
       context['Object']['prototype']['toString'].callMethod('call', [obj]);
   if (type == '[object Promise]') {
     var completer = Completer();
     obj.callMethod('then', [completer.complete, completer.completeError]);
     var future = completer.future.then(jsToScheme);
-    return AsyncExpression(future)..jsPromise = obj;
+    return AsyncValue(future)..jsPromise = obj;
   }
-  return JsExpression(obj);
+  return JsValue(obj);
 }
 
 Expression jsEval(String code) {
