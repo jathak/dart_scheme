@@ -127,7 +127,7 @@ class CodeInput {
     List output = ["", false];
     if (totalMissingCount != 0) {
       int strIndex = refLine.indexOf("(");
-      while (strIndex < (refLine.length - 1)) {
+      while (strIndex < refLine.length) {
         int nextClose = refLine.indexOf(")", strIndex + 1);
         int nextOpen = refLine.indexOf("(", strIndex + 1);
         // Find the open paren that corresponds to the missing closed paren
@@ -141,6 +141,8 @@ class CodeInput {
             if (symbol.length < currString.length) {
               output[1] = true;
             }
+          } else if (position > 1) {
+            output = _currOp(inputText, position - 1);
           }
           break;
         }
@@ -149,7 +151,6 @@ class CodeInput {
     }
     return output;
   }
-
 
   /// Determines how much space to indent the next line, based on parens
   int _countSpace(String inputText, int position) {
@@ -200,7 +201,8 @@ class CodeInput {
     List<String> matchingWords = [];
     int currLength = currWord.length;
     for (String schemeWord in wordToDocs.keys) {
-      if (((schemeWord.length > currWord.length) && !fullWord) || schemeWord.length == currWord.length) {
+      if (((schemeWord.length > currWord.length) && !fullWord) ||
+          schemeWord.length == currWord.length) {
         if (schemeWord.substring(0, currLength) == currWord) {
           matchingWords.add(schemeWord);
         }
