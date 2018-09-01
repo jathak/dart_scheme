@@ -111,6 +111,46 @@ class CodeInput {
     parenListener(missingParens);
   }
 
+  ///Determines the current function being typed out
+  List _currOp(String inputText, int position) {
+    List<String> splitLines = inputText.substring(0, position).split("\n");
+    // If the cursor is at the end of the line but not the end of the input, we
+    // must find that line and start counting parens from there
+    String refLine;
+    int totalMissingCount = 0;
+    for (refLine in splitLines.reversed) {
+      // Truncate to position of cursor when in middle of the line
+      totalMissingCount += countParens(refLine);
+      // Find the first line with an open paren but no close paren
+      if (totalMissingCount >= 1) break;
+    }
+    List output = ["", false];
+    if (totalMissingCount != 0) {
+      int strIndex = refLine.indexOf("(");
+      while (strIndex < (refLine.length - 1)) {
+        int nextClose = refLine.indexOf(")", strIndex + 1);
+        int nextOpen = refLine.indexOf("(", strIndex + 1);
+        // Find the open paren that corresponds to the missing closed paren
+        if (totalMissingCount > 1) {
+          totalMissingCount -= 1;
+        } else if (nextOpen == -1 || nextOpen < nextClose) {
+          if (refLine.length > strIndex + 1) {
+            String currString = refLine.substring(strIndex + 1);
+            String symbol = currString.split(RegExp("[ ()]"))[0];
+            output[0] = symbol;
+            if (symbol.length < currString.length) {
+              output[1] = true;
+            }
+          }
+          break;
+        }
+        strIndex = nextOpen;
+      }
+    }
+    return output;
+  }
+
+
   /// Determines how much space to indent the next line, based on parens
   int _countSpace(String inputText, int position) {
     List<String> splitLines = inputText.substring(0, position).split("\n");
@@ -156,17 +196,14 @@ class CodeInput {
   }
 
   ///Find the list of words that contain the same prefix as currWord
-  List<String> _wordMatches(String currWord) {
+  List<String> _wordMatches(String currWord, bool fullWord) {
     List<String> matchingWords = [];
     int currLength = currWord.length;
     for (String schemeWord in wordToDocs.keys) {
-      if (schemeWord.length >= currWord.length) {
+      if (((schemeWord.length > currWord.length) && !fullWord) || schemeWord.length == currWord.length) {
         if (schemeWord.substring(0, currLength) == currWord) {
           matchingWords.add(schemeWord);
         }
-      } else if (currWord.endsWith(" ") &&
-          schemeWord == currWord.substring(0, currWord.length - 1)) {
-        matchingWords.add(schemeWord);
       }
     }
     return matchingWords;
@@ -181,9 +218,11 @@ class CodeInput {
     List<String> matchingWords = [];
     //Find the last word that was being typed
     int currLength = 0;
-    String findMatch = inputText.last;
+    List output = _currOp(element.text, cursorPos);
+    String findMatch = output[0];
+    bool fullWord = output[1];
     if (findMatch.isNotEmpty && inputText.length > 1) {
-      matchingWords = _wordMatches(findMatch);
+      matchingWords = _wordMatches(findMatch, fullWord);
       currLength = findMatch.length;
     }
     //Clear whatever is currently in the box
