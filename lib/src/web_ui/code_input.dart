@@ -111,45 +111,38 @@ class CodeInput {
     parenListener(missingParens);
   }
 
-  ///Determines the current function being typed out
-  List _currOp(String inputText, int position) {
+  /// Determines the operation at the last open parens
+  List _currOp(String inputText, int position, {int fromLast = 1}) {
     List<String> splitLines = inputText.substring(0, position).split("\n");
-    // If the cursor is at the end of the line but not the end of the input, we
-    // must find that line and start counting parens from there
+    //The first item indicates the word that was matched, the second item indicates
+    //if that word is the full string(true) or is in progress of being written out(false)
     String refLine;
     int totalMissingCount = 0;
+  
     for (refLine in splitLines.reversed) {
-      // Truncate to position of cursor when in middle of the line
       totalMissingCount += countParens(refLine);
       // Find the first line with an open paren but no close paren
-      if (totalMissingCount >= 1) break;
+      if (totalMissingCount >= fromLast) break;
     }
-    List output = ["", false];
-    if (totalMissingCount != 0) {
+    //if there are not enough open parentheses, return the default output value
+    if (totalMissingCount >= fromLast) {
       int strIndex = refLine.indexOf("(");
-      while (strIndex < refLine.length) {
+      while (strIndex != -1 && strIndex < (refLine.length - 1)) {
         int nextClose = refLine.indexOf(")", strIndex + 1);
         int nextOpen = refLine.indexOf("(", strIndex + 1);
         // Find the open paren that corresponds to the missing closed paren
-        if (totalMissingCount > 1) {
+        if (totalMissingCount > fromLast) {
           totalMissingCount -= 1;
-        } else if (nextOpen == -1 || nextOpen < nextClose) {
-          if (refLine.length > strIndex + 1) {
-            String currString = refLine.substring(strIndex + 1);
-            String symbol = currString.split(RegExp("[ ()]"))[0];
-            output[0] = symbol;
-            if (symbol.length < currString.length) {
-              output[1] = true;
-            }
-          } else if (position > 1) {
-            output = _currOp(inputText, position - 1);
-          }
-          break;
+        } else if (nextOpen == -1 || nextClose == -1 || nextOpen < nextClose) {
+          //Assuming the word is right after the parens
+          List splitRef = refLine.substring(strIndex + 1).split(RegExp("[ \n()]+"));
+          //Determine if op represents the full string
+          return [splitRef[0], splitRef.length > 1];
         }
         strIndex = nextOpen;
       }
     }
-    return output;
+    return ["", true];
   }
 
   /// Determines how much space to indent the next line, based on parens
@@ -221,6 +214,7 @@ class CodeInput {
     //Find the last word that was being typed
     int currLength = 0;
     List output = _currOp(element.text, cursorPos);
+    print(output);
     String findMatch = output[0];
     bool fullWord = output[1];
     if (findMatch.isNotEmpty && inputText.length > 1) {
