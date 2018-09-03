@@ -112,17 +112,19 @@ class CodeInput {
   }
 
   /// Determines the operation at the last open parens
-  List _currOp(String inputText, int position, {int fromLast = 1}) {
+  List _currOp(String inputText, int position, [int fromLast = 1]) {
     List<String> splitLines = inputText.substring(0, position).split("\n");
     //The first item indicates the word that was matched, the second item indicates
     //if that word is the full string(true) or is in progress of being written out(false)
+    bool multipleLines = false;
     String refLine;
     int totalMissingCount = 0;
   
     for (refLine in splitLines.reversed) {
-      totalMissingCount += countParens(refLine);
+      totalMissingCount += countParens(refLine) ?? 0;
       // Find the first line with an open paren but no close paren
       if (totalMissingCount >= fromLast) break;
+      multipleLines = true;
     }
     //if there are not enough open parentheses, return the default output value
     if (totalMissingCount >= fromLast) {
@@ -135,9 +137,9 @@ class CodeInput {
           totalMissingCount -= 1;
         } else if (nextOpen == -1 || nextClose == -1 || nextOpen < nextClose) {
           //Assuming the word is right after the parens
-          List splitRef = refLine.substring(strIndex + 1).split(RegExp("[ \n()]+"));
+          List splitRef = refLine.substring(strIndex + 1).split(RegExp("[ ()]+"));
           //Determine if op represents the full string
-          return [splitRef[0], splitRef.length > 1];
+          return [splitRef[0], splitRef.length > 1 || multipleLines];
         }
         strIndex = nextOpen;
       }
@@ -214,9 +216,13 @@ class CodeInput {
     //Find the last word that was being typed
     int currLength = 0;
     List output = _currOp(element.text, cursorPos);
-    print(output);
+    List output2 = _currOp(element.text, cursorPos, 2);
     String findMatch = output[0];
     bool fullWord = output[1];
+    if (findMatch.isEmpty) {
+      findMatch = output2[0];
+      fullWord = output2[1];
+    }
     if (findMatch.isNotEmpty && inputText.length > 1) {
       matchingWords = _wordMatches(findMatch, fullWord);
       currLength = findMatch.length;
