@@ -31,13 +31,16 @@ class CodeInput {
       ..classes = ['code-input']
       ..contentEditable = 'true';
     _autoBox = DivElement()
-      ..classes = ["autobox"]
+      ..classes = ["docs"]
       ..style.visibility = "hidden";
+    Element wrapperAutoBox = DivElement()
+      ..classes = ["render"]
+      ..append(_autoBox);
     _subs.add(element.onKeyPress.listen(_onInputKeyPress));
     _subs.add(element.onKeyDown.listen(_keyListener));
     _subs.add(element.onKeyUp.listen(_keyListener));
     log.append(element);
-    log.append(_autoBox);
+    log.append(wrapperAutoBox);
     element.focus();
     parenListener ??= (_) => null;
     parenListener(missingParens);
@@ -230,7 +233,7 @@ class CodeInput {
     }
     //Clear whatever is currently in the box
     _autoBox.children = [];
-    _autoBox.classes = ["autobox"];
+    _autoBox.classes = ["docs"];
     if (matchingWords.isEmpty) {
       //If there are no matching words, hide the autocomplete box
       _autoBox.style.visibility = "hidden";
@@ -263,6 +266,8 @@ class CodeInput {
       await delay(0);
       parenListener(missingParens);
       await highlight(saveCursor: true);
+    } else if (key == KeyCode.TAB) {
+      event.preventDefault();
     }
   }
 }
