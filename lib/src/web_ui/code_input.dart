@@ -119,7 +119,7 @@ class CodeInput {
     bool multipleLines = false;
     String refLine;
     int totalMissingCount = 0;
-  
+
     for (refLine in splitLines.reversed) {
       totalMissingCount += countParens(refLine) ?? 0;
       // Find the first line with an open paren but no close paren
@@ -137,7 +137,8 @@ class CodeInput {
           totalMissingCount -= 1;
         } else if (nextOpen == -1 || nextClose == -1 || nextOpen < nextClose) {
           //Assuming the word is right after the parens
-          List splitRef = refLine.substring(strIndex + 1).split(RegExp("[ ()]+"));
+          List splitRef =
+              refLine.substring(strIndex + 1).split(RegExp("[ ()]+"));
           //Determine if op represents the full string
           return [splitRef[0], splitRef.length > 1 || multipleLines];
         }
