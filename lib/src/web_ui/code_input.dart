@@ -25,6 +25,7 @@ class CodeInput {
   Map<String, Docs> wordToDocs;
   bool _active = true;
   final List<StreamSubscription> _subs = [];
+  String tabComplete = "";
 
   Function(String code) runCode;
   Function(int parens) parenListener;
@@ -242,13 +243,16 @@ class CodeInput {
     _autoBox.classes = ["docs"];
     if (matchingWords.isEmpty) {
       //If there are no matching words, hide the autocomplete box
+      tabComplete = "";
       _autoBox.style.visibility = "hidden";
     } else if (matchingWords.length == 1) {
       //If there is only one matching word, display the docs for that word
       render(wordToDocs[matchingWords.first], _autoBox);
       _autoBox.style.visibility = "hidden";
       _autoBox.children.last.style.visibility = "visible";
+      tabComplete = matchingWords.first.substring(currLength);
     } else {
+      tabComplete = "";
       //Add each matching word as its own element for formatting purposes
       for (String match in matchingWords) {
         _autoBox.append(SpanElement()
@@ -276,6 +280,9 @@ class CodeInput {
       await highlight(saveCursor: true);
     } else if (key == KeyCode.TAB) {
       event.preventDefault();
+      int cursor = findPosition(element, window.getSelection().getRangeAt(0));
+      element.appendText(tabComplete);
+      await highlight(cursor: cursor + tabComplete.length + 1);
     }
   }
 }
