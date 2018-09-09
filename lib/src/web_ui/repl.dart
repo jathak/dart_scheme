@@ -21,7 +21,6 @@ class Repl {
   int historyIndex = -1;
 
   final String prompt;
-
   Repl(this.interpreter, Element parent, {this.prompt = 'scm> '}) {
     if (window.localStorage.containsKey('#repl-history')) {
       var decoded = json.decode(window.localStorage['#repl-history']);
@@ -77,6 +76,17 @@ class Repl {
     addBuiltin(env, const SchemeSymbol('disable-autodraw'), (_a, _b) {
       logText('Autodraw disabled\n');
       autodraw = false;
+      return undefined;
+    }, 0);
+    addBuiltin(env, const SchemeSymbol('autocomplete'), (_a, _b) {
+      logText('While typing, will display a list of possible procedures.\n'
+          '(disable-autocomplete) to disable\n');
+      activeInput.enableAutocomplete();
+      return undefined;
+    }, 0);
+    addBuiltin(env, const SchemeSymbol('disable-autocomplete'), (_a, _b) {
+      logText('Autocomplete disabled\n');
+      activeInput.disableAutocomplete();
       return undefined;
     }, 0);
   }
