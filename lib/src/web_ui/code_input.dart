@@ -19,6 +19,7 @@ class CodeInput {
   Element element;
   //Create an element that contains possible autcomplete options
   Element _autoBox;
+  Element _wrapperAutoBox;
   Map<String, Docs> wordToDocs;
   bool _active = true;
   final List<StreamSubscription> _subs = [];
@@ -33,14 +34,14 @@ class CodeInput {
     _autoBox = DivElement()
       ..classes = ["docs"]
       ..style.visibility = "hidden";
-    Element wrapperAutoBox = DivElement()
+    _wrapperAutoBox = DivElement()
       ..classes = ["render"]
       ..append(_autoBox);
     _subs.add(element.onKeyPress.listen(_onInputKeyPress));
     _subs.add(element.onKeyDown.listen(_keyListener));
     _subs.add(element.onKeyUp.listen(_keyListener));
     log.append(element);
-    log.append(wrapperAutoBox);
+    log.append(_wrapperAutoBox);
     element.focus();
     parenListener ??= (_) => null;
     parenListener(missingParens);
@@ -61,7 +62,7 @@ class CodeInput {
   void deactivate() {
     _active = false;
     element.contentEditable = 'false';
-    _autoBox.remove();
+    _wrapperAutoBox.remove();
     for (var sub in _subs) {
       sub.cancel();
     }
