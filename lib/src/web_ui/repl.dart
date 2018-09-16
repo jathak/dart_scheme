@@ -94,7 +94,7 @@ class Repl {
     addBuiltin(env, const SchemeSymbol('disable-autocomplete'), (_a, _b) {
       logText('Autocomplete disabled\n');
       activeInput.disableAutocomplete();
-      window.localStorage['autocomplte'] = 'f';
+      window.localStorage['autocomplete'] = 'f';
       return undefined;
     }, 0);
   }
