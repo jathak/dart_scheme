@@ -263,6 +263,7 @@ class CodeInput {
       }
       _autoBox.style.visibility = "visible";
     }
+    _autoBox.scrollIntoView();
   }
 
   _keyListener(KeyboardEvent event) async {
