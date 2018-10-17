@@ -152,10 +152,10 @@ class CodeInput {
           // Find the operations separated by any number of spaces, open parentheses, or closed parentheses.
           List splitRef =
               refLine.substring(strIndex + 1).split(RegExp("[ ()]+"));
-          // Determine if op represents the full string.
-          return Tuple2(
-              splitRef.firstWhere((s) => s.isNotEmpty, orElse: () => ""),
-              splitRef.length > 1 || isMultipleLines);
+          String op =
+              splitRef.firstWhere((s) => s.isNotEmpty, orElse: () => "");
+          return Tuple2(op,
+              (splitRef.length - splitRef.indexOf(op)) > 1 || isMultipleLines);
         }
         strIndex = nextOpen;
       }

@@ -11,6 +11,7 @@ dependencies:
   analyzer: ^0.32.4
   markdown: ^2.0.2
   quiver: ^2.0.0+1
+  tuple: ^1.0.2
 
 dev_dependencies:
   # Implementation library
