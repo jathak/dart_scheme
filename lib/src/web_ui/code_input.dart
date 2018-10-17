@@ -3,9 +3,10 @@ library web_ui.code_input;
 import 'dart:async';
 import 'dart:html';
 
+import 'package:tuple/tuple.dart';
+
 import 'package:cs61a_scheme/cs61a_scheme.dart';
 import 'package:cs61a_scheme/cs61a_scheme_web.dart';
-import 'package:tuple/tuple.dart';
 
 import 'highlight.dart';
 
@@ -16,7 +17,7 @@ const List<SchemeSymbol> noIndentForms = [
   SchemeSymbol("define-macro")
 ];
 
-bool _enableAutocomplete = false;
+bool _isEnabledAutocomplete = false;
 
 class CodeInput {
   Element element;
@@ -70,8 +71,8 @@ class CodeInput {
     }
   }
 
-  void enableAutocomplete() => _enableAutocomplete = true;
-  void disableAutocomplete() => _enableAutocomplete = false;
+  void enableAutocomplete() => _isEnabledAutocomplete = true;
+  void disableAutocomplete() => _isEnabledAutocomplete = false;
 
   Future highlight(
       {bool saveCursor = false, int cursor, bool atEnd = false}) async {
@@ -269,7 +270,7 @@ class CodeInput {
 
   _keyListener(KeyboardEvent event) async {
     int key = event.keyCode;
-    if (_enableAutocomplete) {
+    if (_isEnabledAutocomplete) {
       _autocomplete();
     }
     if (key == KeyCode.BACKSPACE) {
