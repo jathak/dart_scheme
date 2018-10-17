@@ -19,9 +19,8 @@ bool _enableAutocomplete = false;
 
 class CodeInput {
   Element element;
-  //Create an element that contains possible autcomplete options
   Element _autoBox;
-  Element _wrapperAutoBox;
+  Element _autoBoxWrapper;
   Map<String, Docs> wordToDocs;
   bool _active = true;
   final List<StreamSubscription> _subs = [];
@@ -30,25 +29,24 @@ class CodeInput {
   Function(String code) runCode;
   Function(int parens) parenListener;
 
-  CodeInput(Element log, this.runCode, Frame env, {this.parenListener}) {
+  CodeInput(Element log, this.runCode, this.wordToDocs, {this.parenListener}) {
     element = SpanElement()
       ..classes = ['code-input']
       ..contentEditable = 'true';
     _autoBox = DivElement()
       ..classes = ["docs"]
       ..style.visibility = "hidden";
-    _wrapperAutoBox = DivElement()
+    _autoBoxWrapper = DivElement()
       ..classes = ["render"]
       ..append(_autoBox);
     _subs.add(element.onKeyPress.listen(_onInputKeyPress));
     _subs.add(element.onKeyDown.listen(_keyListener));
     _subs.add(element.onKeyUp.listen(_keyListener));
     log.append(element);
-    log.append(_wrapperAutoBox);
+    log.append(_autoBoxWrapper);
     element.focus();
     parenListener ??= (_) => null;
     parenListener(missingParens);
-    wordToDocs = allDocumentedForms(env);
   }
 
   String get text => element.text;
@@ -65,7 +63,7 @@ class CodeInput {
   void deactivate() {
     _active = false;
     element.contentEditable = 'false';
-    _wrapperAutoBox.remove();
+    _autoBoxWrapper.remove();
     for (var sub in _subs) {
       sub.cancel();
     }

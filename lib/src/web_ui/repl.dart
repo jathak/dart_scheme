@@ -108,7 +108,8 @@ class Repl {
       ..text = prompt
       ..classes = ['repl-prompt'];
     container.append(activePrompt);
-    activeInput = CodeInput(container, runCode, interpreter.globalEnv,
+    activeInput = CodeInput(
+        container, runCode, allDocumentedForms(interpreter.globalEnv),
         parenListener: updateParenStatus);
     container.scrollTop = container.scrollHeight;
   }
