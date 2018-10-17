@@ -145,7 +145,7 @@ class CodeInput {
       while (strIndex != -1 && strIndex < (refLine.length - 1)) {
         int nextClose = refLine.indexOf(")", strIndex + 1);
         int nextOpen = refLine.indexOf("(", strIndex + 1);
-        // Find the open paren that corresponds to the missing closed parentheses.
+        // Find the open parentheses that corresponds to the missing closed parentheses.
         if (totalMissingCount > fromLast) {
           totalMissingCount -= 1;
         } else if (nextOpen == -1 || nextClose == -1 || nextOpen < nextClose) {
@@ -227,16 +227,17 @@ class CodeInput {
     int cursorPos = findPosition(element, window.getSelection().getRangeAt(0));
     List<String> matchingWords = [];
     int currLength = 0;
-    // Find the last word that was being typed [output] or the second to last word that was typed [output2].
+    // Find the last word that being typed [output] or the second to last operation that was typed [output2].
     // Used for the case where an empty open parentheses is being typed.
     // Eventually, may be used to implement different autocomplete behavior for special forms.
     Tuple2<String, bool> output = _currOp(element.text, cursorPos);
-    Tuple2<String, bool> output2 = _currOp(element.text, cursorPos, 2);
+    Tuple2<String, bool> secondToLastOutput =
+        _currOp(element.text, cursorPos, 2);
     String match = output.item1;
     bool isFullWord = output.item2;
     if (match.isEmpty) {
-      match = output2.item1;
-      isFullWord = output2.item2;
+      match = secondToLastOutput.item1;
+      isFullWord = secondToLastOutput.item2;
     }
     if (match.isNotEmpty) {
       matchingWords = _wordMatches(match, isFullWord);
