@@ -119,35 +119,37 @@ class CodeInput {
     parenListener(missingParens);
   }
 
-  /// Determines the operation at the last open parens
+  /// Determines the operation at the last open parens.
+  ///
+  /// Returns a two item list where the first item indicates the word that was matched
+  /// and the second item indicates if that word is the full string(true)
+  /// or is in progress of being written out(false).
   List _currOp(String inputText, int position, [int fromLast = 1]) {
     List<String> splitLines = inputText.substring(0, position).split("\n");
-    //The first item indicates the word that was matched, the second item indicates
-    //if that word is the full string(true) or is in progress of being written out(false)
     bool multipleLines = false;
     String refLine;
     int totalMissingCount = 0;
 
     for (refLine in splitLines.reversed) {
       totalMissingCount += countParens(refLine) ?? 0;
-      // Find the first line with an open paren but no close paren
+      // Find the first line with an open paren but no close parentheses.
       if (totalMissingCount >= fromLast) break;
       multipleLines = true;
     }
-    //if there are not enough open parentheses, return the default output value
+    // If there are not enough open parentheses, return the default output value.
     if (totalMissingCount >= fromLast) {
       int strIndex = refLine.indexOf("(");
       while (strIndex != -1 && strIndex < (refLine.length - 1)) {
         int nextClose = refLine.indexOf(")", strIndex + 1);
         int nextOpen = refLine.indexOf("(", strIndex + 1);
-        // Find the open paren that corresponds to the missing closed paren
+        // Find the open paren that corresponds to the missing closed parentheses.
         if (totalMissingCount > fromLast) {
           totalMissingCount -= 1;
         } else if (nextOpen == -1 || nextClose == -1 || nextOpen < nextClose) {
-          //Assuming the word is right after the parens
+          // Find the operations separated by any number of spaces, open parentheses, or closed parentheses.
           List splitRef =
               refLine.substring(strIndex + 1).split(RegExp("[ ()]+"));
-          //Determine if op represents the full string
+          // Determine if op represents the full string.
           return [splitRef[0], splitRef.length > 1 || multipleLines];
         }
         strIndex = nextOpen;
@@ -156,17 +158,17 @@ class CodeInput {
     return ["", true];
   }
 
-  /// Determines how much space to indent the next line, based on parens
+  /// Determines how much space to indent the next line, based on parens.
   int _countSpace(String inputText, int position) {
     List<String> splitLines = inputText.substring(0, position).split("\n");
     // If the cursor is at the end of the line but not the end of the input, we
-    // must find that line and start counting parens from there
+    // must find that line and start counting parens from there.
     String refLine;
     int totalMissingCount = 0;
     for (refLine in splitLines.reversed) {
-      // Truncate to position of cursor when in middle of the line
+      // Truncate to position of cursor when in middle of the line.
       totalMissingCount += countParens(refLine);
-      // Find the first line with an open paren but no close paren
+      // Find the first line with an open paren but no close paren.
       if (totalMissingCount >= 1) break;
     }
     if (totalMissingCount == 0) {
@@ -176,13 +178,13 @@ class CodeInput {
     while (strIndex < (refLine.length - 1)) {
       int nextClose = refLine.indexOf(")", strIndex + 1);
       int nextOpen = refLine.indexOf("(", strIndex + 1);
-      // Find the open paren that corresponds to the missing closed paren
+      // Find the open paren that corresponds to the missing closed paren.
       if (totalMissingCount > 1) {
         totalMissingCount -= 1;
       } else if (nextOpen == -1 || nextOpen < nextClose) {
         Iterable<Expression> tokens = tokenizeLine(refLine.substring(strIndex));
         Expression symbol = tokens.elementAt(1);
-        // Align subexpressions if any exist; otherwise, indent by two spaces
+        // Align subexpressions if any exist; otherwise, indent by two spaces.
         if (symbol == const SchemeSymbol("(")) {
           return strIndex + 1;
         } else if (noIndentForms.contains(symbol)) {
@@ -200,14 +202,13 @@ class CodeInput {
     return strIndex + 2;
   }
 
-  ///Find the list of words that contain the same prefix as currWord
+  /// Find the list of words that contain the same prefix as currWord.
   List<String> _wordMatches(String currWord, bool fullWord) {
     List<String> matchingWords = [];
-    int currLength = currWord.length;
     for (String schemeWord in wordToDocs.keys) {
       if (((schemeWord.length > currWord.length) && !fullWord) ||
           schemeWord.length == currWord.length) {
-        if (schemeWord.substring(0, currLength) == currWord) {
+        if (schemeWord.substring(0, currWord.length) == currWord) {
           matchingWords.add(schemeWord);
         }
       }
@@ -215,15 +216,13 @@ class CodeInput {
     return matchingWords;
   }
 
-  ///Finds and displays the possible words that the user may be typing
+  /// Finds and displays the possible words that the user may be typing.
   void _autocomplete() {
-    //Find the text to the left of where the typing cursor currently is
+    // Find the text to the left of where the typing cursor currently is.
     int cursorPos = findPosition(element, window.getSelection().getRangeAt(0));
-    List<String> inputText =
-        element.text.substring(0, cursorPos).split(RegExp("[(]+"));
     List<String> matchingWords = [];
-    //Find the last word that was being typed
     int currLength = 0;
+    // Find the last word that was being typed [output] or the second to last word that was typed [output2].
     List output = _currOp(element.text, cursorPos);
     List output2 = _currOp(element.text, cursorPos, 2);
     String findMatch = output[0];
@@ -232,26 +231,26 @@ class CodeInput {
       findMatch = output2[0];
       fullWord = output2[1];
     }
-    if (findMatch.isNotEmpty && inputText.length > 1) {
+    if (findMatch.isNotEmpty) {
       matchingWords = _wordMatches(findMatch, fullWord);
       currLength = findMatch.length;
     }
-    //Clear whatever is currently in the box
+    // Clear whatever is currently in the box.
     _autoBox.children = [];
     _autoBox.classes = ["docs"];
     if (matchingWords.isEmpty) {
-      //If there are no matching words, hide the autocomplete box
+      // If there are no matching words, hide the autocomplete box.
       tabComplete = "";
       _autoBox.style.visibility = "hidden";
     } else if (matchingWords.length == 1) {
-      //If there is only one matching word, display the docs for that word
+      // If there is only one matching word, display the docs for that word.
       render(wordToDocs[matchingWords.first], _autoBox);
       _autoBox.style.visibility = "hidden";
       _autoBox.children.last.style.visibility = "visible";
       tabComplete = matchingWords.first.substring(currLength);
     } else {
       tabComplete = "";
-      //Add each matching word as its own element for formatting purposes
+      // Add each matching word as its own element for formatting purposes.
       for (String match in matchingWords) {
         _autoBox.append(SpanElement()
           ..classes = ["autobox-word"]
