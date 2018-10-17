@@ -37,9 +37,9 @@ class Repl {
     status = SpanElement()..classes = ['repl-status'];
     container.append(status);
     buildNewInput();
-    if (window.localStorage.containsKey('autocomplete')) {
-      String val = window.localStorage['autocomplete'];
-      if (val == 't') {
+    if (window.localStorage.containsKey('#autocomplete')) {
+      String val = window.localStorage['#autocomplete'];
+      if (val == 'enabled') {
         activeInput.enableAutocomplete();
       }
     }
@@ -88,13 +88,13 @@ class Repl {
       logText('While typing, will display a list of possible procedures.\n'
           '(disable-autocomplete) to disable\n');
       activeInput.enableAutocomplete();
-      window.localStorage['autocomplete'] = 't';
+      window.localStorage['#autocomplete'] = 'enabled';
       return undefined;
     }, 0);
     addBuiltin(env, const SchemeSymbol('disable-autocomplete'), (_a, _b) {
       logText('Autocomplete disabled\n');
       activeInput.disableAutocomplete();
-      window.localStorage['autocomplete'] = 'f';
+      window.localStorage['#autocomplete'] = 'disabled';
       return undefined;
     }, 0);
   }
