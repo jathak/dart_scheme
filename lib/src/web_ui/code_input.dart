@@ -129,7 +129,7 @@ class CodeInput {
   Tuple2<String, bool> _currOp(String inputText, int position,
       [int fromLast = 1]) {
     List<String> splitLines = inputText.substring(0, position).split("\n");
-    bool multipleLines = false;
+    bool isMultipleLines = false;
     String refLine;
     int totalMissingCount = 0;
 
@@ -137,7 +137,7 @@ class CodeInput {
       totalMissingCount += countParens(refLine) ?? 0;
       // Find the first line with an open paren but no close parentheses.
       if (totalMissingCount >= fromLast) break;
-      multipleLines = true;
+      isMultipleLines = true;
     }
     // If there are not enough open parentheses, return the default output value.
     if (totalMissingCount >= fromLast) {
@@ -153,7 +153,9 @@ class CodeInput {
           List splitRef =
               refLine.substring(strIndex + 1).split(RegExp("[ ()]+"));
           // Determine if op represents the full string.
-          return Tuple2(splitRef[0], splitRef.length > 1 || multipleLines);
+          return Tuple2(
+              splitRef.firstWhere((s) => s.isNotEmpty, orElse: () => ""),
+              splitRef.length > 1 || isMultipleLines);
         }
         strIndex = nextOpen;
       }
