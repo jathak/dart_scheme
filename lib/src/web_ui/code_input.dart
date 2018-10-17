@@ -5,6 +5,7 @@ import 'dart:html';
 
 import 'package:cs61a_scheme/cs61a_scheme.dart';
 import 'package:cs61a_scheme/cs61a_scheme_web.dart';
+import 'package:tuple/tuple.dart';
 
 import 'highlight.dart';
 
@@ -122,9 +123,10 @@ class CodeInput {
   /// Determines the operation at the last open parens.
   ///
   /// Returns a two item list where the first item indicates the word that was matched
-  /// and the second item indicates if that word is the full string(true)
-  /// or is in progress of being written out(false).
-  List _currOp(String inputText, int position, [int fromLast = 1]) {
+  /// and the second item indicates if that word is the full string (true)
+  /// or is in progress of being written out (false).
+  Tuple2<String, bool> _currOp(String inputText, int position,
+      [int fromLast = 1]) {
     List<String> splitLines = inputText.substring(0, position).split("\n");
     bool multipleLines = false;
     String refLine;
@@ -150,12 +152,12 @@ class CodeInput {
           List splitRef =
               refLine.substring(strIndex + 1).split(RegExp("[ ()]+"));
           // Determine if op represents the full string.
-          return [splitRef[0], splitRef.length > 1 || multipleLines];
+          return Tuple2(splitRef[0], splitRef.length > 1 || multipleLines);
         }
         strIndex = nextOpen;
       }
     }
-    return ["", true];
+    return const Tuple2("", true);
   }
 
   /// Determines how much space to indent the next line, based on parens.
@@ -223,17 +225,19 @@ class CodeInput {
     List<String> matchingWords = [];
     int currLength = 0;
     // Find the last word that was being typed [output] or the second to last word that was typed [output2].
-    List output = _currOp(element.text, cursorPos);
-    List output2 = _currOp(element.text, cursorPos, 2);
-    String findMatch = output[0];
-    bool fullWord = output[1];
-    if (findMatch.isEmpty) {
-      findMatch = output2[0];
-      fullWord = output2[1];
+    // Used for the case where an empty open parentheses is being typed.
+    // Eventually, may be used to implement different autocomplete behavior for special forms.
+    Tuple2<String, bool> output = _currOp(element.text, cursorPos);
+    Tuple2<String, bool> output2 = _currOp(element.text, cursorPos, 2);
+    String match = output.item1;
+    bool isFullWord = output.item2;
+    if (match.isEmpty) {
+      match = output2.item1;
+      isFullWord = output2.item2;
     }
-    if (findMatch.isNotEmpty) {
-      matchingWords = _wordMatches(findMatch, fullWord);
-      currLength = findMatch.length;
+    if (match.isNotEmpty) {
+      matchingWords = _wordMatches(match, isFullWord);
+      currLength = match.length;
     }
     // Clear whatever is currently in the box.
     _autoBox.children = [];
@@ -254,7 +258,7 @@ class CodeInput {
       for (String match in matchingWords) {
         _autoBox.append(SpanElement()
           ..classes = ["autobox-word"]
-          //Bold the matching characters
+          // Bold the matching characters.
           ..innerHtml =
               "<strong>${match.substring(0, currLength)}</strong>${match.substring(currLength)}");
       }
