@@ -17,7 +17,7 @@ const List<SchemeSymbol> noIndentForms = [
   SchemeSymbol("define-macro")
 ];
 
-bool _isEnabledAutocomplete = false;
+bool _isAutocompleteEnabled = false;
 
 class CodeInput {
   Element element;
@@ -71,8 +71,8 @@ class CodeInput {
     }
   }
 
-  void enableAutocomplete() => _isEnabledAutocomplete = true;
-  void disableAutocomplete() => _isEnabledAutocomplete = false;
+  void enableAutocomplete() => _isAutocompleteEnabled = true;
+  void disableAutocomplete() => _isAutocompleteEnabled = false;
 
   Future highlight(
       {bool saveCursor = false, int cursor, bool atEnd = false}) async {
@@ -273,7 +273,7 @@ class CodeInput {
 
   _keyListener(KeyboardEvent event) async {
     int key = event.keyCode;
-    if (_isEnabledAutocomplete) {
+    if (_isAutocompleteEnabled) {
       _autocomplete();
     }
     if (key == KeyCode.BACKSPACE) {
