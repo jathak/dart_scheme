@@ -21,7 +21,6 @@ class Repl {
   int historyIndex = -1;
 
   final String prompt;
-
   Repl(this.interpreter, Element parent, {this.prompt = 'scm> '}) {
     if (window.localStorage.containsKey('#repl-history')) {
       var decoded = json.decode(window.localStorage['#repl-history']);
@@ -38,6 +37,12 @@ class Repl {
     status = SpanElement()..classes = ['repl-status'];
     container.append(status);
     buildNewInput();
+    if (window.localStorage.containsKey('#autocomplete')) {
+      String val = window.localStorage['#autocomplete'];
+      if (val == 'enabled') {
+        activeInput.enableAutocomplete();
+      }
+    }
     interpreter.logger = (logging, [newline = true]) {
       var box = SpanElement();
       activeLoggingArea.append(box);
@@ -79,6 +84,19 @@ class Repl {
       autodraw = false;
       return undefined;
     }, 0);
+    addBuiltin(env, const SchemeSymbol('autocomplete'), (_a, _b) {
+      logText('While typing, will display a list of possible procedures.\n'
+          '(disable-autocomplete) to disable\n');
+      activeInput.enableAutocomplete();
+      window.localStorage['#autocomplete'] = 'enabled';
+      return undefined;
+    }, 0);
+    addBuiltin(env, const SchemeSymbol('disable-autocomplete'), (_a, _b) {
+      logText('Autocomplete disabled\n');
+      activeInput.disableAutocomplete();
+      window.localStorage['#autocomplete'] = 'disabled';
+      return undefined;
+    }, 0);
   }
 
   buildNewInput() {
@@ -90,8 +108,9 @@ class Repl {
       ..text = prompt
       ..classes = ['repl-prompt'];
     container.append(activePrompt);
-    activeInput =
-        CodeInput(container, runCode, parenListener: updateParenStatus);
+    activeInput = CodeInput(
+        container, runCode, allDocumentedForms(interpreter.globalEnv),
+        parenListener: updateParenStatus);
     container.scrollTop = container.scrollHeight;
   }
 
