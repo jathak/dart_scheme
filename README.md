@@ -59,7 +59,6 @@ pointing to the 61A Dokku server and run `make deploy`.
 
 
 
-
 [policy]: https://cs61a.org/articles/about.html#academic-honesty
 [spec]: https://cs61a.org/articles/scheme-spec.html
 [scheme.cs61a.org]: https://scheme.cs61a.org

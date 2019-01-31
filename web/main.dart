@@ -6,8 +6,8 @@ import 'package:cs61a_scheme_impl/impl.dart' show StaffProjectImplementation;
 
 import 'package:cs61a_scheme/web_ui.dart';
 
-const String motd = "**61A Scheme Web Interpreter 2.0.0-beta**"
-    "                         <small>"
+const String motd = "**61A Scheme Web Interpreter**"
+    "                                    <small>"
     "[View Source on GitHub](https://github.com/Cal-CS-61A-Staff/dart_scheme)"
     """</small>
 --------------------------------------------------------------------------------
@@ -18,6 +18,7 @@ const String motd = "**61A Scheme Web Interpreter 2.0.0-beta**"
 
 **Other Useful Commands**
 `(docs symbol)` to display documentation for some built-in or special form
+`(autocomplete)` to display scheme built-ins and documentation while typing [Try It](:try-autocomplete)
 `(clear)` to clear all output on the screen
 `(theme 'id)` to change the interpreter's theme
 [default](:try-default) [solarized](:try-solarized) """
@@ -81,6 +82,7 @@ startScheme(WebLibrary webLibrary) async {
   addDemo(demos, 'try-draw', "(draw '(1 2 3))");
   addDemo(demos, 'try-chess', "(import 'scm/apps/chess)");
   addDemo(demos, 'try-ad', "(autodraw)");
+  addDemo(demos, 'try-autocomplete', "(autocomplete)");
   addDemo(demos, 'try-default', "(theme 'default)");
   addDemo(demos, 'try-solarized', "(theme 'solarized)");
   addDemo(demos, 'try-monochrome', "(theme 'monochrome)");
