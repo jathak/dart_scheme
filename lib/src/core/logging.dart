@@ -1,9 +1,11 @@
 library cs61a_scheme.core.logging;
 
 import 'expressions.dart';
+import 'frame.dart';
+import 'values.dart';
 
-/// Logs [expr] somewhere with a new line if [addNewLine] is true.
-typedef Logger = void Function(Expression expr, bool addNewLine);
+/// Logs [value] somewhere with a new line if [addNewLine] is true.
+typedef Logger = void Function(Value value, bool addNewLine);
 
 /// Given two loggers, returns a new one that calls both.
 Logger combineLoggers(Logger a, Logger b) => (e, addNewLine) {
@@ -11,20 +13,20 @@ Logger combineLoggers(Logger a, Logger b) => (e, addNewLine) {
       b(e, addNewLine);
     };
 
-/// Scheme expression representing an expression to be displayed.
+/// Scheme value representing a value to be displayed.
 ///
 /// Used by the built-in `display` Scheme procedure.
-class DisplayOutput extends SelfEvaluating {
-  final Expression expression;
-  const DisplayOutput(this.expression);
-  toString() => expression.display;
-  toJS() => expression.toJS();
+class DisplayOutput extends Value {
+  final Value value;
+  const DisplayOutput(this.value);
+  toString() => value.display;
+  toJS() => value.toJS();
 }
 
-/// Scheme expression representing text to be outputted.
+/// Scheme value representing text to be outputted.
 ///
 /// Used for logging.
-class TextMessage extends SelfEvaluating {
+class TextMessage extends Value {
   final String message;
   const TextMessage(this.message);
   toString() => message;
@@ -37,11 +39,11 @@ class TextMessage extends SelfEvaluating {
 /// code. While other Dart errors will still be caught by the outer interpreter
 /// loop, throwing a [SchemeException] ensures that the logged stack trace is
 /// for Scheme, not Dart/JS.
-class SchemeException extends SelfEvaluating implements Exception {
+class SchemeException extends Value implements Exception {
   final String message;
   final bool showTrace;
   final Expression context;
-  final List<Expression> callStack = [];
+  final List<Value> callStack = [];
   SchemeException([this.message, this.showTrace = true, this.context]);
 
   toString() {
@@ -54,7 +56,7 @@ class SchemeException extends SelfEvaluating implements Exception {
   }
 
   // Adds [expr] to the stack trace of this exception.
-  addCall(Expression expr) {
+  addCall(Value expr) {
     callStack.insert(0, expr);
   }
 }

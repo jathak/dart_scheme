@@ -2,14 +2,17 @@ library cs61a_scheme.core.procedures;
 
 import 'documentation.dart';
 import 'expressions.dart';
+import 'frame.dart';
 import 'logging.dart';
+import 'values.dart';
 import 'widgets.dart';
+import 'wrappers.dart';
 
 /// Base class for all Scheme procedures.
 ///
 /// A Scheme procedure is analagous to a Dart or JS function and call be called
 /// with 0 or more arguments through a call expression.
-abstract class Procedure extends SelfEvaluating {
+abstract class Procedure extends Value {
   Procedure();
 
   /// Intrinsic name of this procedure. `null` if none.
@@ -19,14 +22,14 @@ abstract class Procedure extends SelfEvaluating {
   Docs docs;
 
   /// Calls the procedure in [env] with a list of unevaluated [operands].
-  Expression call(PairOrEmpty operands, Frame env) =>
+  Value call(SchemeList<Expression> operands, Frame env) =>
       env.interpreter.impl.procedureCall(this, operands, env);
 
   /// Applies the procedure in [env] to a list of [arguments].
   ///
   /// Arguments are typically evaluated, except in the case of [MacroProcedure]
   /// or [OperandBuiltinProcedure].
-  Expression apply(PairOrEmpty arguments, Frame env);
+  Value apply(SchemeList arguments, Frame env);
   @override
   toString() => '#[$name]';
 
@@ -45,7 +48,7 @@ abstract class Procedure extends SelfEvaluating {
 }
 
 /// Used for defining built-in Scheme procedures.
-typedef SchemeBuiltin = Expression Function(List<Expression> args, Frame env);
+typedef SchemeBuiltin = Value Function(List<Value> args, Frame env);
 
 /// A built-in Scheme procedure.
 ///
@@ -81,7 +84,7 @@ class BuiltinProcedure extends Procedure {
       [this.maxArgs = -1])
       : fixedArgs = false;
 
-  Expression apply(PairOrEmpty arguments, Frame env) =>
+  Value apply(SchemeList arguments, Frame env) =>
       env.interpreter.impl.builtinApply(this, arguments, env);
 }
 
@@ -95,17 +98,17 @@ abstract class UserDefinedProcedure extends Procedure {
   Expression get formals;
 
   /// Scheme list of expressions in the body of this procedure.
-  PairOrEmpty get body;
+  SchemeList get body;
 
   /// Creates a new frame to evaluate the body in when this procedure is called.
-  Frame makeCallFrame(PairOrEmpty arguments, Frame env);
+  Frame makeCallFrame(SchemeList arguments, Frame env);
 
-  Expression call(PairOrEmpty operands, Frame env) {
+  Value call(SchemeList<Expression> operands, Frame env) {
     env.interpreter.triggerEvent(const SchemeSymbol('pre-user-call'), [], env);
     return super.call(operands, env);
   }
 
-  Expression apply(PairOrEmpty arguments, Frame env) {
+  Value apply(SchemeList arguments, Frame env) {
     Frame frame = makeCallFrame(arguments, env);
     if (name != null) frame.tag = name.toString();
     if (this is MacroProcedure) {
@@ -131,7 +134,7 @@ class LambdaProcedure extends UserDefinedProcedure {
   /// When created with `(define (fn ...) ...)`, this will be `"fn"`.
   SchemeSymbol name;
   final Expression formals;
-  final PairOrEmpty body;
+  final SchemeList<Expression> body;
 
   /// The frame this lambda was defined in.
   ///
@@ -142,12 +145,12 @@ class LambdaProcedure extends UserDefinedProcedure {
       [this.name = const SchemeSymbol('λ')]);
 
   /// Creates a call frame based on [env], the frame this lambda was defined in.
-  Frame makeCallFrame(PairOrEmpty arguments, Frame _) =>
+  Frame makeCallFrame(SchemeList arguments, Frame _) =>
       env.interpreter.impl.makeLambdaFrame(this, arguments, env);
 
   @override
   toString() =>
-      Pair(const SchemeSymbol('lambda'), Pair(formals, body)).toString();
+      Pair(const SchemeSymbol('lambda'), Pair(formals, body.list)).toString();
 
   @override
   Widget draw(diag) {
@@ -166,11 +169,11 @@ class MacroProcedure extends LambdaProcedure {
 
   /// Instead of evaluated the operands, they are passed directly to [apply].
   @override
-  Expression call(PairOrEmpty operands, Frame env) =>
+  Value call(SchemeList<Expression> operands, Frame env) =>
       env.interpreter.impl.macroCall(this, operands, env);
 
   toString() =>
-      Pair(const SchemeSymbol('#macro'), Pair(formals, body)).toString();
+      Pair(const SchemeSymbol('#macro'), Pair(formals, body.list)).toString();
 }
 
 /// A [UserDefinedProcedure] with dynamic scope and normal operand evaluation.
@@ -180,34 +183,15 @@ class MacroProcedure extends LambdaProcedure {
 /// defined in.
 class MuProcedure extends UserDefinedProcedure {
   SchemeSymbol name;
-  final PairOrEmpty formals, body;
+  final Expression formals;
+  final SchemeList<Expression> body;
 
   MuProcedure(this.formals, this.body, [this.name = const SchemeSymbol('μ')]);
 
   /// Creates a call frame based on [env], the frame this mu was called in.
-  Frame makeCallFrame(PairOrEmpty arguments, Frame env) =>
+  Frame makeCallFrame(SchemeList arguments, Frame env) =>
       env.interpreter.impl.makeMuFrame(this, arguments, env);
 
-  toString() => Pair(const SchemeSymbol('mu'), Pair(formals, body)).toString();
-}
-
-/// An approximation of a first-class continuation.
-///
-/// Unlike true continuations, this is built on top of exceptions, so it may
-/// only be called once.
-///
-/// For more information on continuations see [the Wikipedia page][wiki].
-///
-/// [wiki]: https://en.wikipedia.org/wiki/Continuation
-class Continuation extends Procedure {
-  final SchemeSymbol name = null;
-  static int counter = 0;
-  final int id;
-  Expression result;
-  Continuation() : id = counter++;
-
-  Expression apply(PairOrEmpty args, Frame env) =>
-      env.interpreter.impl.continuationApply(this, args, env);
-
-  toString() => "#[continuation$id]";
+  toString() =>
+      Pair(const SchemeSymbol('mu'), Pair(formals, body.list)).toString();
 }

@@ -65,6 +65,7 @@ class BuiltinStub {
   String returnType;
   List<String> paramTypes;
   List<String> paramNames;
+  String variableType;
   bool needsEnvironment = false;
 
   String comment;
@@ -112,6 +113,7 @@ class BuiltinStub {
   String _makeFunction() {
     if (variableArity &&
         needsEnvironment &&
+        variableType == 'Value' &&
         !returnConversions.containsKey(returnType) &&
         returnType != 'void') return "this.$methodName";
     String before = needsTurtle ? "turtle.show();" : "";
@@ -136,14 +138,25 @@ class BuiltinStub {
   }
 
   String _makeChecks() {
-    if (variableArity) return "";
     var checks = [];
-    for (int i = 0; i < paramTypes.length; i++) {
-      var type = paramTypes[i];
-      if (typeChecks.containsKey(paramTypes[i])) {
+    if (variableArity) {
+      var type = variableType;
+      if (typeChecks.containsKey(type)) {
         type = typeChecks[type];
+      } else if (type.startsWith('SchemeList')) {
+        type = 'PairOrEmpty';
       }
-      if (type != 'Expression') checks.add("__exprs[$i] is! $type");
+      if (type != 'Value') checks.add("__exprs.any((x) => x is! $type)");
+    } else {
+      for (int i = 0; i < paramTypes.length; i++) {
+        var type = paramTypes[i];
+        if (typeChecks.containsKey(type)) {
+          type = typeChecks[type];
+        } else if (type.startsWith('SchemeList')) {
+          type = 'PairOrEmpty';
+        }
+        if (type != 'Value') checks.add("__exprs[$i] is! $type");
+      }
     }
     if (checks.isEmpty) return "";
     var decodeName = name.substring(1, name.length - 1);
@@ -152,36 +165,59 @@ class BuiltinStub {
   }
 
   String _makeParams() {
-    if (variableArity) return needsEnvironment ? "__exprs, __env" : "__exprs";
     var params = [];
-    for (int i = 0; i < paramTypes.length; i++) {
-      var param = '__exprs[$i]';
-      switch (paramTypes[i]) {
-        case 'int':
-          param = '$param.toJS().toInt()';
-          break;
-        case 'double':
-          param = '$param.toJS().toDouble()';
-          break;
-        case 'num':
-          param = '$param.toJS()';
-          break;
-        case 'bool':
-          param = '$param.isTruthy';
-          break;
-        case 'String':
-          param = '($param as SchemeString).value';
-          break;
+    if (variableArity) {
+      var param = "__exprs";
+      var type = variableType;
+      if (typeChecks.containsKey(type)) {
+        type = typeChecks[type];
+      }
+      if (type != 'Value') param += ".cast<$type>()";
+      var converted = _convertParam('x', variableType);
+      if (converted != 'x') {
+        param += '.map((x) => $converted).toList()';
       }
       params.add(param);
+    } else {
+      for (int i = 0; i < paramTypes.length; i++) {
+        var param = _convertParam('__exprs[$i]', paramTypes[i]);
+        params.add(param);
+      }
     }
     if (needsEnvironment) params.add("__env");
     return params.join(',');
   }
 
+  String _convertParam(String param, String type) {
+    switch (type) {
+      case 'int':
+        param = '$param.toJS().toInt()';
+        break;
+      case 'double':
+        param = '$param.toJS().toDouble()';
+        break;
+      case 'num':
+        param = '$param.toJS()';
+        break;
+      case 'bool':
+        param = '$param.isTruthy';
+        break;
+      case 'String':
+        param = '($param as SchemeString).value';
+        break;
+    }
+    if (type.startsWith('SchemeList')) {
+      param = '$type($param)';
+    }
+    return param;
+  }
+
   String _wrapReturn(String call) {
     if (returnConversions.containsKey(returnType)) {
       return '${returnConversions[returnType]}($call)';
+    }
+    if (returnType.startsWith('SchemeList')) {
+      return '($call).list';
     }
     return call;
   }
@@ -201,10 +237,12 @@ class BuiltinStub {
     'Procedure': 'procedure',
     'Pair': 'pair',
     'SchemeEventListener': 'event listener',
-    'JsExpression': 'js object',
+    'JsValue': 'js object',
     'JsProcedure': 'js function',
     'Color': 'color',
-    'ImportedLibrary': 'library'
+    'ImportedLibrary': 'library',
+    'Value': 'value',
+    'Expression': 'expression'
   };
 
   static const Map<String, String> typeChecks = {
@@ -221,9 +259,9 @@ class BuiltinStub {
     'num': 'Number.fromNum',
     'String': 'SchemeString',
     'bool': 'Boolean',
-    'Future<Expression>': 'AsyncExpression',
+    'Future<Value>': 'AsyncValue',
     'JsFunction': 'JsProcedure',
-    'JsObject': 'JsExpression'
+    'JsObject': 'JsValue'
   };
 }
 
@@ -274,12 +312,14 @@ BuiltinStub _buildStub(MethodDeclaration method) {
   }
   stub.name ??= json.encode(method.name.toSource().toLowerCase());
   stub.returnType = method.returnType.toSource();
-  bool takesListExpr = _isVariableArity(method);
-  if (stub.variableArity && !takesListExpr) {
-    throw Exception("Built-ins with fixed arguments can have min/max");
+  var variableType = _findVariableArityType(method);
+  if (stub.variableArity && variableType == null) {
+    print(method);
+    throw Exception("Built-ins with fixed arguments can't have min/max");
   }
-  stub.variableArity = takesListExpr;
+  stub.variableArity = variableType != null;
   if (stub.variableArity) {
+    stub.variableType = variableType;
     int paramCount = method.parameters.parameters.length;
     if (paramCount != 1 && paramCount != 2) {
       throw Exception("${stub.name} has an invalid number of parameters!");
@@ -320,18 +360,18 @@ List<String> _paramNames(MethodDeclaration method) {
   return names;
 }
 
-bool _isVariableArity(MethodDeclaration method) {
-  if (method.parameters.parameters.isNotEmpty) {
-    FormalParameter param = method.parameters.parameters[0];
-    if (param is SimpleFormalParameter) {
-      if (param.type.toSource() == "List<Expression>") {
-        return true;
-      }
-    } else {
-      throw Exception("Built-in procedures may not have optional parameters.");
-    }
+String _findVariableArityType(MethodDeclaration method) {
+  if (method.parameters.parameters.isEmpty) return null;
+  FormalParameter param = method.parameters.parameters[0];
+  if (param is! SimpleFormalParameter) {
+    throw Exception("Built-in procedures may not have optional parameters.");
   }
-  return false;
+  TypeAnnotation paramType = (param as SimpleFormalParameter).type;
+  if (paramType is! NamedType) return null;
+  NamedType namedType = paramType as NamedType;
+  if (namedType.name.toSource() != 'List') return null;
+  if ((namedType.typeArguments?.length ?? 0) == 0) return null;
+  return namedType.typeArguments.arguments[0].toSource();
 }
 
 String generateDocumentation(String markdownSource) {

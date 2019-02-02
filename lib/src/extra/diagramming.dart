@@ -1,8 +1,10 @@
 library cs61a_scheme.extra.diagramming;
 
+import 'dart:collection' show LinkedHashMap;
+
 import 'package:cs61a_scheme/cs61a_scheme.dart';
 
-class Arrow extends SelfEvaluating {
+class Arrow extends Value {
   final Anchor start, end;
   Arrow(this.start, this.end);
   toString() => "#Arrow($start->$end)";
@@ -28,7 +30,7 @@ class FrameElement extends Widget {
   bool fromMacro;
   bool active = false;
   List<Binding> bindings = [];
-  FrameElement(Frame frame, Diagram diagram, [Expression returnValue]) {
+  FrameElement(Frame frame, Diagram diagram, [Value returnValue]) {
     id = frame.id;
     parentId = frame.parent?.id;
     fromMacro = frame.fromMacro;
@@ -48,20 +50,22 @@ class Diagram extends DiagramInterface {
   List<FrameElement> frames = [];
   List<Row> rows = [Row([])];
   List<Arrow> arrows = [];
-  Diagram(Expression expression) {
-    if (expression is Frame) {
-      drawEnvironment(expression);
+  Diagram(Object obj) {
+    if (obj is Frame) {
+      drawEnvironment(obj);
       frames.last.active = true;
+    } else if (obj is Value) {
+      rows[0].elements.insert(0, _build(obj));
     } else {
-      rows[0].elements.insert(0, _build(expression));
+      throw SchemeException('Cannot diagram $obj');
     }
     _finish();
   }
 
-  Diagram.allFrames(List<Pair<Frame, Expression>> framePairs, Frame active) {
-    for (Pair<Frame, Expression> framePair in framePairs) {
-      frames.add(FrameElement(framePair.first, this, framePair.second)
-        ..active = identical(framePair.first, active));
+  Diagram.allFrames(LinkedHashMap<Frame, Value> frameRets, Frame active) {
+    for (Frame frame in frameRets.keys) {
+      frames.add(FrameElement(frame, this, frameRets[frame])
+        ..active = identical(frame, active));
     }
     _finish();
   }
@@ -79,53 +83,53 @@ class Diagram extends DiagramInterface {
         }
       }
     }
-    for (Pair<Anchor, Expression> item in _incompleteArrows) {
+    for (Pair<Anchor, Value> item in _incompleteArrows) {
       arrows.add(Arrow(item.first, _known[item.second].anchor(Direction.left)));
     }
     _known.clear();
     _incompleteArrows.clear();
   }
 
-  final Map<Expression, Widget> _known = Map.identity();
-  final List<Pair<Anchor, Expression>> _incompleteArrows = [];
+  final Map<Value, Widget> _known = Map.identity();
+  final List<Pair<Anchor, Value>> _incompleteArrows = [];
 
-  Anchor _handleExisting(Expression expression) {
+  Anchor _handleExisting(Value value) {
     Anchor anchor = Anchor();
-    Widget element = _known[expression];
+    Widget element = _known[value];
     if (element == null) {
-      _incompleteArrows.add(Pair(anchor, expression));
+      _incompleteArrows.add(Pair(anchor, value));
     } else {
       arrows.add(Arrow(anchor, element.anchor(Direction.left)));
     }
     return anchor;
   }
 
-  Widget _build(Expression expression) {
-    _known[expression] = null;
-    Widget element = expression.draw(this);
-    _known[expression] = element;
+  Widget _build(Value value) {
+    _known[value] = null;
+    Widget element = value.draw(this);
+    _known[value] = element;
     return element;
   }
 
-  Widget bindingTo(Expression expression) {
-    if (expression.inlineInDiagram) return expression.draw(this);
-    if (_known.containsKey(expression)) return _handleExisting(expression);
+  Widget bindingTo(Value value) {
+    if (value.inlineInDiagram) return value.draw(this);
+    if (_known.containsKey(value)) return _handleExisting(value);
     if (rows.last.elements.isNotEmpty) rows.add(Row([]));
     int myRow = rows.length - 1;
-    Widget element = _build(expression);
+    Widget element = _build(value);
     rows[myRow].elements.insert(0, element);
     Anchor anchor = Anchor();
     arrows.add(Arrow(anchor, element.anchor(Direction.left)));
     return anchor;
   }
 
-  Widget pointTo(Expression expression, [int parentRow]) {
-    if (expression == nil) return Strike();
-    if (expression.inlineInDiagram) return expression.draw(this);
-    if (_known.containsKey(expression)) return _handleExisting(expression);
+  Widget pointTo(Value value, [int parentRow]) {
+    if (value == nil) return Strike();
+    if (value.inlineInDiagram) return value.draw(this);
+    if (_known.containsKey(value)) return _handleExisting(value);
     if (parentRow != null) rows.add(Row([]));
     int myRow = rows.length - 1;
-    Widget element = _build(expression);
+    Widget element = _build(value);
     rows[myRow].elements.insert(0, element);
     if (parentRow != null) {
       _rowParent[myRow] = parentRow;

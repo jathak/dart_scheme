@@ -5,11 +5,14 @@ library cs61a_scheme.core.widgets;
 import 'dart:async';
 
 import 'expressions.dart';
+import 'frame.dart';
 import 'logging.dart';
 import 'procedures.dart' show Procedure;
 import 'utils.dart' show schemeApply;
+import 'values.dart';
+import 'wrappers.dart';
 
-class Direction extends SelfEvaluating {
+class Direction extends Value {
   final String _id;
 
   const Direction._(this._id);
@@ -53,9 +56,8 @@ class Direction extends SelfEvaluating {
 ///
 /// Whenever something extending [Widget] is logged, the web REPL will render it
 /// instead of just printing it. Used primarily for diagramming.
-abstract class Widget extends SelfEvaluating {
+abstract class Widget extends Value {
   Widget();
-  toJS() => this;
   final Map<Direction, Anchor> _anchors = {};
   Anchor anchor(Direction dir) => _anchors.putIfAbsent(dir, () => Anchor());
   Iterable<Direction> get anchoredDirections => _anchors.keys;
@@ -97,7 +99,7 @@ class MarkdownWidget extends TextWidget {
     if (env == null) return;
     var proc = env.lookup(SchemeSymbol.runtime(name));
     if (proc is Procedure) {
-      schemeApply(proc, nil, env);
+      schemeApply(proc, SchemeList(nil), env);
     }
   }
 }
@@ -170,9 +172,9 @@ class BlockGrid extends Widget {
 abstract class DiagramInterface extends Widget {
   int get currentRow;
 
-  /// If expression.inlineInDiagram is true, returns expression.draw(this).
-  /// If not, returns an anchor that is linked to expression.draw(this).
+  /// If value.inlineInDiagram is true, returns value.draw(this).
+  /// If not, returns an anchor that is linked to value.draw(this).
   /// If parentRow is set, the new object will be on a new line, with spacing
   /// based on the parentRow.
-  Widget pointTo(Expression expression, [int parentRow]);
+  Widget pointTo(Value value, [int parentRow]);
 }

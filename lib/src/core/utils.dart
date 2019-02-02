@@ -4,22 +4,22 @@ import 'dart:async';
 
 import 'documentation.dart';
 import 'expressions.dart';
+import 'frame.dart';
 import 'logging.dart';
 import 'procedures.dart';
 import 'reader.dart';
+import 'values.dart';
+import 'wrappers.dart';
 
-void checkForm(Expression expressions, int min, [int max = -1]) {
-  if (expressions is PairOrEmpty && expressions.wellFormed) {
-    int length = expressions.length;
-    if (length < min) {
-      throw SchemeException("$expressions must contain at least $min items.");
-    }
-    if (max > -1 && length > max) {
-      throw SchemeException("$expressions may contain at most $max items.");
-    }
-    return;
+void checkForm(SchemeList expressions, int min, [int max = -1]) {
+  int length = expressions.length;
+  if (length < min) {
+    throw SchemeException("$expressions must contain at least $min items.");
   }
-  throw SchemeException("$expressions is not a valid list.");
+  if (max > -1 && length > max) {
+    throw SchemeException("$expressions may contain at most $max items.");
+  }
+  return;
 }
 
 void checkFormals(Expression formals) {
@@ -40,7 +40,7 @@ void checkFormals(Expression formals) {
   if (!formals.isNil) checkAndAdd(formals);
 }
 
-Expression schemeEval(Expression expr, Frame env) {
+Value schemeEval(Expression expr, Frame env) {
   try {
     return completeEval(expr.evaluate(env));
   } on SchemeException catch (e) {
@@ -49,10 +49,10 @@ Expression schemeEval(Expression expr, Frame env) {
   }
 }
 
-Expression schemeApply(Procedure procedure, PairOrEmpty args, Frame env) =>
+Value schemeApply(Procedure procedure, SchemeList args, Frame env) =>
     completeEval(procedure.apply(args, env));
 
-Expression evalCallExpression(Pair expr, Frame env) {
+Value evalCallExpression(Pair expr, Frame env) {
   if (!expr.wellFormed) {
     throw SchemeException("Malformed list: $expr");
   }
@@ -60,7 +60,8 @@ Expression evalCallExpression(Pair expr, Frame env) {
   Expression rest = expr.second;
   if (first is SchemeSymbol &&
       env.interpreter.specialForms.containsKey(first)) {
-    var result = env.interpreter.specialForms[first](rest, env);
+    var result =
+        env.interpreter.specialForms[first](SchemeList<Expression>(rest), env);
     env.interpreter.triggerEvent(first, [rest], env);
     return result;
   }
@@ -69,7 +70,8 @@ Expression evalCallExpression(Pair expr, Frame env) {
   return env.interpreter.impl.evalProcedureCall(first, rest, env);
 }
 
-Expression completeEval(val) => val is Thunk ? val.evaluate(null) : val;
+Value completeEval(Value val) =>
+    val is Thunk ? schemeEval(val.expr, val.env) : val;
 
 addBuiltin(Frame env, SchemeSymbol name, SchemeBuiltin fn, int args,
     {Docs docs}) {

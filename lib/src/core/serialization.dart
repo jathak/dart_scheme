@@ -5,6 +5,7 @@ import 'dart:convert' show json;
 import 'expressions.dart';
 import 'logging.dart';
 import 'numbers.dart';
+import 'values.dart';
 
 final Map<String, Serializable> deserializers = {
   'Integer': Number.zero,
@@ -14,7 +15,7 @@ final Map<String, Serializable> deserializers = {
   'SchemeString': const SchemeString('x')
 };
 
-abstract class Serializable<T extends Expression> extends Expression {
+abstract class Serializable<T extends Value> extends Value {
   Map serialize();
   T deserialize(Map data);
 }
@@ -23,7 +24,7 @@ class Serialization {
   static String serializeToJson(Serializable expr) =>
       json.encode(expr.serialize());
 
-  static Expression deserialize(Map data) {
+  static Value deserialize(Map data) {
     if (!data.containsKey('type')) {
       throw SchemeException("Invalid serialized expression");
     } else if (!deserializers.containsKey(data['type'])) {
@@ -32,6 +33,6 @@ class Serialization {
     return deserializers[data['type']].deserialize(data);
   }
 
-  static Expression deserializeFromJson(String data) =>
+  static Value deserializeFromJson(String data) =>
       deserialize(json.decode(data));
 }

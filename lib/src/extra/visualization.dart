@@ -1,6 +1,7 @@
 library cs61a_scheme.extra.visualization;
 
 import 'dart:async';
+import 'dart:collection' show LinkedHashMap;
 
 import 'package:cs61a_scheme/cs61a_scheme.dart';
 
@@ -22,11 +23,11 @@ class Visualization extends Widget {
   Frame env;
   List<Expression> code;
   List<Diagram> diagrams = [];
-  Map<Frame, Expression> frameReturnValues = Map.identity();
+  Map<Frame, Value> frameReturnValues = Map.identity();
   int current = 0;
 
   List<Widget> buttonRow;
-  Expression result;
+  Value result;
 
   Visualization(this.code, this.env) {
     Interpreter inter = env.interpreter;
@@ -100,7 +101,7 @@ class Visualization extends Widget {
     }
     frameReturnValues[myEnv] = returnValue;
     for (SchemeSymbol binding in myEnv.bindings.keys) {
-      Expression value = myEnv.bindings[binding];
+      Value value = myEnv.bindings[binding];
       if (value is LambdaProcedure) {
         _addFrames(value.env);
       }
@@ -109,25 +110,26 @@ class Visualization extends Widget {
   }
 
   void _addDiagram(Frame active) {
-    List<Frame> frames = frameReturnValues.keys.toList()
-      ..sort((a, b) => a.id - b.id);
-    List<Pair<Frame, Expression>> passing =
-        frames.map((frame) => Pair(frame, frameReturnValues[frame])).toList();
-    diagrams.add(Diagram.allFrames(passing, active));
+    var ordered = LinkedHashMap.identity();
+    for (var frame in frameReturnValues.keys.toList()
+      ..sort((a, b) => a.id - b.id)) {
+      ordered[frame] = frameReturnValues[frame];
+    }
+    diagrams.add(Diagram.allFrames(ordered, active));
   }
 
-  Undefined _makeVisualizeStep(List<Expression> exprs, Frame env) {
+  Undefined _makeVisualizeStep(List<Value> exprs, Frame env) {
     _addFrames(env);
     _addDiagram(env);
     return undefined;
   }
 
-  Undefined _makeVisualizeReturnStep(List<Expression> exprs, Frame env) {
+  Undefined _makeVisualizeReturnStep(List<Value> exprs, Frame env) {
     if (exprs.length != 1) {
       throw SchemeException(
           "Invalid event $exprs trigged during visualization");
     }
-    Expression returnValue = exprs[0];
+    Value returnValue = exprs[0];
     _addFrames(env, returnValue);
     _addDiagram(env);
     return undefined;

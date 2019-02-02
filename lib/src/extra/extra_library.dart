@@ -26,8 +26,8 @@ class ExtraLibrary extends SchemeLibrary with _$ExtraLibraryMixin {
   }
 
   @SchemeSymbol("run-async")
-  Future<Expression> runAsync(Procedure proc, Frame env) {
-    var completer = Completer<Expression>();
+  Future<Value> runAsync(Procedure proc, Frame env) {
+    var completer = Completer<Value>();
 
     var resolver = (args, env) {
       completer.complete(args[0]);
@@ -41,23 +41,24 @@ class ExtraLibrary extends SchemeLibrary with _$ExtraLibraryMixin {
         const SchemeSymbol("async:resolve"), resolver, 1);
     var reject =
         BuiltinProcedure.fixed(const SchemeSymbol("async:reject"), rejecter, 1);
-    var operands = PairOrEmpty.fromIterable([resolve, reject]);
+    var operands = SchemeList.fromIterable([resolve, reject]);
     Future.microtask(() => completeEval(proc.apply(operands, env)));
     return completer.future;
   }
 
   @SchemeSymbol("run-after")
-  Future<Expression> runAfter(Number millis, Procedure proc, Frame env) {
+  Future<Value> runAfter(Number millis, Procedure proc, Frame env) {
     var duration = Duration(milliseconds: millis.toJS());
-    return Future.delayed(duration, () => completeEval(proc.apply(nil, env)));
+    return Future.delayed(
+        duration, () => completeEval(proc.apply(SchemeList(nil), env)));
   }
 
   @SchemeSymbol("completed?")
-  Boolean isCompleted(AsyncExpression expr) =>
+  Boolean isCompleted(AsyncValue expr) =>
       expr.complete ? schemeTrue : schemeFalse;
 
-  /// Creates a diagram of [expression].
-  Diagram draw(Expression expression) => Diagram(expression);
+  /// Creates a diagram of [value].
+  Diagram draw(Value value) => Diagram(value);
 
   /// Create a diagram of the current environment.
   Diagram diagram(Frame env) => Diagram(env);
@@ -68,17 +69,16 @@ class ExtraLibrary extends SchemeLibrary with _$ExtraLibraryMixin {
       Visualization(code, env);
 
   /// Returns a list of all bindings in the current environment.
-  PairOrEmpty bindings(Frame env) =>
-      PairOrEmpty.fromIterable(env.bindings.keys);
+  SchemeList bindings(Frame env) => SchemeList.fromIterable(env.bindings.keys);
 
   /// Triggers an event with a given name (first arg) and arguments.
   @SchemeSymbol('trigger-event')
   @MinArgs(1)
-  void triggerEvent(List<Expression> exprs, Frame env) {
-    if (exprs.first is! SchemeSymbol) {
-      throw SchemeException('${exprs.first} is not a symbol');
+  void triggerEvent(List<Value> args, Frame env) {
+    if (args.first is! SchemeSymbol) {
+      throw SchemeException('${args.first} is not a symbol');
     }
-    env.interpreter.triggerEvent(exprs[0], exprs.skip(1).toList(), env);
+    env.interpreter.triggerEvent(args[0], args.skip(1).toList(), env);
   }
 
   /// Sets up an listener to call [onEvent] when an event with [id] occurs.
@@ -86,13 +86,13 @@ class ExtraLibrary extends SchemeLibrary with _$ExtraLibraryMixin {
   SchemeEventListener listenFor(SchemeSymbol id, Procedure onEvent, Frame env) {
     var callback = (exprs, env) {
       try {
-        schemeApply(onEvent, PairOrEmpty.fromIterable(exprs), env);
+        schemeApply(onEvent, SchemeList.fromIterable(exprs), env);
         // ignore: avoid_catches_without_on_clauses
       } catch (e) {
         if (e is SchemeException) {
           e.addCall(onEvent);
-          var eventPair = Pair(id, PairOrEmpty.fromIterable(exprs));
-          e.addCall(TextMessage('<event $eventPair>'));
+          var eventList = SchemeList.fromIterable([id] + exprs);
+          e.addCall(TextMessage('<event $eventList>'));
         }
         env.interpreter.logError(e);
       }
@@ -113,10 +113,10 @@ class ExtraLibrary extends SchemeLibrary with _$ExtraLibraryMixin {
     env.interpreter.stopAllListeners(id);
   }
 
-  /// Constructs a string from the display values of any number of expressions.
+  /// Constructs a string from the display values of any number of values.
   @SchemeSymbol('string-append')
-  String stringAppend(List<Expression> exprs) =>
-      exprs.map((e) => e.display).join('');
+  String stringAppend(List<Value> values) =>
+      values.map((e) => e.display).join('');
 
   String serialize(Serializable expr) => Serialization.serializeToJson(expr);
 
@@ -124,8 +124,8 @@ class ExtraLibrary extends SchemeLibrary with _$ExtraLibraryMixin {
       Serialization.deserializeFromJson(json);
 
   /// Renders all provided text as a block of Markdown.
-  MarkdownWidget formatted(List<Expression> expressions, Frame env) {
-    String text = expressions.map((expr) => expr.display).join('');
+  MarkdownWidget formatted(List<Value> values, Frame env) {
+    String text = values.map((expr) => expr.display).join('');
     return MarkdownWidget(text, inline: true, env: env);
   }
 

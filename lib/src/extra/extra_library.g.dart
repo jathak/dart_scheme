@@ -5,21 +5,21 @@ part of cs61a_scheme.extra.extra_library;
 // ignore_for_file: prefer_expression_function_bodies
 // ignore_for_file: unnecessary_lambdas
 abstract class _$ExtraLibraryMixin {
-  Future<Expression> runAsync(Procedure proc, Frame env);
-  Future<Expression> runAfter(Number millis, Procedure proc, Frame env);
-  Boolean isCompleted(AsyncExpression expr);
-  Diagram draw(Expression expression);
+  Future<Value> runAsync(Procedure proc, Frame env);
+  Future<Value> runAfter(Number millis, Procedure proc, Frame env);
+  Boolean isCompleted(AsyncValue expr);
+  Diagram draw(Value value);
   Diagram diagram(Frame env);
   Visualization visualize(List<Expression> code, Frame env);
-  PairOrEmpty bindings(Frame env);
-  void triggerEvent(List<Expression> exprs, Frame env);
+  SchemeList bindings(Frame env);
+  void triggerEvent(List<Value> args, Frame env);
   SchemeEventListener listenFor(SchemeSymbol id, Procedure onEvent, Frame env);
   void cancelListener(SchemeEventListener listener, Frame env);
   void cancelAll(SchemeSymbol id, Frame env);
-  String stringAppend(List<Expression> exprs);
+  String stringAppend(List<Value> values);
   String serialize(Serializable expr);
   Expression deserialize(String json);
-  MarkdownWidget formatted(List<Expression> expressions, Frame env);
+  MarkdownWidget formatted(List<Value> values, Frame env);
   void logicStart(Frame env);
   Docs docs(SchemeSymbol topic, Frame env);
   void allDocs(Frame env);
@@ -27,35 +27,39 @@ abstract class _$ExtraLibraryMixin {
     addBuiltin(__env, const SchemeSymbol("run-async"), (__exprs, __env) {
       if (__exprs[0] is! Procedure)
         throw SchemeException('Argument of invalid type passed to run-async.');
-      return AsyncExpression(this.runAsync(__exprs[0], __env));
+      return AsyncValue(this.runAsync(__exprs[0], __env));
     }, 1);
     addBuiltin(__env, const SchemeSymbol("run-after"), (__exprs, __env) {
       if (__exprs[0] is! Number || __exprs[1] is! Procedure)
         throw SchemeException('Argument of invalid type passed to run-after.');
-      return AsyncExpression(this.runAfter(__exprs[0], __exprs[1], __env));
+      return AsyncValue(this.runAfter(__exprs[0], __exprs[1], __env));
     }, 2);
     addBuiltin(__env, const SchemeSymbol("completed?"), (__exprs, __env) {
-      if (__exprs[0] is! AsyncExpression)
+      if (__exprs[0] is! AsyncValue)
         throw SchemeException('Argument of invalid type passed to completed?.');
       return this.isCompleted(__exprs[0]);
     }, 1);
     addBuiltin(__env, const SchemeSymbol("draw"), (__exprs, __env) {
       return this.draw(__exprs[0]);
     }, 1,
-        docs: Docs("draw", "Creates a diagram of [expression].\n",
-            [Param(null, "expression")]));
+        docs: Docs("draw", "Creates a diagram of [value].\n",
+            [Param("value", "value")]));
     addBuiltin(__env, const SchemeSymbol("diagram"), (__exprs, __env) {
       return this.diagram(__env);
     }, 0,
         docs: Docs(
             "diagram", "Create a diagram of the current environment.\n", []));
-    addVariableOperandBuiltin(
-        __env, const SchemeSymbol("visualize"), this.visualize, 0,
+    addVariableOperandBuiltin(__env, const SchemeSymbol("visualize"),
+        (__exprs, __env) {
+      if (__exprs.any((x) => x is! Expression))
+        throw SchemeException('Argument of invalid type passed to visualize.');
+      return this.visualize(__exprs.cast<Expression>(), __env);
+    }, 0,
         maxArgs: -1,
         docs: Docs.variable(
             "visualize", "Visualizes the execution of a piece of code.\n"));
     addBuiltin(__env, const SchemeSymbol("bindings"), (__exprs, __env) {
-      return this.bindings(__env);
+      return (this.bindings(__env)).list;
     }, 0,
         docs: Docs(
             "bindings",
@@ -104,7 +108,7 @@ abstract class _$ExtraLibraryMixin {
     }, 0,
         maxArgs: -1,
         docs: Docs.variable('string-append',
-            "Constructs a string from the display values of any number of expressions.\n",
+            "Constructs a string from the display values of any number of values.\n",
             returnType: "string"));
     addBuiltin(__env, const SchemeSymbol("serialize"), (__exprs, __env) {
       if (__exprs[0] is! Serializable)

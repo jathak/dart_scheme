@@ -1,8 +1,10 @@
 library cs61a_scheme.core.numbers;
 
 import 'expressions.dart';
+import 'frame.dart';
 import 'logging.dart';
 import 'serialization.dart';
+import 'values.dart';
 
 /// Base class for both Scheme number types.
 ///
@@ -12,7 +14,7 @@ import 'serialization.dart';
 ///
 /// With the exception of true division, all arithmetic operations between two
 /// [Integer] expressions should return another [Integer].
-abstract class Number extends SelfEvaluating {
+abstract class Number extends Expression {
   Number();
 
   /// Create a new [Number] from a Dart [num].
@@ -37,6 +39,8 @@ abstract class Number extends SelfEvaluating {
 
   bool get inlineInDiagram => true;
   dynamic get value;
+
+  Value evaluate(Frame env) => this;
 
   Number _operation(Number other, Function fn) {
     num myNum = this is Double ? value : num.parse("$this");
@@ -145,8 +149,3 @@ class Double extends Number implements Serializable<Double> {
   @override
   double toJS() => value;
 }
-
-/// Given an iterable of [Expression] objects, checks that they are all numbers
-/// and returns a new iterable will all of them casted as such.
-Iterable<Number> allNumbers(Iterable<Expression> expr) => expr.map(
-    (ex) => ex is Number ? ex : throw SchemeException("$ex is not a number."));
