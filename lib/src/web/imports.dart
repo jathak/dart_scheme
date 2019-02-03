@@ -37,7 +37,7 @@ class ImportedLibrary extends Value {
     return library;
   }
 
-  Expression reference(SchemeSymbol symbol) {
+  Value reference(SchemeSymbol symbol) {
     if (!env.bindings.containsKey(symbol)) {
       throw SchemeException("Cannot find $symbol in library");
     }

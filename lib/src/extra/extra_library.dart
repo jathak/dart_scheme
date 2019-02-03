@@ -17,14 +17,6 @@ part 'extra_library.g.dart';
 /// the built-ins and performs type checking on arguments).
 @schemelib
 class ExtraLibrary extends SchemeLibrary with _$ExtraLibraryMixin {
-  void importAll(Frame env) {
-    super.importAll(env);
-    env.interpreter.specialForms[const SchemeSymbol('define-async')] =
-        doDefineAsync;
-    env.interpreter.specialForms[const SchemeSymbol('lambda-async')] =
-        doAsyncLambda;
-  }
-
   @SchemeSymbol("run-async")
   Future<Value> runAsync(Procedure proc, Frame env) {
     var completer = Completer<Value>();
