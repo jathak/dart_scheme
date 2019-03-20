@@ -110,7 +110,7 @@ class Visualization extends Widget {
   }
 
   void _addDiagram(Frame active) {
-    var ordered = LinkedHashMap.identity();
+    var ordered = LinkedHashMap<Frame, Value>.identity();
     for (var frame in frameReturnValues.keys.toList()
       ..sort((a, b) => a.id - b.id)) {
       ordered[frame] = frameReturnValues[frame];
