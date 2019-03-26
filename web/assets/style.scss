@@ -59,7 +59,7 @@ body {
   white-space: pre-wrap;
   word-wrap: break-word;
   overflow-y:auto;
-  
+
   @include background;
   @include text;
 
@@ -83,14 +83,14 @@ body {
     font-size: 80%;
     @include status;
   }
-  
+
   .render {
     position: relative;
     margin: 0;
     padding: 0;
     display: block;
   }
-  
+
   .render td {
     margin: 0;
     padding: 0;
@@ -98,6 +98,25 @@ body {
 
   .error {
     @include error;
+  }
+
+  .mouseover-wrapper {
+    .render {
+      display: none;
+    }
+    .objects {
+      padding: 0;
+    }
+    &:hover {
+      .render {
+        z-index: 1000;
+        border-radius: 0.185em;
+        position: absolute;
+        width: auto;
+        display: block;
+        @include other-frame;
+      }
+    }
   }
 }
 
@@ -109,7 +128,7 @@ body {
 .code-input {
   display: inline-block;
 }
-  
+
 .code-input:focus {
   outline: none;
 }
