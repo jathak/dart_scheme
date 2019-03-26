@@ -13,19 +13,19 @@ import 'project_interface.dart';
 Expression schemeRead(List<Expression> tokens, ProjectInterface impl) =>
     impl.read(tokens);
 
-Set _numeralStarts = Set.from("0123456789+-.".split(""));
-Set _symbolChars = Set.from(
+final _numeralStarts = Set.from("0123456789+-.".split(""));
+final _symbolChars = Set.from(
         r"!$%&*/:<=>?@^_~abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
             .split(""))
     .union(_numeralStarts);
-Set _stringDelims = Set.from(['"']);
-Set _whitespace = Set.from([' ', '\t', '\n', '\r']);
-Set _singleCharTokens = Set.from(['(', ')', '[', ']', "'", '`', '#']);
-Set _tokenEnd = _whitespace
+const _stringDelims = {'"'};
+const _whitespace = {' ', '\t', '\n', '\r'};
+const _singleCharTokens = {'(', ')', '[', ']', "'", '`', '#'};
+final _tokenEnd = _whitespace
     .union(_singleCharTokens)
     .union(_stringDelims)
-    .union(Set.from([',', ',@']));
-Set _delimiters = _singleCharTokens.union(Set.from(['.', ',', ',@']));
+    .union({',', ',@'});
+final _delimiters = _singleCharTokens.union({'.', ',', ',@'});
 
 /// Returns whether [s] is a well-formed symbol.
 bool validSymbol(String s) {

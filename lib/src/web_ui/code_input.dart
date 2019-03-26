@@ -35,15 +35,14 @@ class CodeInput {
     element = SpanElement()
       ..classes = ['code-input']
       ..contentEditable = 'true';
-    _autoBox = DivElement()
-      ..classes = ["docs"]
-      ..style.visibility = "hidden";
+    _autoBox = DivElement()..style.visibility = "hidden";
     _autoBoxWrapper = DivElement()
       ..classes = ["render"]
       ..append(_autoBox);
     _subs.add(element.onKeyPress.listen(_onInputKeyPress));
     _subs.add(element.onKeyDown.listen(_keyListener));
     _subs.add(element.onKeyUp.listen(_keyListener));
+    _subs.add(document.onSelectionChange.listen(_selectListener));
     log.append(element);
     log.append(_autoBoxWrapper);
     element.focus();
@@ -87,7 +86,15 @@ class CodeInput {
     }
   }
 
-  Future _onInputKeyPress(KeyboardEvent event) async {
+  Future _onInputKeyPress(KeyboardEvent event) {
+    if (runCode != null) {
+      return _replKeyPress(event);
+    } else {
+      return _editorKeyPress(event);
+    }
+  }
+
+  Future _replKeyPress(KeyboardEvent event) async {
     if ((missingParens ?? -1) > 0 &&
         event.shiftKey &&
         event.keyCode == KeyCode.ENTER) {
@@ -103,6 +110,32 @@ class CodeInput {
       await delay(100);
       await highlight();
     } else if ((missingParens ?? 0) > 0 && KeyCode.ENTER == event.keyCode) {
+      event.preventDefault();
+      int cursor = findPosition(element, window.getSelection().getRangeAt(0));
+      String newInput = element.text;
+      String first = newInput.substring(0, cursor) + "\n";
+      String second = "";
+      if (cursor != newInput.length) {
+        second = newInput.substring(cursor);
+      }
+      int spaces = _countSpace(newInput, cursor);
+      element.text = first + " " * spaces + second;
+      await highlight(cursor: cursor + spaces + 1);
+    } else {
+      await delay(5);
+      await highlight(saveCursor: true);
+    }
+    parenListener(missingParens);
+  }
+
+  Future _editorKeyPress(KeyboardEvent event) async {
+    if ((missingParens ?? -1) > 0 &&
+        event.shiftKey &&
+        event.keyCode == KeyCode.ENTER) {
+      event.preventDefault();
+      element.text = element.text.trimRight() + ')' * missingParens + '\n\n';
+      await highlight(atEnd: true);
+    } else if (KeyCode.ENTER == event.keyCode) {
       event.preventDefault();
       int cursor = findPosition(element, window.getSelection().getRangeAt(0));
       String newInput = element.text;
@@ -225,6 +258,7 @@ class CodeInput {
   void _autocomplete() {
     // Find the text to the left of where the typing cursor currently is.
     int cursorPos = findPosition(element, window.getSelection().getRangeAt(0));
+    if (cursorPos > element.text.length) cursorPos = element.text.length;
     List<String> matchingWords = [];
     int currLength = 0;
     // Find the last word that being typed [output] or the second to last operation that was typed [output2].
@@ -245,20 +279,28 @@ class CodeInput {
     }
     // Clear whatever is currently in the box.
     _autoBox.children = [];
-    _autoBox.classes = ["docs"];
+    _autoBox.classes = [];
     if (matchingWords.isEmpty) {
-      // If there are no matching words, hide the autocomplete box.
+      // If there are no matching words, hide the autocomplete box in the REPL
       tabComplete = "";
       _autoBox.style.visibility = "hidden";
+      // In the editor, list a full word as a current match anyway.
+      if (runCode == null && match.isNotEmpty && isFullWord) {
+        _autoBox.classes = ["docs"];
+        _autoBox.append(SpanElement()
+          ..classes = ["autobox-word"]
+          ..innerHtml = "<strong>($match ...)</strong>");
+        _autoBox.style.visibility = "visible";
+      }
     } else if (matchingWords.length == 1) {
       // If there is only one matching word, display the docs for that word.
       render(wordToDocs[matchingWords.first], _autoBox);
-      _autoBox.style.visibility = "hidden";
-      _autoBox.children.last.style.visibility = "visible";
+      _autoBox.style.visibility = "visible";
       tabComplete = matchingWords.first.substring(currLength);
-    } else {
+    } else if (matchingWords.isNotEmpty) {
       tabComplete = "";
       // Add each matching word as its own element for formatting purposes.
+      _autoBox.classes = ["docs"];
       for (String match in matchingWords) {
         _autoBox.append(SpanElement()
           ..classes = ["autobox-word"]
@@ -268,7 +310,9 @@ class CodeInput {
       }
       _autoBox.style.visibility = "visible";
     }
-    _autoBox.scrollIntoView();
+    if (runCode != null) {
+      _autoBox.scrollIntoView();
+    }
   }
 
   _keyListener(KeyboardEvent event) async {
@@ -290,5 +334,9 @@ class CodeInput {
       element.appendText(tabComplete);
       await highlight(cursor: cursor + tabComplete.length + 1);
     }
+  }
+
+  _selectListener(event) {
+    if (_isAutocompleteEnabled) _autocomplete();
   }
 }

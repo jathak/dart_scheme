@@ -11,12 +11,6 @@ class Button extends Widget {
   void Function() click;
   Widget inside;
   Button(this.inside, this.click);
-  Button.forEvent(
-      this.inside, SchemeSymbol id, List<Expression> data, Frame env) {
-    click = () {
-      env.interpreter.triggerEvent(id, data, env);
-    };
-  }
 }
 
 class Visualization extends Widget {
@@ -93,7 +87,7 @@ class Visualization extends Widget {
     buttonRow = [first, prev, status, next, last, animate];
   }
 
-  void _addFrames(Frame myEnv, [Expression returnValue]) {
+  void _addFrames(Frame myEnv, [Value returnValue]) {
     if (myEnv.tag == '#imported') return;
     if (frameReturnValues.containsKey(myEnv)) {
       frameReturnValues[myEnv] = returnValue;

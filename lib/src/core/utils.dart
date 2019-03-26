@@ -23,7 +23,7 @@ void checkForm(SchemeList expressions, int min, [int max = -1]) {
 }
 
 void checkFormals(Expression formals) {
-  var symbols = Set<SchemeSymbol>();
+  var symbols = <SchemeSymbol>{};
   void checkAndAdd(Expression symbol) {
     if (symbol is! SchemeSymbol) {
       throw SchemeException("Non-symbol: $symbol");

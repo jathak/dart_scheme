@@ -1,0 +1,59 @@
+@import 'theme';
+
+.editor {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  @include background;
+
+  display: flex;
+
+  .sidebar {
+    display: flex;
+    min-width: 300px;
+    width: 300px;
+    background: blue;
+    &.collapsed {
+
+    }
+  }
+
+  .content {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+  }
+
+  .tabs {
+    display: flex;
+    $tab-height: 48px;
+    height: $tab-height;
+    min-height: $tab-height;
+    background: green;
+  }
+
+  .buffer {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    overflow-y: auto;
+    .code-input {
+      font-family: $font-stack;
+      flex: 1;
+      padding: 16px;
+    }
+    .render {
+      height: auto;
+      padding: 0;
+    }
+    .docs {
+      margin: 0;
+      border-radius: 0;
+      padding: 16px;
+      width: calc(100% - 32px);
+    }
+  }
+
+}

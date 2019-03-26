@@ -1,0 +1,55 @@
+@import "theme";
+
+.repl {
+  padding: 16px;
+  margin: 0;
+  position:absolute;
+  left:0;
+  top:0;
+  right:0;
+  bottom:0;
+
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  overflow-y:auto;
+
+  @include background;
+  @include text;
+
+  a:not(.button){
+    @include link;
+  }
+
+  .repl-prompt {
+    vertical-align: top;
+    @include prompt;
+  }
+
+  .repl-async {
+    @include async-log;
+  }
+
+  .repl-status {
+    position: fixed;
+    right: 8px;
+    bottom: 8px;
+    font-size: 80%;
+    @include status;
+  }
+
+  .render {
+    position: relative;
+    margin: 0;
+    padding: 0;
+    display: block;
+  }
+
+  .render td {
+    margin: 0;
+    padding: 0;
+  }
+
+  .error {
+    @include error;
+  }
+}

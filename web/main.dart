@@ -65,6 +65,12 @@ main() async {
   });
 }
 
+startEditor(Interpreter inter) async {
+  var container = DivElement()..classes = ['editor'];
+  document.body.append(container);
+  var editor = Editor(inter, container);
+}
+
 startScheme(WebLibrary webLibrary) async {
   var inter = Interpreter(StaffProjectImplementation());
   var normals = inter.globalEnv.bindings.keys.toSet();
@@ -104,6 +110,9 @@ startScheme(WebLibrary webLibrary) async {
     })
   ]);
   inter.logger(MarkdownWidget(motd, env: demos), true);
+  if (window.location.hash == "#editor") {
+    startEditor(inter);
+  }
 }
 
 addDemo(Frame env, String demoName, String code) {

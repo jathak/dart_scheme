@@ -1,5 +1,9 @@
-@import 'package:cs61a_scheme/styles/theme';
+@import 'package:cs61a_scheme/styles/syntax';
+@import 'package:cs61a_scheme/styles/input';
 @import 'package:cs61a_scheme/styles/diagram';
+@import 'package:cs61a_scheme/styles/editor';
+@import 'package:cs61a_scheme/styles/repl';
+@import 'package:cs61a_scheme/styles/turtle';
 
 @font-face {
   font-family: 'Inconsolata-g';
@@ -8,118 +12,7 @@
   font-style: normal;
 }
 
-$font-stack: 'Inconsolata-g', 'Inconsolata', monospace;
-
-
 body {
   margin: 0;
   padding: 0;
 }
-
-#turtle{
-  position: absolute;
-  right: 0;
-  top: 0;
-  width: 31.25em;
-  height: 31.25em;
-  z-index:100;
-  background:#fff;
-  display:none;
-
-  @media all and (max-width: 768px) {
-    transform-origin: 100% 0% 0;
-    transform: scale(0.75,0.75);
-    -webkit-transform-origin: 100% 0% 0;
-    -webkit-transform: scale(0.75,0.75);
-  }
-
-  @media all and (max-width: 500px) {
-    #turtle {
-      transform-origin: 100% 0% 0;
-      transform: scale(0.5,0.5);
-      -webkit-transform-origin: 100% 0% 0;
-      -webkit-transform: scale(0.5,0.5);
-    }
-  }
-}
-
-.repl {
-  padding: 16px;
-  margin: 0;
-  position:absolute;
-  left:0;
-  top:0;
-  right:0;
-  bottom:0;
-  width: calc(100%-16px);
-  height: calc(100%-16px);
-  font-family: $font-stack;
-  font-size: 0.92em;
-
-  white-space: pre-wrap;
-  word-wrap: break-word;
-  overflow-y:auto;
-  
-  @include background;
-  @include text;
-
-  a:not(.button){
-    @include link;
-  }
-
-  .repl-prompt {
-    vertical-align: top;
-    @include prompt;
-  }
-
-  .repl-async {
-    @include async-log;
-  }
-
-  .repl-status {
-    position: fixed;
-    right: 8px;
-    bottom: 8px;
-    font-size: 80%;
-    @include status;
-  }
-  
-  .render {
-    position: relative;
-    margin: 0;
-    padding: 0;
-    display: block;
-  }
-  
-  .render td {
-    margin: 0;
-    padding: 0;
-  }
-
-  .error {
-    @include error;
-  }
-}
-
-.autobox-word {
-  margin: 10px;
-  display: inline-block;
-}
-
-.code-input {
-  display: inline-block;
-}
-  
-.code-input:focus {
-  outline: none;
-}
-
-.hljs-builtin-normal { @include spec-keyword; }
-.hljs-builtin-special, .hljs-builtin-turtle { @include extra-keyword; }
-
-.hljs-number { @include number; }
-.hljs-literal { @include boolean; }
-.hljs-string { @include string; }
-.hljs-name { @include procedure; }
-.hljs-symbol { @include symbol; }
-.hljs-comment { @include comment; }

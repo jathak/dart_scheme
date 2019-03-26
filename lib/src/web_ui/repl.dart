@@ -27,10 +27,11 @@ class Repl {
       if (decoded is List) history = decoded.map((item) => '$item').toList();
     }
     addBuiltins();
-    container = PreElement()..classes = ['repl'];
+    container = DivElement()..classes = ['repl'];
     container.onClick.listen((e) async {
       if (!activeInput.element.contains(document.activeElement)) {
         activeInput.element.focus();
+        await activeInput.highlight(atEnd: true);
       }
     });
     parent.append(container);
