@@ -113,7 +113,14 @@ class StandardLibrary extends SchemeLibrary with _$StandardLibraryMixin {
   Value cdr(Pair val) => val.second;
 
   /// Constructs a pair from values [car] and [cdr].
-  Pair cons(Value car, Value cdr) => Pair(car, cdr);
+  Pair cons(Value car, Value cdr) {
+    // Added if statement to disallow malformed lists
+    if (!(cdr is PairOrEmpty &&
+        (cdr.wellFormed || cdr.pair.second is Promise))) {
+      throw SchemeException("cdr must be another pair or nil");
+    }
+    return Pair(car, cdr);
+  }
 
   /// Finds the length of a well-formed Scheme list.
   num length(PairOrEmpty lst) => lst.lengthOrCycle;
@@ -262,6 +269,10 @@ class StandardLibrary extends SchemeLibrary with _$StandardLibraryMixin {
   @SchemeSymbol("set-cdr!")
   @TriggerEventAfter(const SchemeSymbol("pair-mutation"))
   void setCdr(Pair pair, Value val) {
+    // Added if statement to disallow malformed lists
+    if (!(val is PairOrEmpty && (val.wellFormed))) {
+      throw SchemeException("cdr must be another pair or nil");
+    }
     pair.second = val;
   }
 
