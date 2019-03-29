@@ -250,15 +250,29 @@ circumference
   (= (* (numer x) (denom y))
      (* (numer y) (denom x))))
 
+;;; Modified test to error because dotted lists no longer allowed
 (define x (cons 1 2))
 (car x)
-; expect 1
+; expect Error
 
-(cdr x)
-; expect 2
+;;; Old version of test with dotted lists
+;;; (cdr x)
+;;; expect 2
 
-(define x (cons 1 2))
-(define y (cons 3 4))
+
+;;; Old version of test with dotted lists
+;;;(define x (cons 1 2))
+;;; expect Error
+;;;(define y (cons 3 4))
+;;;(define z (cons x y))
+;;;(car (car z))
+;;;; expect 1
+;;; z
+;;; expect ((1 . 2) 3 . 4)
+
+;;; New version of test without dotted lists
+(define x (cons 1 nil))
+(define y (cons 3 nil))
 (define z (cons x y))
 (car (car z))
 ; expect 1
@@ -267,11 +281,17 @@ circumference
 ; expect 3
 
 z
-; expect ((1 . 2) 3 . 4)
+;expect ((1) 3)
 
-(define (make-rat n d) (cons n d))
+;;; Old version of test with dotted lists
+;;;(define (make-rat n d) (cons n d))
+;;;(define (numer x) (car x))
+;;;(define (denom x) (cdr x))
+
+;;; New version of test without dotted lists
+(define (make-rat n d) (cons n (cons d nil)))
 (define (numer x) (car x))
-(define (denom x) (cdr x))
+(define (denom x) (car (cdr x)))
 (define (print-rat x)
   (display (numer x))
   (display '/)
@@ -295,9 +315,16 @@ z
   (if (= b 0)
       a
       (gcd b (remainder a b))))
+
+;;; Old version of test with dotted lists
+;;; (define (make-rat n d)
+;;;  (let ((g (gcd n d)))
+;;;    (cons (/ n g) (/ d g))))
+
+;;; New version of test without dotted lists
 (define (make-rat n d)
-  (let ((g (gcd n d)))
-    (cons (/ n g) (/ d g))))
+     (let ((g (gcd n d)))
+       (cons (/ n g) (cons (/ d g) nil))))
 (print-rat (add-rat one-third one-third))
 ; expect 2/3
 
