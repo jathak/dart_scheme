@@ -1,7 +1,7 @@
 @import 'theme';
 
 .render {
-  
+
   @include render;
 
   .markdown {
@@ -34,7 +34,7 @@
     @include button;
     @include button-text;
   }
-  
+
   .block {
     display: inline-block;
     padding: 0.3em;
@@ -42,7 +42,7 @@
     height: 1.9em;
     vertical-align: middle;
     text-align: center;
-    
+
     .strike {
       display: inline-block;
       position: relative;
@@ -50,27 +50,27 @@
       transform: rotate(-45deg) scaleX(8);
     }
   }
-  
+
   svg path, svg circle {
     @include arrow;
   }
-  
+
   svg *[fill="transparent"] {
     fill: transparent;
   }
-  
+
   svg *[stroke="transparent"] {
     stroke: transparent;
   }
-  
+
   svg *[fill="none"] {
     fill: none;
   }
-  
+
   svg *[stroke="none"] {
     stroke: none;
   }
-  
+
   .pair {
     @include pair;
   }
@@ -88,11 +88,11 @@
     border-radius: 1.25em;
     @include async-block;
   }
-  
+
   .block-grid{
     margin: 0.5em;
     display: inline-block;
-    
+
     .block:not(:first-child) {
       border-left: none;
     }
@@ -166,16 +166,17 @@
 
     .frames{
       vertical-align: top;
-      
+
       %frame {
         padding: 0.375em;
         margin: 0.5em;
+        margin-right: 3.63em;
         border-radius: 0.185em;
-        
+
         .binding{
           margin-top: 0.125em;
         }
-        
+
         .align-right{
           float: right;
           border-bottom: 0.125em solid #fff;
@@ -183,33 +184,32 @@
           padding-left: 0.125em;
           @include binding-box;
         }
-        
+
         .parent{
           float: right;
           font-size: 75%;
         }
-        
+
         .return{
           @include return-value;
         }
       }
-      
+
       .current-frame {
         @extend %frame;
         @include current-frame;
       }
-      
+
       .other-frame {
         @extend %frame;
         @include other-frame;
       }
-      
+
     }
-    
+
     .objects{
       vertical-align: top;
       padding: 0.375em;
-      padding-left: 3.13em;
       padding-top: 1em;
       line-height: 2.0em;
     }

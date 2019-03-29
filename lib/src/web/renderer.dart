@@ -11,8 +11,10 @@ import '../web_ui/highlight.dart';
 
 import 'web_library.dart';
 
-void render(Widget widget, Element container) {
-  _Renderer(container, context['jsPlumb']).render(widget);
+Function render(Widget widget, Element container) {
+  var renderer = _Renderer(container, context['jsPlumb']);
+  renderer.render(widget);
+  return () => renderer.refreshConnections();
 }
 
 class _Renderer {

@@ -218,6 +218,21 @@ class Repl {
         logInto(box, expr is Undefined ? null : expr);
         return null;
       });
+    } else if (logging is Pair && !autodraw) {
+      var pairBox = SpanElement()..classes = ['mouseover-wrapper'];
+      pairBox.text = logging.toString() + (newline ? '\n' : '');
+      var diagram = Diagram(logging);
+      var diagramBox = SpanElement();
+      var refresher = render(diagram, diagramBox);
+      pairBox.append(diagramBox);
+      element.append(pairBox);
+      pairBox.onMouseOver.listen((e) {
+        refresher();
+      });
+      pairBox.onClick.listen((e) {
+        pairBox.classes = [];
+        refresher();
+      });
     } else if (logging == null) {
       element.text = '';
     } else if (logging is Widget) {
