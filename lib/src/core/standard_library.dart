@@ -115,8 +115,7 @@ class StandardLibrary extends SchemeLibrary with _$StandardLibraryMixin {
   /// Constructs a pair from values [car] and [cdr].
   Pair cons(Value car, Value cdr) {
     // Added if statement to disallow malformed lists
-    if (!(cdr is PairOrEmpty &&
-        (cdr.wellFormed || cdr.pair.second is Promise))) {
+    if (!(cdr is PairOrEmpty && cdr.wellFormed)) {
       throw SchemeException("cdr must be another pair or nil");
     }
     return Pair(car, cdr);
