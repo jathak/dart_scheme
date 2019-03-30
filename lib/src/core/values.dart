@@ -117,7 +117,7 @@ class Promise extends Value {
       // Added to disallow malformed lists/streams
       if (!(expr is PairOrEmpty &&
           ((expr as PairOrEmpty).wellFormed || expr.pair.second is Promise))) {
-        throw SchemeException("A promise must contain a pair or nil");
+        throw SchemeException("A promise must contain a pair, stream, or nil");
       }
       _evaluated = true;
     }

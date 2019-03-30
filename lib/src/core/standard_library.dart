@@ -269,7 +269,7 @@ class StandardLibrary extends SchemeLibrary with _$StandardLibraryMixin {
   @TriggerEventAfter(const SchemeSymbol("pair-mutation"))
   void setCdr(Pair pair, Value val) {
     // Added if statement to disallow malformed lists
-    if (!(val is PairOrEmpty && (val.wellFormed))) {
+    if (!(val is PairOrEmpty && val.wellFormed)) {
       throw SchemeException("cdr must be another pair or nil");
     }
     pair.second = val;
