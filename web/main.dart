@@ -12,8 +12,10 @@ const String motd = "**61A Scheme Web Interpreter**"
     """</small>
 --------------------------------------------------------------------------------
 **Diagramming**
-`(draw some-pair)` to create a box-and-pointer diagram [Try It](:try-draw)
-`(autodraw)` to start drawing diagrams for any returned list [Try It](:try-ad)
+Hover over any list to see its box-and-pointer diagram. Click to keep it.
+`(draw some-pair)` to draw a diagram directly [Try It](:try-draw)
+`(autodraw)` to display the diagram automatically [Try It](:try-ad)
+
 `(visualize some-code)` to create an environment diagram [Try It](:try-viz)
 
 **Other Useful Commands**
