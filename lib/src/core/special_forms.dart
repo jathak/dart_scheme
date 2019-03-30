@@ -132,3 +132,7 @@ Pair<Value, Boolean> quasiquoteItem(Value v, Frame env, [int level = 1]) {
 Value doUnquoteForm(SchemeList<Expression> expressions, Frame env) {
   throw SchemeException("Unquote outside of quasiquote");
 }
+
+Value doVariadicForm(SchemeList<Expression> expressions, Frame env) {
+  throw SchemeException("Variadic used outside of formals list");
+}

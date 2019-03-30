@@ -103,6 +103,7 @@ class Interpreter {
     const SchemeSymbol('set!'): doSetForm,
     const SchemeSymbol('quasiquote'): doQuasiquoteForm,
     const SchemeSymbol('unquote'): doUnquoteForm,
-    const SchemeSymbol('unquote-splicing'): doUnquoteForm
+    const SchemeSymbol('unquote-splicing'): doUnquoteForm,
+    const SchemeSymbol('variadic'): doVariadicForm
   };
 }
