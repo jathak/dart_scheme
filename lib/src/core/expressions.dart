@@ -100,9 +100,6 @@ abstract class PairOrEmpty extends Expression {
   /// Returns true iff this is a well-formed Scheme list.
   bool get wellFormed;
 
-  /// Returns true iff this pair is permitted in the CS61A version of Scheme.
-  bool get allowedForm;
-
   /// See [wellFormed].
   @deprecated
   bool isWellFormedList() => wellFormed;
@@ -115,7 +112,6 @@ class _EmptyList extends Expression implements PairOrEmpty {
   const _EmptyList();
   bool get inlineInDiagram => true;
   bool get wellFormed => true;
-  bool get allowedForm => true;
   @deprecated
   bool isWellFormedList() => true;
   bool get isNil => true;
@@ -145,11 +141,6 @@ class Pair<A extends Value, B extends Value> extends Expression
   /// This is a well-formed list if [second] is also a well-formed list.
   bool get wellFormed =>
       second is PairOrEmpty && (second as PairOrEmpty).wellFormed;
-
-  /// This is allowed in our version of scheme if [second] is a well-formed list or a [Promise].
-  bool get allowedForm =>
-      second is Promise ||
-      (second is PairOrEmpty && (second as PairOrEmpty).allowedForm);
 
   @deprecated
   bool isWellFormedList() => wellFormed;

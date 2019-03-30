@@ -16,7 +16,7 @@ class ImportedLibrary extends Value {
     env = containing;
     List<Expression> tokens = tokenizeLines(code.split('\n')).toList();
     while (tokens.isNotEmpty) {
-      Expression expr = schemeRead(tokens, env.interpreter.impl);
+      Expression expr = schemeRead(tokens, env.interpreter);
       Value result = schemeEval(expr, env);
       if (result is AsyncValue) {
         await result.future;

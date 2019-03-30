@@ -1,7 +1,10 @@
 library cs61a_scheme.core.interpreter;
 
+import 'dart:collection';
+
 import 'expressions.dart';
 import 'frame.dart';
+import 'language.dart';
 import 'logging.dart';
 import 'procedures.dart';
 import 'project_interface.dart';
@@ -14,6 +17,7 @@ import 'values.dart';
 
 class Interpreter {
   final ProjectInterface impl;
+  Language language = languages['default'];
   Frame globalEnv;
   bool tailCallOptimized = true;
   Logger logger = (e, newline) => null;
@@ -31,6 +35,9 @@ class Interpreter {
     };
     StandardLibrary().importAll(globalEnv);
   }
+
+  UnmodifiableMapView<SchemeSymbol, SpecialForm> get specialForms =>
+      UnmodifiableMapView(language.specialForms);
 
   @deprecated
   ProjectInterface get implementation => impl;
@@ -70,7 +77,7 @@ class Interpreter {
     _tokens.addAll(tokenizeLines(code.split("\n")));
     while (_tokens.isNotEmpty) {
       try {
-        Expression expr = schemeRead(_tokens, impl);
+        Expression expr = schemeRead(_tokens, this);
         Value result = schemeEval(expr, globalEnv);
         if (!identical(result, undefined)) logger(result, true);
       } on SchemeException catch (e) {
@@ -85,25 +92,4 @@ class Interpreter {
   void addLogger(Logger newLog) => logger = combineLoggers(logger, newLog);
 
   void logText(String text) => logger(TextMessage(text), true);
-
-  Map<SchemeSymbol, SpecialForm> specialForms = {
-    const SchemeSymbol('define'): doDefineForm,
-    const SchemeSymbol('if'): doIfForm,
-    const SchemeSymbol('cond'): doCondForm,
-    const SchemeSymbol('and'): doAndForm,
-    const SchemeSymbol('or'): doOrForm,
-    const SchemeSymbol('let'): doLetForm,
-    const SchemeSymbol('begin'): doBeginForm,
-    const SchemeSymbol('lambda'): doLambdaForm,
-    const SchemeSymbol('mu'): doMuForm,
-    const SchemeSymbol('quote'): doQuoteForm,
-    const SchemeSymbol('delay'): doDelayForm,
-    const SchemeSymbol('cons-stream'): doConsStreamForm,
-    const SchemeSymbol('define-macro'): doDefineMacroForm,
-    const SchemeSymbol('set!'): doSetForm,
-    const SchemeSymbol('quasiquote'): doQuasiquoteForm,
-    const SchemeSymbol('unquote'): doUnquoteForm,
-    const SchemeSymbol('unquote-splicing'): doUnquoteForm,
-    const SchemeSymbol('variadic'): doVariadicForm
-  };
 }

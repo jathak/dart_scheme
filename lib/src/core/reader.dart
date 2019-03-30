@@ -4,14 +4,35 @@ import 'dart:convert' show json;
 import 'dart:math' show min;
 
 import 'expressions.dart';
+import 'logging.dart';
+import 'interpreter.dart';
 import 'numbers.dart';
-import 'project_interface.dart';
 
 /// Reads the first complete Scheme expression from [tokens].
 ///
 /// This function mutates [tokens].
-Expression schemeRead(List<Expression> tokens, ProjectInterface impl) =>
-    impl.read(tokens);
+Expression schemeRead(List<Expression> tokens, Interpreter interpreter) {
+  var token = tokens.removeAt(0);
+  if (token is! SchemeSymbol) return token;
+  var value = (token as SchemeSymbol).value;
+  const quotes = {
+    "'": SchemeSymbol('quote'),
+    "`": SchemeSymbol('quasiquote'),
+    ",": SchemeSymbol('unquote'),
+    ",@": SchemeSymbol('unquote-splicing')
+  };
+  if (quotes.containsKey(value)) {
+    return interpreter.impl.readFromQuote(tokens, quotes[value], interpreter);
+  } else if (value == '(') {
+    return interpreter.impl.readFromParen(tokens, interpreter);
+  } else if (value == '.') {
+    throw SchemeException("Unexpected token: $value");
+  }
+  return token;
+}
+
+Expression readTail(List<Expression> tokens, Interpreter interpreter) =>
+    interpreter.language.readTail(tokens, interpreter);
 
 Set _numeralStarts = Set.from("0123456789+-.".split(""));
 Set _symbolChars = Set.from(
