@@ -115,7 +115,7 @@ class StandardLibrary extends SchemeLibrary with _$StandardLibraryMixin {
   /// Constructs a pair from values [car] and [cdr].
   Pair cons(Value car, Value cdr) {
     // Added if statement to disallow malformed lists
-    if (!(cdr is PairOrEmpty && cdr.wellFormed)) {
+    if (!((cdr is PairOrEmpty && cdr.allowedForm) || cdr is Promise)) {
       throw SchemeException("The cdr of a list must be another pair or nil");
     }
     return Pair(car, cdr);
@@ -269,7 +269,7 @@ class StandardLibrary extends SchemeLibrary with _$StandardLibraryMixin {
   @TriggerEventAfter(const SchemeSymbol("pair-mutation"))
   void setCdr(Pair pair, Value val) {
     // Added if statement to disallow malformed lists
-    if (!(val is PairOrEmpty && val.wellFormed)) {
+    if (!((val is PairOrEmpty && val.allowedForm) || val is Promise)) {
       throw SchemeException("The cdr of a list must be another pair or nil");
     }
     pair.second = val;
