@@ -116,7 +116,7 @@ class StandardLibrary extends SchemeLibrary with _$StandardLibraryMixin {
   Pair cons(Value car, Value cdr) {
     // Added if statement to disallow malformed lists
     if (!(cdr is PairOrEmpty && cdr.wellFormed)) {
-      throw SchemeException("cdr must be another pair or nil");
+      throw SchemeException("The cdr of a list must be another pair or nil");
     }
     return Pair(car, cdr);
   }
@@ -270,7 +270,7 @@ class StandardLibrary extends SchemeLibrary with _$StandardLibraryMixin {
   void setCdr(Pair pair, Value val) {
     // Added if statement to disallow malformed lists
     if (!(val is PairOrEmpty && val.wellFormed)) {
-      throw SchemeException("cdr must be another pair or nil");
+      throw SchemeException("The cdr of a list must be another pair or nil");
     }
     pair.second = val;
   }
