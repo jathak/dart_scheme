@@ -69,10 +69,11 @@ class Sp19Language extends Language {
   @override
   T validateCdr<T extends Value>(T cdr,
       {errorMessage: "The cdr of a list must be another list"}) {
-    while (cdr is Pair) {
-      cdr = (cdr as Pair).second;
+    T checkCdr = cdr;
+    while (checkCdr is Pair) {
+      checkCdr = (checkCdr as Pair).second;
     }
-    if (cdr != nil && cdr is! Promise) {
+    if (checkCdr != nil && checkCdr is! Promise) {
       throw SchemeException(errorMessage);
     }
     return cdr;
