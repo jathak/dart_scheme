@@ -91,24 +91,24 @@ class Interpreter {
 
   void logText(String text) => logger(TextMessage(text), true);
 
-  Map<SchemeSymbol, SpecialForm> get specialForms => {
-        const SchemeSymbol('define'): doDefineForm,
-        const SchemeSymbol('if'): doIfForm,
-        const SchemeSymbol('cond'): doCondForm,
-        const SchemeSymbol('and'): doAndForm,
-        const SchemeSymbol('or'): doOrForm,
-        const SchemeSymbol('let'): doLetForm,
-        const SchemeSymbol('begin'): doBeginForm,
-        const SchemeSymbol('lambda'): doLambdaForm,
-        const SchemeSymbol('mu'): doMuForm,
-        const SchemeSymbol('quote'): doQuoteForm,
-        const SchemeSymbol('delay'): doDelayForm,
-        const SchemeSymbol('cons-stream'): doConsStreamForm,
-        const SchemeSymbol('define-macro'): doDefineMacroForm,
-        const SchemeSymbol('set!'): doSetForm,
-        const SchemeSymbol('quasiquote'): doQuasiquoteForm,
-        const SchemeSymbol('unquote'): doUnquoteForm,
-        const SchemeSymbol('unquote-splicing'): doUnquoteForm,
-        const SchemeSymbol('variadic'): doVariadicForm
-      };
+  Map<SchemeSymbol, SpecialForm> specialForms = {
+    const SchemeSymbol('define'): doDefineForm,
+    const SchemeSymbol('if'): doIfForm,
+    const SchemeSymbol('cond'): doCondForm,
+    const SchemeSymbol('and'): doAndForm,
+    const SchemeSymbol('or'): doOrForm,
+    const SchemeSymbol('let'): doLetForm,
+    const SchemeSymbol('begin'): doBeginForm,
+    const SchemeSymbol('lambda'): doLambdaForm,
+    const SchemeSymbol('mu'): doMuForm,
+    const SchemeSymbol('quote'): doQuoteForm,
+    const SchemeSymbol('delay'): doDelayForm,
+    const SchemeSymbol('cons-stream'): doConsStreamForm,
+    const SchemeSymbol('define-macro'): doDefineMacroForm,
+    const SchemeSymbol('set!'): doSetForm,
+    const SchemeSymbol('quasiquote'): doQuasiquoteForm,
+    const SchemeSymbol('unquote'): doUnquoteForm,
+    const SchemeSymbol('unquote-splicing'): doUnquoteForm,
+    const SchemeSymbol('variadic'): doVariadicForm
+  };
 }
