@@ -10,6 +10,7 @@ export 'src/core/documentation.dart';
 export 'src/core/expressions.dart';
 export 'src/core/frame.dart';
 export 'src/core/interpreter.dart';
+export 'src/core/language.dart';
 export 'src/core/logging.dart';
 export 'src/core/numbers.dart';
 export 'src/core/procedures.dart';

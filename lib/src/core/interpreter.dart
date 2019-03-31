@@ -36,9 +36,6 @@ class Interpreter {
     StandardLibrary().importAll(globalEnv);
   }
 
-  UnmodifiableMapView<SchemeSymbol, SpecialForm> get specialForms =>
-      UnmodifiableMapView(language.specialForms);
-
   @deprecated
   ProjectInterface get implementation => impl;
 
@@ -74,7 +71,8 @@ class Interpreter {
   importLibrary(SchemeLibrary library) => library.importAll(globalEnv);
 
   run(String code) {
-    _tokens.addAll(tokenizeLines(code.split("\n")));
+    var lines = code.split("\n");
+    _tokens.addAll(tokenizeLines(lines));
     while (_tokens.isNotEmpty) {
       try {
         Expression expr = schemeRead(_tokens, this);
@@ -92,4 +90,25 @@ class Interpreter {
   void addLogger(Logger newLog) => logger = combineLoggers(logger, newLog);
 
   void logText(String text) => logger(TextMessage(text), true);
+
+  Map<SchemeSymbol, SpecialForm> get specialForms => {
+        const SchemeSymbol('define'): doDefineForm,
+        const SchemeSymbol('if'): doIfForm,
+        const SchemeSymbol('cond'): doCondForm,
+        const SchemeSymbol('and'): doAndForm,
+        const SchemeSymbol('or'): doOrForm,
+        const SchemeSymbol('let'): doLetForm,
+        const SchemeSymbol('begin'): doBeginForm,
+        const SchemeSymbol('lambda'): doLambdaForm,
+        const SchemeSymbol('mu'): doMuForm,
+        const SchemeSymbol('quote'): doQuoteForm,
+        const SchemeSymbol('delay'): doDelayForm,
+        const SchemeSymbol('cons-stream'): doConsStreamForm,
+        const SchemeSymbol('define-macro'): doDefineMacroForm,
+        const SchemeSymbol('set!'): doSetForm,
+        const SchemeSymbol('quasiquote'): doQuasiquoteForm,
+        const SchemeSymbol('unquote'): doUnquoteForm,
+        const SchemeSymbol('unquote-splicing'): doUnquoteForm,
+        const SchemeSymbol('variadic'): doVariadicForm
+      };
 }

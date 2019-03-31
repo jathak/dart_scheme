@@ -1,41 +1,27 @@
 import 'expressions.dart';
-import 'interpreter.dart';
+import 'frame.dart';
 import 'logging.dart';
-import 'special_forms.dart';
 import 'values.dart';
 
 abstract class Language {
   static const String id = null;
   const Language();
 
-  Map<SchemeSymbol, SpecialForm> get specialForms => {
-        const SchemeSymbol('define'): doDefineForm,
-        const SchemeSymbol('if'): doIfForm,
-        const SchemeSymbol('cond'): doCondForm,
-        const SchemeSymbol('and'): doAndForm,
-        const SchemeSymbol('or'): doOrForm,
-        const SchemeSymbol('let'): doLetForm,
-        const SchemeSymbol('begin'): doBeginForm,
-        const SchemeSymbol('lambda'): doLambdaForm,
-        const SchemeSymbol('mu'): doMuForm,
-        const SchemeSymbol('quote'): doQuoteForm,
-        const SchemeSymbol('delay'): doDelayForm,
-        const SchemeSymbol('cons-stream'): doConsStreamForm,
-        const SchemeSymbol('define-macro'): doDefineMacroForm,
-        const SchemeSymbol('set!'): doSetForm,
-        const SchemeSymbol('quasiquote'): doQuasiquoteForm,
-        const SchemeSymbol('unquote'): doUnquoteForm,
-        const SchemeSymbol('unquote-splicing'): doUnquoteForm
-      };
+  bool get dotAsCons;
 
   T validateCdr<T extends Value>(T cdr, {String errorMessage}) => cdr;
+}
 
-  Expression readTail(List<Expression> tokens, Interpreter interpreter) {
-    Expression first = tokens.first;
-    if (first is SchemeSymbol && first.value == ')') {
-      return interpreter.impl.readTailAtParen(tokens);
+class LanguageChange extends Expression {
+  String languageId;
+  LanguageChange(this.languageId);
+
+  evaluate(Frame env) {
+    if (!languages.containsKey(languageId)) {
+      throw SchemeException('Unknown language "$languageId"');
     } else {
-      return interpreter.impl.readTailElse(tokens, interpreter);
+      env.interpreter.language = languages[languageId];
+      return undefined;
     }
   }
 }
@@ -46,14 +32,7 @@ class Fa18Language extends Language {
   const Fa18Language._();
   toString() => id;
 
-  @override
-  Expression readTail(List<Expression> tokens, Interpreter interpreter) {
-    Expression first = tokens.first;
-    if (first is SchemeSymbol && first.value == '.') {
-      return interpreter.impl.readTailAtDot(tokens, interpreter);
-    }
-    return super.readTail(tokens, interpreter);
-  }
+  final bool dotAsCons = true;
 }
 
 class Sp19Language extends Language {
@@ -62,14 +41,12 @@ class Sp19Language extends Language {
   const Sp19Language._();
   toString() => id;
 
-  @override
-  Map<SchemeSymbol, SpecialForm> get specialForms =>
-      super.specialForms..[const SchemeSymbol('variadic')] = doVariadicForm;
+  final bool dotAsCons = false;
 
   @override
   T validateCdr<T extends Value>(T cdr,
       {errorMessage: "The cdr of a list must be another list"}) {
-    T checkCdr = cdr;
+    Value checkCdr = cdr;
     while (checkCdr is Pair) {
       checkCdr = (checkCdr as Pair).second;
     }

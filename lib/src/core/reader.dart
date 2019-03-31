@@ -4,9 +4,12 @@ import 'dart:convert' show json;
 import 'dart:math' show min;
 
 import 'expressions.dart';
-import 'logging.dart';
+import 'frame.dart';
 import 'interpreter.dart';
+import 'language.dart';
+import 'logging.dart';
 import 'numbers.dart';
+import 'values.dart';
 
 /// Reads the first complete Scheme expression from [tokens].
 ///
@@ -26,13 +29,28 @@ Expression schemeRead(List<Expression> tokens, Interpreter interpreter) {
   } else if (value == '(') {
     return interpreter.impl.readFromParen(tokens, interpreter);
   } else if (value == '.') {
-    throw SchemeException("Unexpected token: $value");
+    if (interpreter.language.dotAsCons) {
+      throw SchemeException("Unexpected token: $value");
+    } else {
+      return Pair(const SchemeSymbol("variadic"),
+          Pair(schemeRead(tokens, interpreter), nil));
+    }
   }
   return token;
 }
 
-Expression readTail(List<Expression> tokens, Interpreter interpreter) =>
-    interpreter.language.readTail(tokens, interpreter);
+Expression readTail(List<Expression> tokens, Interpreter interpreter) {
+  Expression first = tokens.first;
+  if (first is SchemeSymbol && first.value == ')') {
+    return interpreter.impl.readTailAtParen(tokens);
+  } else if (interpreter.language.dotAsCons &&
+      first is SchemeSymbol &&
+      first.value == '.') {
+    return interpreter.impl.readTailAtDot(tokens, interpreter);
+  } else {
+    return interpreter.impl.readTailElse(tokens, interpreter);
+  }
+}
 
 Set _numeralStarts = Set.from("0123456789+-.".split(""));
 Set _symbolChars = Set.from(
@@ -112,6 +130,10 @@ List nextCandidateToken(String line, int k) {
 }
 
 Iterable<Expression> tokenizeLine(String line) sync* {
+  if (line.startsWith("#lang ")) {
+    yield LanguageChange(line.substring(6).trim());
+    return;
+  }
   var candidate = nextCandidateToken(line, 0);
   String text = candidate[0];
   int i = candidate[1];

@@ -600,7 +600,7 @@ one-through-four
 ; expect -1
 
 (remainder 5 -4)
-; expect 1 
+; expect 1
 
 (remainder -5 -4)
 ; expect -1
@@ -659,6 +659,9 @@ one-through-four
 (test)
 ; expect 11
 
+; This test uses the dotted syntax for variable arity procedures
+#lang 61a-scheme/fa18
+
 (define-macro (when test . branch)
   (list 'if test (cons 'begin branch)))
 
@@ -676,11 +679,13 @@ b
 (when false
   (define a 2)
   (define b 2))
-  
+
 a
 ; expect 1
 b
 ; expect 1
+
+#lang 61a-scheme
 
 ;;;;;;;;;;;;;;;;
 ;;;; Vectors ;;; (disabled for now since new interpreter doesn't support it)
@@ -770,24 +775,24 @@ b
 
 ;; Map f over s.
 (define (map f s)
-  (if (null? s) 
+  (if (null? s)
       nil
       (cons (f (car s))
-            (map f 
+            (map f
                  (cdr s)))))
-  
+
 ;; Filter s by f.
 (define (filter f s)
   (if (null? s)
       nil
       (if (f (car s))
-          (cons (car s) 
+          (cons (car s)
                 (filter f (cdr s)))
           (filter f (cdr s)))))
 
 ;; Reduce s using f and start value.
 (define (reduce f s start)
-  (if (null? s) 
+  (if (null? s)
       start
       (reduce f
               (cdr s)
@@ -805,9 +810,9 @@ b
 
 ;; Is x prime?
 (define (prime? x)
-  (if (<= x 1) 
+  (if (<= x 1)
       false
-      (null? 
+      (null?
        (filter (lambda (y) (= 0 (remainder x y)))
                (range 2 x)))))
 
@@ -816,7 +821,7 @@ b
   (sum (filter prime? (range a b))))
 
 
-;; Streams 
+;; Streams
 
 (define s (cons-stream 1 (cons-stream 2 nil)))
 
@@ -831,10 +836,10 @@ b
   (cons-stream start (int-stream (+ start 1))))
 
 (define (prefix s k)
-  (if (= k 0) 
-      nil 
-      (cons (car s) 
-            (prefix (cdr-stream s) 
+  (if (= k 0)
+      nil
+      (cons (car s)
+            (prefix (cdr-stream s)
                     (- k 1)))))
 
 ;; Processing
@@ -856,7 +861,7 @@ b
 
 (define a (cons-stream 1 (cons-stream 2 (cons-stream 3 a))))
 
-(define (f s) (cons-stream (car s) 
+(define (f s) (cons-stream (car s)
                            (cons-stream (car s)
                                         (f (cdr-stream s)))))
 
@@ -867,24 +872,24 @@ b
 
 ;; Map f over s.
 (define (map-stream f s)
-  (if (null? s) 
+  (if (null? s)
       nil
       (cons-stream (f (car s))
-            (map-stream f 
+            (map-stream f
                  (cdr-stream s)))))
-  
+
 ;; Filter s by f.
 (define (filter-stream f s)
   (if (null? s)
       nil
       (if (f (car s))
-          (cons-stream (car s) 
+          (cons-stream (car s)
                 (filter-stream f (cdr-stream s)))
           (filter-stream f (cdr-stream s)))))
 
 ;; Reduce s using f and start value.
 (define (reduce-stream f s start)
-  (if (null? s) 
+  (if (null? s)
       start
       (reduce-stream f
               (cdr-stream s)
@@ -897,8 +902,8 @@ b
   (sum-stream (filter-stream prime? (range-stream a b))))
 
 (define (sieve s)
-  (cons-stream 
-   (car s) 
+  (cons-stream
+   (car s)
    (sieve (filter-stream
            (lambda (x) (> (remainder x (car s)) 0))
            (cdr-stream s)))))
@@ -911,6 +916,9 @@ b
 ;;;;;;;;;;;;;;
 ;;;; Logic ;;;
 ;;;;;;;;;;;;;;
+
+; The Logic tests relies on dotted pairs, so we need to change languages
+#lang 61a-scheme/fa18
 
 (logic)
 
@@ -966,6 +974,8 @@ b
       (ancestor ?a ?gray-dog)
       (dog (name ?gray-dog) (color gray)))
 ; expect Success!; a: fillmore	gray-dog: herbert
+
+#lang 61a-scheme
 
 ;;; ***************************************************************************
 ;;; DO NOT ADD ANY TESTS AFTER THIS LINE!

@@ -57,6 +57,8 @@ String runSchemeTests() {
         failedCount++;
       }
       testCount++;
+    } else if (line.startsWith('#lang ')) {
+      inter.language = languages[line.substring(6).trim()];
     } else if (!line.startsWith(';')) {
       if (!awaitingInput) {
         log = "";

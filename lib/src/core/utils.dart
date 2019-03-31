@@ -25,12 +25,19 @@ void checkForm(SchemeList expressions, int min, [int max = -1]) {
 void checkFormals(Expression formals) {
   var symbols = Set<SchemeSymbol>();
   void checkAndAdd(Expression symbol) {
+    if (symbol is Pair<SchemeSymbol, Value> &&
+        symbol.first == const SchemeSymbol("variadic")) {
+      if (symbol.second is Pair) {
+        checkAndAdd(symbol);
+      }
+    }
     if (symbol is! SchemeSymbol) {
       throw SchemeException("Non-symbol: $symbol");
     } else if (symbols.contains(symbol)) {
       throw SchemeException("Duplicate symbol: $symbol");
+    } else {
+      symbols.add(symbol);
     }
-    symbols.add(symbol);
   }
 
   while (formals is Pair) {

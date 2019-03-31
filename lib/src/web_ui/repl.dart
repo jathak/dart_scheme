@@ -205,6 +205,14 @@ class Repl {
       status.classes = ['repl-status'];
       status.text = "";
     }
+    if (interpreter.language != languages['default']) {
+      var extra = "#lang ${interpreter.language}";
+      if (status.text.trim() == "") {
+        status.text = extra;
+      } else {
+        status.text += " - $extra";
+      }
+    }
   }
 
   logInto(Element element, Value logging, [bool newline = true]) {
