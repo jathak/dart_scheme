@@ -27,7 +27,7 @@ abstract class _$StandardLibraryMixin {
   Value append(List<Value> args);
   Value car(Pair val);
   Value cdr(Pair val);
-  Pair cons(Value car, Value cdr);
+  Pair cons(Value car, Value cdr, Frame env);
   num length(PairOrEmpty lst);
   SchemeList list(List<Value> args);
   SchemeList map(Procedure fn, SchemeList lst, Frame env);
@@ -56,7 +56,7 @@ abstract class _$StandardLibraryMixin {
   Expression force(Promise promise);
   Expression cdrStream(Pair stream);
   void setCar(Pair pair, Value val);
-  void setCdr(Pair pair, Value val);
+  void setCdr(Pair pair, Value val, Frame env);
   String getRuntimeType(Expression expression);
   void importAll(Frame __env) {
     addBuiltin(__env, const SchemeSymbol("apply"), (__exprs, __env) {
@@ -202,7 +202,7 @@ abstract class _$StandardLibraryMixin {
             [Param("pair", "val")],
             returnType: "value"));
     addBuiltin(__env, const SchemeSymbol("cons"), (__exprs, __env) {
-      return this.cons(__exprs[0], __exprs[1]);
+      return this.cons(__exprs[0], __exprs[1], __env);
     }, 2,
         docs: Docs("cons", "Constructs a pair from values [car] and [cdr].\n",
             [Param("value", "car"), Param("value", "cdr")],
@@ -445,7 +445,7 @@ abstract class _$StandardLibraryMixin {
     addBuiltin(__env, const SchemeSymbol("set-cdr!"), (__exprs, __env) {
       if (__exprs[0] is! Pair)
         throw SchemeException('Argument of invalid type passed to set-cdr!.');
-      this.setCdr(__exprs[0], __exprs[1]);
+      this.setCdr(__exprs[0], __exprs[1], __env);
       __env.interpreter.triggerEvent(
           const SchemeSymbol("pair-mutation"), [undefined], __env);
       return undefined;

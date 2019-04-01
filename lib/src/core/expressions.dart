@@ -141,6 +141,7 @@ class Pair<A extends Value, B extends Value> extends Expression
   /// This is a well-formed list if [second] is also a well-formed list.
   bool get wellFormed =>
       second is PairOrEmpty && (second as PairOrEmpty).wellFormed;
+
   @deprecated
   bool isWellFormedList() => wellFormed;
 

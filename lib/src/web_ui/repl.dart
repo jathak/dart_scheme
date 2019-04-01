@@ -123,7 +123,7 @@ class Repl {
     while (tokens.isNotEmpty) {
       Value result;
       try {
-        Expression expr = schemeRead(tokens, interpreter.impl);
+        Expression expr = schemeRead(tokens, interpreter);
         result = schemeEval(expr, interpreter.globalEnv);
         if (result is! Undefined) {
           var box = SpanElement();
@@ -206,6 +206,14 @@ class Repl {
       status.classes = ['repl-status'];
       status.text = "";
     }
+    if (interpreter.language != languages['default']) {
+      var extra = "#lang ${interpreter.language}";
+      if (status.text.trim() == "") {
+        status.text = extra;
+      } else {
+        status.text += " - $extra";
+      }
+    }
   }
 
   logInto(Element element, Value logging, [bool newline = true]) {
@@ -218,6 +226,21 @@ class Repl {
         box.classes = ['repl-log'];
         logInto(box, expr is Undefined ? null : expr);
         return null;
+      });
+    } else if (logging is Pair && !autodraw) {
+      var pairBox = SpanElement()..classes = ['mouseover-wrapper'];
+      pairBox.text = logging.toString() + (newline ? '\n' : '');
+      var diagram = Diagram(logging);
+      var diagramBox = SpanElement();
+      var refresher = render(diagram, diagramBox);
+      pairBox.append(diagramBox);
+      element.append(pairBox);
+      pairBox.onMouseOver.listen((e) {
+        refresher();
+      });
+      pairBox.onClick.listen((e) {
+        pairBox.classes = [];
+        refresher();
       });
     } else if (logging == null) {
       element.text = '';

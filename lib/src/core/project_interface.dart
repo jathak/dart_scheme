@@ -4,6 +4,7 @@ import 'dart:async';
 
 import 'expressions.dart';
 import 'frame.dart';
+import 'interpreter.dart';
 import 'procedures.dart';
 import 'values.dart';
 import 'wrappers.dart';
@@ -29,8 +30,25 @@ import 'wrappers.dart';
 /// [skeleton]: https://github.com/jathak/scheme_impl_skeleton
 /// [course policies]: https://cs61a.org/articles/about.html#academic-honesty
 abstract class ProjectInterface {
-  /// Analagous to scheme_read ans read_tail in Problems 1, 2, and 7
-  Expression read(List<Expression> tokens);
+  /// Implement the following five functions instead.
+  @deprecated
+  Expression read(List<Expression> tokens) => null;
+
+  /// Read an expression, assuming the previous token was `(`
+  Expression readFromParen(List<Expression> tokens, Interpreter interpreter);
+
+  /// Read an expression, assuming the previous token was a quote.
+  Expression readFromQuote(
+      List<Expression> tokens, SchemeSymbol quote, Interpreter interpreter);
+
+  /// Read the tail expression, assuming the first token is `)`
+  Expression readTailAtParen(List<Expression> tokens);
+
+  /// Read the tail expression, assuming the first token is `.`
+  Expression readTailAtDot(List<Expression> tokens, Interpreter interpreter);
+
+  /// Read the tail expression, assuming the first token was not `)` or `.`
+  Expression readTailElse(List<Expression> tokens, Interpreter interpreter);
 
   /// Analagous to Frame.define and Frame.lookup in Problem 3
   void defineInFrame(SchemeSymbol symbol, Value value, Frame env);

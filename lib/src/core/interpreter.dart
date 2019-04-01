@@ -2,6 +2,7 @@ library cs61a_scheme.core.interpreter;
 
 import 'expressions.dart';
 import 'frame.dart';
+import 'language.dart';
 import 'logging.dart';
 import 'procedures.dart';
 import 'project_interface.dart';
@@ -14,6 +15,7 @@ import 'values.dart';
 
 class Interpreter {
   final ProjectInterface impl;
+  Language language = languages['default'];
   Frame globalEnv;
   bool tailCallOptimized = true;
   Logger logger = (e, newline) => null;
@@ -67,10 +69,11 @@ class Interpreter {
   importLibrary(SchemeLibrary library) => library.importAll(globalEnv);
 
   run(String code) {
-    _tokens.addAll(tokenizeLines(code.split("\n")));
+    var lines = code.split("\n");
+    _tokens.addAll(tokenizeLines(lines));
     while (_tokens.isNotEmpty) {
       try {
-        Expression expr = schemeRead(_tokens, impl);
+        Expression expr = schemeRead(_tokens, this);
         Value result = schemeEval(expr, globalEnv);
         if (!identical(result, undefined)) logger(result, true);
       } on SchemeException catch (e) {
@@ -103,6 +106,7 @@ class Interpreter {
     const SchemeSymbol('set!'): doSetForm,
     const SchemeSymbol('quasiquote'): doQuasiquoteForm,
     const SchemeSymbol('unquote'): doUnquoteForm,
-    const SchemeSymbol('unquote-splicing'): doUnquoteForm
+    const SchemeSymbol('unquote-splicing'): doUnquoteForm,
+    const SchemeSymbol('variadic'): doVariadicForm
   };
 }
