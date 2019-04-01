@@ -113,7 +113,8 @@ class StandardLibrary extends SchemeLibrary with _$StandardLibraryMixin {
   Value cdr(Pair val) => val.second;
 
   /// Constructs a pair from values [car] and [cdr].
-  Pair cons(Value car, Value cdr) => Pair(car, cdr);
+  Pair cons(Value car, Value cdr, Frame env) =>
+      Pair(car, env.interpreter.language.validateCdr(cdr));
 
   /// Finds the length of a well-formed Scheme list.
   num length(PairOrEmpty lst) => lst.lengthOrCycle;
@@ -261,7 +262,8 @@ class StandardLibrary extends SchemeLibrary with _$StandardLibraryMixin {
   /// Mutates the cdr of [pair] to be [val].
   @SchemeSymbol("set-cdr!")
   @TriggerEventAfter(const SchemeSymbol("pair-mutation"))
-  void setCdr(Pair pair, Value val) {
+  void setCdr(Pair pair, Value val, Frame env) {
+    env.interpreter.language.validateCdr(val);
     pair.second = val;
   }
 

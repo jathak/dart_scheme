@@ -250,15 +250,13 @@ circumference
   (= (* (numer x) (denom y))
      (* (numer y) (denom x))))
 
+;;; Modified test to error because dotted lists no longer allowed
 (define x (cons 1 2))
-(car x)
-; expect 1
+; expect Error
 
-(cdr x)
-; expect 2
-
-(define x (cons 1 2))
-(define y (cons 3 4))
+;;; New version of test without dotted lists
+(define x (cons 1 nil))
+(define y (cons 3 nil))
 (define z (cons x y))
 (car (car z))
 ; expect 1
@@ -267,11 +265,12 @@ circumference
 ; expect 3
 
 z
-; expect ((1 . 2) 3 . 4)
+; expect ((1) 3)
 
-(define (make-rat n d) (cons n d))
+;;; New version of test without dotted lists
+(define (make-rat n d) (cons n (cons d nil)))
 (define (numer x) (car x))
-(define (denom x) (cdr x))
+(define (denom x) (car (cdr x)))
 (define (print-rat x)
   (display (numer x))
   (display '/)
@@ -295,9 +294,11 @@ z
   (if (= b 0)
       a
       (gcd b (remainder a b))))
+
+;;; New version of test without dotted lists
 (define (make-rat n d)
-  (let ((g (gcd n d)))
-    (cons (/ n g) (/ d g))))
+     (let ((g (gcd n d)))
+       (cons (/ n g) (cons (/ d g) nil))))
 (print-rat (add-rat one-third one-third))
 ; expect 2/3
 
@@ -573,7 +574,7 @@ one-through-four
 ; expect -1
 
 (remainder 5 -4)
-; expect 1 
+; expect 1
 
 (remainder -5 -4)
 ; expect -1
@@ -649,89 +650,11 @@ b
 (when false
   (define a 2)
   (define b 2))
-  
+
 a
 ; expect 1
 b
 ; expect 1
-
-;;;;;;;;;;;;;;;;
-;;;; Vectors ;;; (disabled for now since new interpreter doesn't support it)
-;;;;;;;;;;;;;;;;
-;
-;'#(1 2 3 4 5)
-;; expect #(1 2 3 4 5)
-;
-;(define a 0)
-;
-;'#(a 1 2 3)
-;; expect #(a 1 2 3)
-;
-;(vector a 1 2 3)
-;; expect #(0 1 2 3)
-;
-;(define test-vector '#(1 2 3 4 5))
-;
-;(define (vector-map vector fn . index)
-;  (define index (if (null? index) 0 (car index)))
-;  (if (= (vector-length vector) index) vector
-;      (begin (vector-set! vector index (fn (vector-ref vector index)))
-;             (vector-map vector fn (+ index 1)))))
-;(define (square x) (* x x))
-;
-;(vector-map test-vector square)
-;; expect #(1 4 9 16 25)
-;
-;test-vector
-;; expect #(1 4 9 16 25)
-;
-;(vector? test-vector)
-;; expect #t
-;
-;(vector? '(1 2 3))
-;; expect #f
-;
-;(vector->list '#(1 2 3))
-;; expect (1 2 3)
-;
-;(list->vector '(1 2 3))
-;; expect #(1 2 3)
-;
-;(make-vector 4)
-;; expect #(() () () ())
-;
-;(make-vector 4 'hi)
-;; expect #(hi hi hi hi)
-
-;;;;;;;;;;;;;;;;
-;;;; Hashing ;;; (disabled for now since new interpreter doesn't support it)
-;;;;;;;;;;;;;;;;
-;
-;(= (hash-code '(1 2 3)) (hash-code '(1 2 3)))
-;; expect #t
-;
-;(= (hash-code '#(1 2 3)) (hash-code '#(1 2 3)))
-;; expect #t
-;
-;(= (hash-code '(1 2 3)) (hash-code '#(1 2 3)))
-;; expect #f
-;
-;(= (hash-code (lambda () 4)) (hash-code (lambda () 4)))
-;; expect #t
-;
-;(= (hash-code (lambda () 4)) (hash-code (lambda () 5)))
-;; expect #f
-;
-;; This works when compiled to JS, but Dart's bignums
-;; overrides my implementation in the VM, so 4 != 4.0 there
-;;(= (hash-code 4) (hash-code 4.0))
-;;; expect #t
-;
-;(= (hash-code 4) (hash-code (+ 2 2)))
-;; expect #t
-;
-;(= (hash-code 4.1) (hash-code (/ 41 10)))
-;; expect #t
 
 ;;;;;;;;;;;;;;;;
 ;;; Promises ;;;
@@ -743,24 +666,24 @@ b
 
 ;; Map f over s.
 (define (map f s)
-  (if (null? s) 
+  (if (null? s)
       nil
       (cons (f (car s))
-            (map f 
+            (map f
                  (cdr s)))))
-  
+
 ;; Filter s by f.
 (define (filter f s)
   (if (null? s)
       nil
       (if (f (car s))
-          (cons (car s) 
+          (cons (car s)
                 (filter f (cdr s)))
           (filter f (cdr s)))))
 
 ;; Reduce s using f and start value.
 (define (reduce f s start)
-  (if (null? s) 
+  (if (null? s)
       start
       (reduce f
               (cdr s)
@@ -778,9 +701,9 @@ b
 
 ;; Is x prime?
 (define (prime? x)
-  (if (<= x 1) 
+  (if (<= x 1)
       false
-      (null? 
+      (null?
        (filter (lambda (y) (= 0 (remainder x y)))
                (range 2 x)))))
 
@@ -789,7 +712,7 @@ b
   (sum (filter prime? (range a b))))
 
 
-;; Streams 
+;; Streams
 
 (define s (cons-stream 1 (cons-stream 2 nil)))
 
@@ -804,10 +727,10 @@ b
   (cons-stream start (int-stream (+ start 1))))
 
 (define (prefix s k)
-  (if (= k 0) 
-      nil 
-      (cons (car s) 
-            (prefix (cdr-stream s) 
+  (if (= k 0)
+      nil
+      (cons (car s)
+            (prefix (cdr-stream s)
                     (- k 1)))))
 
 ;; Processing
@@ -829,7 +752,7 @@ b
 
 (define a (cons-stream 1 (cons-stream 2 (cons-stream 3 a))))
 
-(define (f s) (cons-stream (car s) 
+(define (f s) (cons-stream (car s)
                            (cons-stream (car s)
                                         (f (cdr-stream s)))))
 
@@ -840,24 +763,24 @@ b
 
 ;; Map f over s.
 (define (map-stream f s)
-  (if (null? s) 
+  (if (null? s)
       nil
       (cons-stream (f (car s))
-            (map-stream f 
+            (map-stream f
                  (cdr-stream s)))))
-  
+
 ;; Filter s by f.
 (define (filter-stream f s)
   (if (null? s)
       nil
       (if (f (car s))
-          (cons-stream (car s) 
+          (cons-stream (car s)
                 (filter-stream f (cdr-stream s)))
           (filter-stream f (cdr-stream s)))))
 
 ;; Reduce s using f and start value.
 (define (reduce-stream f s start)
-  (if (null? s) 
+  (if (null? s)
       start
       (reduce-stream f
               (cdr-stream s)
@@ -870,8 +793,8 @@ b
   (sum-stream (filter-stream prime? (range-stream a b))))
 
 (define (sieve s)
-  (cons-stream 
-   (car s) 
+  (cons-stream
+   (car s)
    (sieve (filter-stream
            (lambda (x) (> (remainder x (car s)) 0))
            (cdr-stream s)))))
@@ -884,6 +807,9 @@ b
 ;;;;;;;;;;;;;;
 ;;;; Logic ;;;
 ;;;;;;;;;;;;;;
+
+; The Logic tests relies on dotted pairs, so we need to change languages
+#lang 61a-scheme/fa18
 
 (logic)
 
@@ -939,6 +865,55 @@ b
       (ancestor ?a ?gray-dog)
       (dog (name ?gray-dog) (color gray)))
 ; expect Success!; a: fillmore	gray-dog: herbert
+
+;;; Tests for 61a-scheme/fa18
+
+(define x (cons 1 2))
+(define y (cons 3 4))
+(define z (cons x y))
+
+(car x)
+; expect 1
+(cdr x)
+; expect 2
+(car (car z))
+; expect 1
+z
+; expect ((1 . 2) 3 . 4)
+
+(define (make-rat n d) (cons n d))
+(define (numer x) (car x))
+(define (denom x) (cdr x))
+(define (print-rat x)
+  (display (numer x))
+  (display '/)
+  (display (denom x))
+  (newline))
+(define one-half (make-rat 1 2))
+(print-rat one-half)
+; expect 1/2
+
+(define one-third (make-rat 1 3))
+(print-rat (add-rat one-half one-third))
+; expect 5/6
+
+(print-rat (mul-rat one-half one-third))
+; expect 1/6
+
+(print-rat (add-rat one-third one-third))
+; expect 6/9
+
+(define (make-rat n d)
+  (let ((g (gcd n d)))
+    (cons (/ n g) (/ d g))))
+(print-rat (add-rat one-third one-third))
+; expect 2/3
+
+(define (f . x) (apply + x))
+(f 1 2 3 4)
+; expect 10
+
+#lang 61a-scheme
 
 ;;; ***************************************************************************
 ;;; DO NOT ADD ANY TESTS AFTER THIS LINE!

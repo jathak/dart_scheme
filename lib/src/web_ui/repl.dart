@@ -122,7 +122,7 @@ class Repl {
     while (tokens.isNotEmpty) {
       Value result;
       try {
-        Expression expr = schemeRead(tokens, interpreter.impl);
+        Expression expr = schemeRead(tokens, interpreter);
         result = schemeEval(expr, interpreter.globalEnv);
         if (result is! Undefined) {
           var box = SpanElement();
@@ -204,6 +204,14 @@ class Repl {
     } else if (missingParens == 0) {
       status.classes = ['repl-status'];
       status.text = "";
+    }
+    if (interpreter.language != languages['default']) {
+      var extra = "#lang ${interpreter.language}";
+      if (status.text.trim() == "") {
+        status.text = extra;
+      } else {
+        status.text += " - $extra";
+      }
     }
   }
 

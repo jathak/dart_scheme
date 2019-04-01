@@ -114,6 +114,8 @@ class Promise extends Value {
   Expression force() {
     if (!_evaluated) {
       expr = schemeEval(expr, env);
+      env.interpreter.language.validateCdr(expr,
+          errorMessage: "A promise must contain a pair, stream, or nil");
       _evaluated = true;
     }
     return expr;

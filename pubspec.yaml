@@ -5,10 +5,10 @@ homepage: https://scheme.cs61a.org
 author: Jen Thakar <jthakar@berkeley.edu>
 
 environment:
-  sdk: '>=2.0.0 <3.0.0'
+  sdk: '>=2.2.0 <3.0.0'
 
 dependencies:
-  analyzer: ^0.32.4
+  analyzer: ^0.34.0
   markdown: ^2.0.2
   quiver: ^2.0.0+1
   tuple: ^1.0.2
@@ -19,7 +19,7 @@ dev_dependencies:
     path: ../dart_scheme_impl
 
   # Core library tools
-  dart_style: any
+  dart_style: ^1.2.3
   dependency_validator: any
   grinder: any
   test: any
@@ -28,6 +28,6 @@ dev_dependencies:
   cli_repl: ^0.2.0
 
   # Web app building
-  sass_builder: ^2.1.1
+  sass_builder: ^2.1.2
   build_runner: any
   build_web_compilers: any

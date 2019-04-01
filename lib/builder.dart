@@ -2,6 +2,7 @@ library builder;
 
 import 'dart:convert' show json;
 
+// ignore: deprecated_member_use
 import 'package:analyzer/analyzer.dart';
 
 /// Generates mixin source code to implement importAll on a SchemeLibrary

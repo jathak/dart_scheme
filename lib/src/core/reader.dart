@@ -4,28 +4,65 @@ import 'dart:convert' show json;
 import 'dart:math' show min;
 
 import 'expressions.dart';
+import 'interpreter.dart';
+import 'language.dart';
+import 'logging.dart';
 import 'numbers.dart';
-import 'project_interface.dart';
 
 /// Reads the first complete Scheme expression from [tokens].
 ///
 /// This function mutates [tokens].
-Expression schemeRead(List<Expression> tokens, ProjectInterface impl) =>
-    impl.read(tokens);
+Expression schemeRead(List<Expression> tokens, Interpreter interpreter) {
+  var token = tokens.removeAt(0);
+  if (token is! SchemeSymbol) return token;
+  var value = (token as SchemeSymbol).value;
+  const quotes = {
+    "'": SchemeSymbol('quote'),
+    "`": SchemeSymbol('quasiquote'),
+    ",": SchemeSymbol('unquote'),
+    ",@": SchemeSymbol('unquote-splicing')
+  };
+  if (quotes.containsKey(value)) {
+    return interpreter.impl.readFromQuote(tokens, quotes[value], interpreter);
+  } else if (value == '(') {
+    return interpreter.impl.readFromParen(tokens, interpreter);
+  } else if (value == '.') {
+    if (interpreter.language.dotAsCons) {
+      throw SchemeException("Unexpected token: $value");
+    } else {
+      return Pair(const SchemeSymbol("variadic"),
+          Pair(schemeRead(tokens, interpreter), nil));
+    }
+  }
+  return token;
+}
 
-Set _numeralStarts = Set.from("0123456789+-.".split(""));
-Set _symbolChars = Set.from(
+Expression readTail(List<Expression> tokens, Interpreter interpreter) {
+  Expression first = tokens.first;
+  if (first is SchemeSymbol && first.value == ')') {
+    return interpreter.impl.readTailAtParen(tokens);
+  } else if (interpreter.language.dotAsCons &&
+      first is SchemeSymbol &&
+      first.value == '.') {
+    return interpreter.impl.readTailAtDot(tokens, interpreter);
+  } else {
+    return interpreter.impl.readTailElse(tokens, interpreter);
+  }
+}
+
+final _numeralStarts = Set.from("0123456789+-.".split(""));
+final _symbolChars = Set.from(
         r"!$%&*/:<=>?@^_~abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
             .split(""))
     .union(_numeralStarts);
-Set _stringDelims = Set.from(['"']);
-Set _whitespace = Set.from([' ', '\t', '\n', '\r']);
-Set _singleCharTokens = Set.from(['(', ')', '[', ']', "'", '`', '#']);
-Set _tokenEnd = _whitespace
+final _stringDelims = {'"'};
+final _whitespace = {' ', '\t', '\n', '\r'};
+final _singleCharTokens = {'(', ')', '[', ']', "'", '`', '#'};
+final _tokenEnd = _whitespace
     .union(_singleCharTokens)
     .union(_stringDelims)
-    .union(Set.from([',', ',@']));
-Set _delimiters = _singleCharTokens.union(Set.from(['.', ',', ',@']));
+    .union({',', ',@'});
+final _delimiters = _singleCharTokens.union({'.', ',', ',@'});
 
 /// Returns whether [s] is a well-formed symbol.
 bool validSymbol(String s) {
@@ -91,6 +128,10 @@ List nextCandidateToken(String line, int k) {
 }
 
 Iterable<Expression> tokenizeLine(String line) sync* {
+  if (line.startsWith("#lang ")) {
+    yield LanguageChange(line.substring(6).trim());
+    return;
+  }
   var candidate = nextCandidateToken(line, 0);
   String text = candidate[0];
   int i = candidate[1];

@@ -9,7 +9,6 @@ linter:
     - avoid_classes_with_only_static_members
     - avoid_double_and_int_checks
     - avoid_empty_else
-    - avoid_field_initializers_in_const_classes
     - avoid_function_literals_in_foreach_calls
     - avoid_init_to_null
     - avoid_js_rounded_ints
@@ -57,7 +56,6 @@ linter:
     - package_prefixed_library_names
     - prefer_adjacent_string_concatenation
     - prefer_asserts_in_initializer_lists
-    - prefer_bool_in_asserts
     - prefer_collection_literals
     - prefer_conditional_assignment
     - prefer_const_constructors
@@ -78,7 +76,6 @@ linter:
     - prefer_typing_uninitialized_variables
     - recursive_getters
     - slash_for_doc_comments
-    - super_goes_last
     - test_types_in_equals
     - throw_in_finally
     - type_init_formals
