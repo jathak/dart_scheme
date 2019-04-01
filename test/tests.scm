@@ -252,23 +252,7 @@ circumference
 
 ;;; Modified test to error because dotted lists no longer allowed
 (define x (cons 1 2))
-(car x)
 ; expect Error
-
-;;; Old version of test with dotted lists
-;;; (cdr x)
-;;; expect 2
-
-
-;;; Old version of test with dotted lists
-;;;(define x (cons 1 2))
-;;; expect Error
-;;;(define y (cons 3 4))
-;;;(define z (cons x y))
-;;;(car (car z))
-;;;; expect 1
-;;; z
-;;; expect ((1 . 2) 3 . 4)
 
 ;;; New version of test without dotted lists
 (define x (cons 1 nil))
@@ -281,12 +265,7 @@ circumference
 ; expect 3
 
 z
-;expect ((1) 3)
-
-;;; Old version of test with dotted lists
-;;;(define (make-rat n d) (cons n d))
-;;;(define (numer x) (car x))
-;;;(define (denom x) (cdr x))
+; expect ((1) 3)
 
 ;;; New version of test without dotted lists
 (define (make-rat n d) (cons n (cons d nil)))
@@ -315,11 +294,6 @@ z
   (if (= b 0)
       a
       (gcd b (remainder a b))))
-
-;;; Old version of test with dotted lists
-;;; (define (make-rat n d)
-;;;  (let ((g (gcd n d)))
-;;;    (cons (/ n g) (/ d g))))
 
 ;;; New version of test without dotted lists
 (define (make-rat n d)
@@ -659,9 +633,6 @@ one-through-four
 (test)
 ; expect 11
 
-; This test uses the dotted syntax for variable arity procedures
-#lang 61a-scheme/fa18
-
 (define-macro (when test . branch)
   (list 'if test (cons 'begin branch)))
 
@@ -684,86 +655,6 @@ a
 ; expect 1
 b
 ; expect 1
-
-#lang 61a-scheme
-
-;;;;;;;;;;;;;;;;
-;;;; Vectors ;;; (disabled for now since new interpreter doesn't support it)
-;;;;;;;;;;;;;;;;
-;
-;'#(1 2 3 4 5)
-;; expect #(1 2 3 4 5)
-;
-;(define a 0)
-;
-;'#(a 1 2 3)
-;; expect #(a 1 2 3)
-;
-;(vector a 1 2 3)
-;; expect #(0 1 2 3)
-;
-;(define test-vector '#(1 2 3 4 5))
-;
-;(define (vector-map vector fn . index)
-;  (define index (if (null? index) 0 (car index)))
-;  (if (= (vector-length vector) index) vector
-;      (begin (vector-set! vector index (fn (vector-ref vector index)))
-;             (vector-map vector fn (+ index 1)))))
-;(define (square x) (* x x))
-;
-;(vector-map test-vector square)
-;; expect #(1 4 9 16 25)
-;
-;test-vector
-;; expect #(1 4 9 16 25)
-;
-;(vector? test-vector)
-;; expect #t
-;
-;(vector? '(1 2 3))
-;; expect #f
-;
-;(vector->list '#(1 2 3))
-;; expect (1 2 3)
-;
-;(list->vector '(1 2 3))
-;; expect #(1 2 3)
-;
-;(make-vector 4)
-;; expect #(() () () ())
-;
-;(make-vector 4 'hi)
-;; expect #(hi hi hi hi)
-
-;;;;;;;;;;;;;;;;
-;;;; Hashing ;;; (disabled for now since new interpreter doesn't support it)
-;;;;;;;;;;;;;;;;
-;
-;(= (hash-code '(1 2 3)) (hash-code '(1 2 3)))
-;; expect #t
-;
-;(= (hash-code '#(1 2 3)) (hash-code '#(1 2 3)))
-;; expect #t
-;
-;(= (hash-code '(1 2 3)) (hash-code '#(1 2 3)))
-;; expect #f
-;
-;(= (hash-code (lambda () 4)) (hash-code (lambda () 4)))
-;; expect #t
-;
-;(= (hash-code (lambda () 4)) (hash-code (lambda () 5)))
-;; expect #f
-;
-;; This works when compiled to JS, but Dart's bignums
-;; overrides my implementation in the VM, so 4 != 4.0 there
-;;(= (hash-code 4) (hash-code 4.0))
-;;; expect #t
-;
-;(= (hash-code 4) (hash-code (+ 2 2)))
-;; expect #t
-;
-;(= (hash-code 4.1) (hash-code (/ 41 10)))
-;; expect #t
 
 ;;;;;;;;;;;;;;;;
 ;;; Promises ;;;
@@ -974,6 +865,53 @@ b
       (ancestor ?a ?gray-dog)
       (dog (name ?gray-dog) (color gray)))
 ; expect Success!; a: fillmore	gray-dog: herbert
+
+;;; Tests for 61a-scheme/fa18
+
+(define x (cons 1 2))
+(define y (cons 3 4))
+(define z (cons x y))
+
+(car x)
+; expect 1
+(cdr x)
+; expect 2
+(car (car z))
+; expect 1
+z
+; expect ((1 . 2) 3 . 4)
+
+(define (make-rat n d) (cons n d))
+(define (numer x) (car x))
+(define (denom x) (cdr x))
+(define (print-rat x)
+  (display (numer x))
+  (display '/)
+  (display (denom x))
+  (newline))
+(define one-half (make-rat 1 2))
+(print-rat one-half)
+; expect 1/2
+
+(define one-third (make-rat 1 3))
+(print-rat (add-rat one-half one-third))
+; expect 5/6
+
+(print-rat (mul-rat one-half one-third))
+; expect 1/6
+
+(print-rat (add-rat one-third one-third))
+; expect 6/9
+
+(define (make-rat n d)
+  (let ((g (gcd n d)))
+    (cons (/ n g) (/ d g))))
+(print-rat (add-rat one-third one-third))
+; expect 2/3
+
+(define (f . x) (apply + x))
+(f 1 2 3 4)
+; expect 10
 
 #lang 61a-scheme
 

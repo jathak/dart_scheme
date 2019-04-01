@@ -113,9 +113,8 @@ class StandardLibrary extends SchemeLibrary with _$StandardLibraryMixin {
   Value cdr(Pair val) => val.second;
 
   /// Constructs a pair from values [car] and [cdr].
-  Pair cons(Value car, Value cdr, Frame env) {
-    return Pair(car, env.interpreter.language.validateCdr(cdr));
-  }
+  Pair cons(Value car, Value cdr, Frame env) =>
+      Pair(car, env.interpreter.language.validateCdr(cdr));
 
   /// Finds the length of a well-formed Scheme list.
   num length(PairOrEmpty lst) => lst.lengthOrCycle;

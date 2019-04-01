@@ -4,12 +4,10 @@ import 'dart:convert' show json;
 import 'dart:math' show min;
 
 import 'expressions.dart';
-import 'frame.dart';
 import 'interpreter.dart';
 import 'language.dart';
 import 'logging.dart';
 import 'numbers.dart';
-import 'values.dart';
 
 /// Reads the first complete Scheme expression from [tokens].
 ///
@@ -52,19 +50,19 @@ Expression readTail(List<Expression> tokens, Interpreter interpreter) {
   }
 }
 
-Set _numeralStarts = Set.from("0123456789+-.".split(""));
-Set _symbolChars = Set.from(
+final _numeralStarts = Set.from("0123456789+-.".split(""));
+final _symbolChars = Set.from(
         r"!$%&*/:<=>?@^_~abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
             .split(""))
     .union(_numeralStarts);
-Set _stringDelims = Set.from(['"']);
-Set _whitespace = Set.from([' ', '\t', '\n', '\r']);
-Set _singleCharTokens = Set.from(['(', ')', '[', ']', "'", '`', '#']);
-Set _tokenEnd = _whitespace
+final _stringDelims = {'"'};
+final _whitespace = {' ', '\t', '\n', '\r'};
+final _singleCharTokens = {'(', ')', '[', ']', "'", '`', '#'};
+final _tokenEnd = _whitespace
     .union(_singleCharTokens)
     .union(_stringDelims)
-    .union(Set.from([',', ',@']));
-Set _delimiters = _singleCharTokens.union(Set.from(['.', ',', ',@']));
+    .union({',', ',@'});
+final _delimiters = _singleCharTokens.union({'.', ',', ',@'});
 
 /// Returns whether [s] is a well-formed symbol.
 bool validSymbol(String s) {

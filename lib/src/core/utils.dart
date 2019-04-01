@@ -11,6 +11,8 @@ import 'reader.dart';
 import 'values.dart';
 import 'wrappers.dart';
 
+/// Checks that [expressions] contains at least [min] items and (if set) no
+/// more than [max] items.
 void checkForm(SchemeList expressions, int min, [int max = -1]) {
   int length = expressions.length;
   if (length < min) {
@@ -22,8 +24,9 @@ void checkForm(SchemeList expressions, int min, [int max = -1]) {
   return;
 }
 
+/// Checks that [formals] is a valid formal parameter list.
 void checkFormals(Expression formals) {
-  var symbols = Set<SchemeSymbol>();
+  var symbols = <SchemeSymbol>{};
   void checkAndAdd(Expression symbol) {
     if (symbol is Pair && symbol.first == const SchemeSymbol("variadic")) {
       checkForm(SchemeList(symbol.second), 1, 1);
@@ -46,6 +49,7 @@ void checkFormals(Expression formals) {
   if (!formals.isNil) checkAndAdd(formals);
 }
 
+/// Evaluates [expr] in the environment [env].
 Value schemeEval(Expression expr, Frame env) {
   try {
     return completeEval(expr.evaluate(env));
@@ -55,9 +59,11 @@ Value schemeEval(Expression expr, Frame env) {
   }
 }
 
+/// Applies [procedure] with [args] in environment [env].
 Value schemeApply(Procedure procedure, SchemeList args, Frame env) =>
     completeEval(procedure.apply(args, env));
 
+/// Evaluates a call expression [expr] in [env].
 Value evalCallExpression(Pair expr, Frame env) {
   if (!expr.wellFormed) {
     throw SchemeException("Malformed list: $expr");
@@ -76,14 +82,17 @@ Value evalCallExpression(Pair expr, Frame env) {
   return env.interpreter.impl.evalProcedureCall(first, rest, env);
 }
 
+/// Unwraps [val] until it is no longer a thunk.
 Value completeEval(Value val) =>
     val is Thunk ? schemeEval(val.expr, val.env) : val;
 
+/// Adds a built-in procedure to [env] that takes a fixed number of arguments.
 addBuiltin(Frame env, SchemeSymbol name, SchemeBuiltin fn, int args,
     {Docs docs}) {
   env.define(name, BuiltinProcedure.fixed(name, fn, args)..docs = docs, true);
 }
 
+/// Adds a variable-arity built-in procedure to [env].
 addVariableBuiltin(Frame env, SchemeSymbol name, SchemeBuiltin fn, int minArgs,
     {int maxArgs = -1, Docs docs}) {
   var p = BuiltinProcedure.variable(name, fn, minArgs, maxArgs);
@@ -91,6 +100,11 @@ addVariableBuiltin(Frame env, SchemeSymbol name, SchemeBuiltin fn, int minArgs,
   env.define(name, p, true);
 }
 
+/// Counts the number of unmatched parens in [text].
+///
+/// If greater than 0, there are that many unclosed open parens.
+/// If less than 0, there are extra closed parens.
+/// If equal to 0, the parens match.
 int countParens(String text) {
   Iterable<Expression> tokens;
   try {
@@ -105,9 +119,11 @@ int countParens(String text) {
   return left - right;
 }
 
+/// Returns a future that completes after the given number of [milliseconds].
 Future delay(int milliseconds) =>
     Future.delayed(Duration(milliseconds: milliseconds));
 
+/// Returns a map from names to documentation for all forms in [env].
 Map<String, Docs> allDocumentedForms(Frame env) {
   var forms = <String, Docs>{};
   for (var value in env.bindings.values) {

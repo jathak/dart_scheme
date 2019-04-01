@@ -1,7 +1,5 @@
 library cs61a_scheme.core.interpreter;
 
-import 'dart:collection';
-
 import 'expressions.dart';
 import 'frame.dart';
 import 'language.dart';
