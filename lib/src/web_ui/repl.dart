@@ -19,6 +19,7 @@ class Repl {
 
   List<String> history = [];
   int historyIndex = -1;
+  String currInput = "";
 
   final String prompt;
   Repl(this.interpreter, Element parent, {this.prompt = 'scm> '}) {
@@ -164,6 +165,9 @@ class Repl {
   }
 
   historyUp() {
+    if (historyIndex == -1) {
+      currInput = activeInput.text;
+    }
     if (historyIndex < history.length - 1) {
       activeInput.text = history[++historyIndex];
     }
@@ -172,9 +176,9 @@ class Repl {
   historyDown() {
     if (historyIndex > 0) {
       activeInput.text = history[--historyIndex];
-    } else {
+    } else if (historyIndex == 0) {
       historyIndex = -1;
-      activeInput.text = "";
+      activeInput.text = currInput;
     }
   }
 
