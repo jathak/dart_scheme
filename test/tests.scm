@@ -804,6 +804,12 @@ b
 (prefix primes 10)
 ; expect (2 3 5 7 11 13 17 19 23 29)
 
+(define promise (delay (begin (print 2) 0)))
+(force promise)
+; expect 2;Traceback (most recent call last);0     (force promise);Error: A promise must contain a pair, stream, or nil
+(force promise)
+; expect 2;Traceback (most recent call last);0     (force promise);Error: A promise must contain a pair, stream, or nil
+
 ;;;;;;;;;;;;;;
 ;;;; Logic ;;;
 ;;;;;;;;;;;;;;

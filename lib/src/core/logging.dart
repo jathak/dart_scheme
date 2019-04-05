@@ -50,7 +50,8 @@ class SchemeException extends Value implements Exception {
     if (!showTrace || callStack.isEmpty) return 'Error: $message';
     var str = 'Traceback (most recent call last)\n';
     for (int i = 0; i < callStack.length; i++) {
-      str += '$i\t${callStack[i]}\n';
+      var space = " " * (6 - i.toString().length);
+      str += '$i$space${callStack[i]}\n';
     }
     return str + 'Error: $message';
   }
