@@ -12,12 +12,18 @@
 
   .sidebar {
     display: flex;
-    min-width: 300px;
     width: 300px;
-    background: blue;
+    transition: width 0.1s ease-in;
+    @include other-frame;
     &.collapsed {
-
+      width: 0;
     }
+  }
+
+  .sidebar-toggle {
+    width: 16px;
+    @include other-frame;
+    opacity: 0.9;
   }
 
   .content {
@@ -28,17 +34,73 @@
 
   .tabs {
     display: flex;
-    $tab-height: 48px;
+    $tab-height: 40px;
     height: $tab-height;
     min-height: $tab-height;
-    background: green;
+    font-family: sans-serif;
+    cursor: pointer;
+    @include other-frame;
+    @include render;
+
+    .tab {
+      display: inline;
+      flex: 1;
+      text-align: center;
+      position: relative;
+      padding-top: 9px;
+      transition: background 0.08s linear;
+      @include other-frame;
+      &:hover:not(.tab-active) {
+        @include current-frame;
+        opacity: 0.8;
+      }
+    }
+
+    .tab-active {
+      @include current-frame;
+    }
+
+    .new-tab {
+      order: 1000;
+      font-size: 150%;
+      padding: 5px 15px;
+      transition: background 0.08s linear;
+      @include other-frame;
+      &:hover {
+        @include current-frame;
+        opacity: 0.8;
+      }
+    }
+
+    .tab-close, .tab-indicator {
+      position: absolute;
+      right: 0;
+      top: 0;
+      padding: 0px 5px 2px 5px;
+      margin: 9px;
+      border-radius: 10px;
+      transition: background 0.2s linear, color 0.2s linear;
+    }
+
+    .tab-indicator {
+      height: 8px;
+      right: 3px;
+      margin-top: 13px;
+      background: #57f;
+      display: none;
+    }
   }
 
   .buffer {
-    display: flex;
-    flex-direction: column;
     flex: 1;
     overflow-y: auto;
+
+    .input-wrapper {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+    }
+
     .code-input {
       font-family: $font-stack;
       flex: 1;

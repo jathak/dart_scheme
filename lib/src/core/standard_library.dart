@@ -244,13 +244,13 @@ class StandardLibrary extends SchemeLibrary with _$StandardLibraryMixin {
   bool isZero(Number x) => x == Number.zero;
 
   /// Forces [promise], evaluating it if necessary.
-  Expression force(Promise promise) => promise.force();
+  Value force(Promise promise) => promise.force();
 
   /// Finds the rest of [stream].
   ///
   /// Equivalent to (force (cdr [stream]))
   @SchemeSymbol("cdr-stream")
-  Expression cdrStream(Pair stream) => force(cdr(stream));
+  Value cdrStream(Pair stream) => force(cdr(stream));
 
   /// Mutates the car of [pair] to be [val].
   @SchemeSymbol("set-car!")

@@ -61,10 +61,9 @@ abstract class _$ExtraLibraryMixin {
     addBuiltin(__env, const SchemeSymbol("bindings"), (__exprs, __env) {
       return (this.bindings(__env)).list;
     }, 0,
-        docs: Docs(
-            "bindings",
-            "Returns a list of all bindings in the current environment.\n",
-            []));
+        docs: Docs("bindings",
+            "Returns a list of all bindings in the current environment.\n", [],
+            returnType: "list"));
     addVariableBuiltin(__env, const SchemeSymbol('trigger-event'),
         (__exprs, __env) {
       this.triggerEvent(__exprs, __env);

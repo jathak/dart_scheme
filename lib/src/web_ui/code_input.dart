@@ -45,7 +45,7 @@ class CodeInput {
     _subs.add(document.onSelectionChange.listen(_selectListener));
     log.append(element);
     log.append(_autoBoxWrapper);
-    element.focus();
+    if (runCode != null) element.focus();
     parenListener ??= (_) => null;
     parenListener(missingParens);
   }

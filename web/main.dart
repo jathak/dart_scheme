@@ -43,7 +43,7 @@ Shift+Enter to add missing parens and run the current input
 main() async {
   String css = await HttpRequest.getString('assets/style.css');
   var style = querySelector('#theme');
-  var webLibrary = WebLibrary(context['jsPlumb'], css, style);
+  var webLibrary = WebLibrary(context['jsPlumb'], css, style, startEditor);
   if (window.location.href.contains('logic')) {
     await startLogic(webLibrary);
   } else {
@@ -67,10 +67,10 @@ main() async {
   });
 }
 
-startEditor(Interpreter inter) async {
+startEditor(Interpreter interpreter) async {
   var container = DivElement()..classes = ['editor'];
   document.body.append(container);
-  var editor = Editor(inter, container);
+  var editor = Editor(interpreter, container);
 }
 
 startScheme(WebLibrary webLibrary) async {
@@ -112,7 +112,7 @@ startScheme(WebLibrary webLibrary) async {
     })
   ]);
   inter.logger(MarkdownWidget(motd, env: demos), true);
-  if (window.location.hash == "#editor") {
+  if (window.location.toString().contains("editor")) {
     startEditor(inter);
   }
 }

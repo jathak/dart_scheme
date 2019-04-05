@@ -19,8 +19,9 @@ class WebLibrary extends SchemeLibrary with _$WebLibraryMixin {
   final JsObject jsPlumb;
   final String css;
   final html.Element styleElement;
+  final Function startEditor;
 
-  WebLibrary(this.jsPlumb, this.css, this.styleElement) {
+  WebLibrary(this.jsPlumb, this.css, this.styleElement, this.startEditor) {
     Undefined.jsUndefined = context['undefined'];
     AsyncValue.makePromise = (expr) => JsObject(context['Promise'], [
           (resolve, reject) {
@@ -180,6 +181,13 @@ class WebLibrary extends SchemeLibrary with _$WebLibraryMixin {
   /// Converts [color] to a string of CSS.
   @SchemeSymbol("color->css")
   String colorToCss(Color color) => color.toCSS();
+
+  /// Launch the editor.
+  ///
+  /// Note: This is still a work in progress. Don't use for important work!
+  void editor(Frame env) {
+    startEditor(env.interpreter);
+  }
 }
 
 StreamController<Theme> _controller = StreamController();
