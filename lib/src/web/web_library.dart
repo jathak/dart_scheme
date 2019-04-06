@@ -172,9 +172,13 @@ class WebLibrary extends SchemeLibrary with _$WebLibraryMixin {
   /// Loads and applies a [theme].
   Future<Value> theme(SchemeSymbol theme, Frame env) async {
     ImportedLibrary lib = await import('scm/theme/$theme', [], env);
-    Value myTheme = lib.reference(const SchemeSymbol('imported-theme'));
-    if (myTheme is! Theme) throw SchemeException("No theme exists");
-    applyThemeBuiltin(myTheme);
+    // For old-style themes
+    try {
+      applyThemeBuiltin(
+          lib.reference(const SchemeSymbol('imported-theme')) as Theme);
+    } on SchemeException catch (e) {
+      // Ignore
+    }
     return undefined;
   }
 
@@ -186,7 +190,7 @@ class WebLibrary extends SchemeLibrary with _$WebLibraryMixin {
   ///
   /// Note: This is still a work in progress. Don't use for important work!
   void editor(Frame env) {
-    startEditor(env.interpreter);
+    startEditor(env.interpreter.clone());
   }
 }
 

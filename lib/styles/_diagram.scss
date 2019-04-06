@@ -1,5 +1,23 @@
 @import 'theme';
 
+.button {
+  font-size: 0.92em;
+  padding: 0.25em 0.375em;
+  border-radius: 0.1875em;
+  margin: 0.5em;
+  display: inline-block;
+  min-width: 2em;
+  text-align: center;
+  z-index: 250;
+  cursor: pointer;
+  user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  -webkit-user-select: none;
+  @include button;
+  @include button-text;
+}
+
 .render {
 
   @include render;
@@ -15,24 +33,6 @@
       font-family: inherit;
       font-size: inherit;
     }
-  }
-
-  .button {
-    font-size: 0.92em;
-    padding: 0.25em 0.375em;
-    border-radius: 0.1875em;
-    margin: 0.5em;
-    display: inline-block;
-    min-width: 2em;
-    text-align: center;
-    z-index: 250;
-    cursor: pointer;
-    user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
-    -webkit-user-select: none;
-    @include button;
-    @include button-text;
   }
 
   .block {

@@ -52,4 +52,23 @@
   .error {
     @include error;
   }
+
+  .mouseover-wrapper {
+    .render {
+      display: none;
+    }
+    .objects {
+      padding: 0;
+    }
+    &:hover {
+      .render {
+        z-index: 1000;
+        border-radius: 0.185em;
+        position: absolute;
+        width: auto;
+        display: block;
+        @include other-frame;
+      }
+    }
+  }
 }

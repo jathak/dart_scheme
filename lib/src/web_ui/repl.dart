@@ -117,9 +117,11 @@ class Repl {
     container.scrollTop = container.scrollHeight;
   }
 
-  runCode(String code) async {
-    addToHistory(code);
-    buildNewInput();
+  runCode(String code, {bool fromTool: false}) async {
+    if (!fromTool) {
+      addToHistory(code);
+      buildNewInput();
+    }
     var tokens = tokenizeLines(code.split("\n")).toList();
     var loggingArea = activeLoggingArea;
     while (tokens.isNotEmpty) {

@@ -34,6 +34,18 @@ class Interpreter {
     StandardLibrary().importAll(globalEnv);
   }
 
+  /// Creates a clone of this interpreter, with a copy of this interpreter's
+  /// current global environment and settings, but a reset logger, exit
+  /// listener, and frame counter.
+  Interpreter clone() {
+    var cloned = Interpreter(impl);
+    cloned.language = language;
+    cloned.tailCallOptimized = tailCallOptimized;
+    cloned.globalEnv.bindings.addAll(globalEnv.bindings);
+    cloned.globalEnv.hidden.addAll(globalEnv.hidden);
+    return cloned;
+  }
+
   @deprecated
   ProjectInterface get implementation => impl;
 
