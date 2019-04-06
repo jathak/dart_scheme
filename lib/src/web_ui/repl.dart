@@ -60,7 +60,7 @@ class Repl {
         print('Stack Trace: ${e.stackTrace}');
       }
     };
-    window.onKeyDown.listen(onWindowKeyDown);
+    container.onKeyDown.listen(onKeyDownListener);
   }
 
   bool autodraw = false;
@@ -183,7 +183,7 @@ class Repl {
     }
   }
 
-  onWindowKeyDown(KeyboardEvent event) {
+  onKeyDownListener(KeyboardEvent event) {
     if (activeInput.text.trim().contains('\n') && !event.ctrlKey) return;
     if (event.keyCode == KeyCode.UP) {
       historyUp();
