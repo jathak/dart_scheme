@@ -29,7 +29,9 @@ class Repl {
     addBuiltins();
     container = PreElement()..classes = ['repl'];
     container.onClick.listen((e) async {
-      if (!activeInput.element.contains(document.activeElement)) {
+      await delay(100);
+      if (window.getSelection().rangeCount == 0 ||
+          window.getSelection().getRangeAt(0).collapsed) {
         activeInput.element.focus();
       }
     });
