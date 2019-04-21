@@ -42,7 +42,7 @@ class NativeValue extends Value {
 }
 
 Value jsToScheme(obj) {
-  if (obj is Expression) return obj;
+  if (obj is Value) return obj;
   if (obj is num) return Number.fromNum(obj);
   if (obj is bool) return obj ? schemeTrue : schemeFalse;
   if (obj is String) return SchemeString(obj);
@@ -66,7 +66,7 @@ Value jsObjectToScheme(JsObject obj) {
   return JsValue(obj);
 }
 
-Expression jsEval(String code) {
+Value jsEval(String code) {
   try {
     return jsToScheme(context.callMethod("eval", [code]));
     // ignore: avoid_catches_without_on_clauses
