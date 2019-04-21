@@ -14,6 +14,20 @@
   <link rel="icon" sizes="192x192" href="assets/icons/xxxhdpi.png">
   <link rel="apple-touch-icon" sizes="144x144" href="assets/icons/xxhdpi.png">
   <link rel="apple-touch-icon" sizes="192x192" href="assets/icons/xxxhdpi.png">
+  <script>
+    /// Wraps a Scheme procedure in a JS function
+    function wrapSchemeProcedure(caller, procedure) {
+      function wrapped(...args) {
+        return caller(args);
+      }
+      wrapped.wrappedSchemeProcedure = procedure;
+      return wrapped;
+    }
+    /// Unwraps a previously wrapped Scheme procedure
+    function unwrapSchemeProcedure(obj) {
+      return obj.wrappedSchemeProcedure || null;
+    }
+  </script>
 </head>
 <body>
 <canvas id='turtle' width='1000px' height='1000px'></canvas>

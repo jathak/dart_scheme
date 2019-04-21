@@ -1,7 +1,10 @@
+@JS()
 library cs61a_scheme.web.js_interop;
 
 import 'dart:async';
 import 'dart:js';
+
+import 'package:js/js.dart';
 
 import 'package:cs61a_scheme/cs61a_scheme_extra.dart';
 
@@ -13,6 +16,8 @@ class JsProcedure extends Procedure {
     var result = fn.apply(args.map((arg) => arg.toJS()).toList());
     return jsToScheme(result);
   }
+
+  toString() => "#[js-function]";
 
   toJS() => fn;
 }
@@ -46,19 +51,17 @@ Value jsToScheme(obj) {
   if (obj is num) return Number.fromNum(obj);
   if (obj is bool) return obj ? schemeTrue : schemeFalse;
   if (obj is String) return SchemeString(obj);
-  if (obj is JsFunction) {
-    if (obj.hasProperty('wrappedSchemeProcedure')) {
-      return obj['wrappedSchemeProcedure'];
-    }
-    return JsProcedure(obj);
-  }
   if (obj is JsObject) return jsObjectToScheme(obj);
   if (obj == null) return undefined;
   if (obj == context['undefined']) return undefined;
-  return NativeValue(obj);
+  return unwrapSchemeProcedure(obj) ?? NativeValue(obj);
 }
 
 Value jsObjectToScheme(JsObject obj) {
+  if (obj.hasProperty('wrappedSchemeProcedure')) {
+    return obj['wrappedSchemeProcedure'];
+  }
+  if (obj is JsFunction) return JsProcedure(obj);
   var type =
       context['Object']['prototype']['toString'].callMethod('call', [obj]);
   if (type == '[object Promise]') {
@@ -80,20 +83,18 @@ Value jsEval(String code) {
   }
 }
 
-JsFunction procedureToJsFunction(Procedure procedure, Frame env) {
-  var wrapper = context.callMethod("eval", [
-    "(fn) => {function wrapped(){return fn(Array.from(arguments));} return wrapped;}"
-  ]) as JsFunction;
-  var wrapped = wrapper.apply([
-    allowInterop((args) {
+@JS("wrapSchemeProcedure")
+external JsFunction wrapSchemeProcedure(dynamic fn(args), procedure);
+
+@JS("unwrapSchemeProcedure")
+external Procedure unwrapSchemeProcedure(obj);
+
+JsFunction procedureToJsFunction(Procedure procedure, Frame env) =>
+    wrapSchemeProcedure(allowInterop((args) {
       var schemeArgs = <Value>[];
       for (var arg in args) {
         schemeArgs.add(jsToScheme(arg));
       }
       return schemeApply(procedure, SchemeList.fromIterable(schemeArgs), env)
           .toJS();
-    })
-  ]) as JsFunction;
-  wrapped['wrappedSchemeProcedure'] = procedure;
-  return wrapped;
-}
+    }), procedure);
