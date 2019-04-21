@@ -84,7 +84,7 @@ Undefined doSetForm(SchemeList<Expression> expressions, Frame env) {
   checkForm(expressions, 2, 2);
   Expression name = expressions.first;
   if (name is! SchemeSymbol) throw SchemeException("$name is not a symbol");
-  Expression value = schemeEval(expressions.skip(1).first, env);
+  Value value = schemeEval(expressions.skip(1).first, env);
   env.update(name as SchemeSymbol, value);
   return undefined;
 }

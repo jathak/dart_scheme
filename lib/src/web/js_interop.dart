@@ -9,7 +9,7 @@ class JsProcedure extends Procedure {
   final SchemeSymbol name = null;
   final JsFunction fn;
   JsProcedure(this.fn);
-  Expression apply(SchemeList args, Frame env) {
+  Value apply(SchemeList args, Frame env) {
     var result = fn.apply(args.map((arg) => arg.toJS()).toList());
     return jsToScheme(result);
   }
@@ -46,8 +46,12 @@ Value jsToScheme(obj) {
   if (obj is num) return Number.fromNum(obj);
   if (obj is bool) return obj ? schemeTrue : schemeFalse;
   if (obj is String) return SchemeString(obj);
-  if (obj is SchemeFunction) return obj.procedure;
-  if (obj is JsFunction) return JsProcedure(obj);
+  if (obj is JsFunction) {
+    if (obj.hasProperty('wrappedSchemeProcedure')) {
+      return obj['wrappedSchemeProcedure'];
+    }
+    return JsProcedure(obj);
+  }
   if (obj is JsObject) return jsObjectToScheme(obj);
   if (obj == null) return undefined;
   if (obj == context['undefined']) return undefined;
@@ -76,17 +80,20 @@ Value jsEval(String code) {
   }
 }
 
-class SchemeFunction {
-  Procedure procedure;
-  Frame env;
-  SchemeFunction(this.procedure, this.env);
-  call() => schemeApply(procedure, SchemeList(nil), null).toJS();
-  noSuchMethod(Invocation invocation) {
-    if (invocation.memberName == const Symbol("call")) {
-      var args = invocation.positionalArguments.map(jsToScheme);
-      return schemeApply(procedure, SchemeList.fromIterable(args), env).toJS();
-    }
-    throw SchemeException(
-        "Something has gone horribly wrong with wrapped procedures");
-  }
+JsFunction procedureToJsFunction(Procedure procedure, Frame env) {
+  var wrapper = context.callMethod("eval", [
+    "(fn) => {function wrapped(){return fn(Array.from(arguments));} return wrapped;}"
+  ]) as JsFunction;
+  var wrapped = wrapper.apply([
+    allowInterop((args) {
+      var schemeArgs = <Value>[];
+      for (var arg in args) {
+        schemeArgs.add(jsToScheme(arg));
+      }
+      return schemeApply(procedure, SchemeList.fromIterable(schemeArgs), env)
+          .toJS();
+    })
+  ]) as JsFunction;
+  wrapped['wrappedSchemeProcedure'] = procedure;
+  return wrapped;
 }
