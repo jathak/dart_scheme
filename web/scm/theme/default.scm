@@ -1,1 +1,1 @@
-(define imported-theme (make-theme))
+(apply-theme (make-theme))

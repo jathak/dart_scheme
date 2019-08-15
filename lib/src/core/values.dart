@@ -99,19 +99,19 @@ class Thunk extends Value {
 /// whose cdr is a promise that evaluates to another stream or the empty list.
 ///
 /// It is semantically different from a JS Promise, which is equivalent to a
-/// Dart [Future]. The Scheme equivalent of [Future] is [AsyncExpression].
+/// Dart [Future]. The Scheme equivalent of [Future] is [AsyncValue].
 ///
 /// A Scheme stream is semantically different from a Dart Stream, which is an
 /// asynchronous sequence. A Scheme stream is analogous to a lazily-computed
 /// iterable built on a linked list.
 class Promise extends Value {
-  Expression expr;
+  Value expr;
   final Frame env;
   bool _evaluated = false;
   Promise(this.expr, this.env);
 
   /// Evaluates the promise, or returns the result if already evaluated.
-  Expression force() {
+  Value force() {
     if (!_evaluated) {
       expr = env.interpreter.language.validateCdr(schemeEval(expr, env),
           errorMessage: "A promise must contain a pair, stream, or nil");

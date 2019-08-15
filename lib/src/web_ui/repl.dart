@@ -27,12 +27,13 @@ class Repl {
       if (decoded is List) history = decoded.map((item) => '$item').toList();
     }
     addBuiltins();
-    container = PreElement()..classes = ['repl'];
+    container = DivElement()..classes = ['repl'];
     container.onClick.listen((e) async {
       await delay(100);
       if (window.getSelection().rangeCount == 0 ||
           window.getSelection().getRangeAt(0).collapsed) {
         activeInput.element.focus();
+        await activeInput.highlight(atEnd: true);
       }
     });
     parent.append(container);
@@ -59,7 +60,7 @@ class Repl {
         print('Stack Trace: ${e.stackTrace}');
       }
     };
-    window.onKeyDown.listen(onWindowKeyDown);
+    container.onKeyDown.listen(onKeyDownListener);
   }
 
   bool autodraw = false;
@@ -116,9 +117,11 @@ class Repl {
     container.scrollTop = container.scrollHeight;
   }
 
-  runCode(String code) async {
-    addToHistory(code);
-    buildNewInput();
+  runCode(String code, {bool fromTool: false}) async {
+    if (!fromTool) {
+      addToHistory(code);
+      buildNewInput();
+    }
     var tokens = tokenizeLines(code.split("\n")).toList();
     var loggingArea = activeLoggingArea;
     while (tokens.isNotEmpty) {
@@ -180,7 +183,7 @@ class Repl {
     }
   }
 
-  onWindowKeyDown(KeyboardEvent event) {
+  onKeyDownListener(KeyboardEvent event) {
     if (activeInput.text.trim().contains('\n') && !event.ctrlKey) return;
     if (event.keyCode == KeyCode.UP) {
       historyUp();

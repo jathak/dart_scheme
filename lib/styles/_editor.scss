@@ -1,0 +1,210 @@
+@import 'theme';
+
+.editor {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  @include background;
+
+  display: flex;
+
+  .sidebar-toggle {
+    width: 16px;
+    @include other-frame;
+    opacity: 0.75;
+  }
+
+  .sidebar {
+    width: 300px;
+    transition: width 0.08s linear;
+    @include render;
+    @include other-frame;
+    border: none;
+    overflow-x: hidden;
+    overflow-y: auto;
+
+    &.collapsed {
+      width: 0 !important;
+    }
+
+
+    .sidebar-header {
+      padding: 16px 16px 0 16px;
+      font-family: sans-serif;
+      text-transform: uppercase;
+    }
+
+    .sidebar-section {
+      padding: 16px;
+
+      &:empty {
+        min-height: 40px;
+      }
+
+      &:empty::after {
+        font-size: 75%;
+        content: "Nothing Here Yet!";
+      }
+    }
+
+    .sidebar-entry {
+      cursor: pointer;
+    }
+  }
+
+  .sidebar-adjust {
+    height: 100%;
+    width: 3px;
+    background: currentcolor;
+    opacity: 0.8;
+    cursor: ew-resize;
+  }
+
+  .content {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+  }
+
+  .tabs {
+    display: flex;
+    $tab-height: 40px;
+    height: $tab-height;
+    min-height: $tab-height;
+    font-family: sans-serif;
+    cursor: pointer;
+
+    @include render;
+
+    .tab {
+      display: inline;
+      flex: 1;
+      text-align: center;
+      position: relative;
+      padding-top: 9px;
+      transition: background 0.08s linear;
+      @include other-frame;
+      border-color: transparent transparent currentcolor transparent;
+      &:hover:not(.tab-active) {
+        @include current-frame;
+        border-color: transparent transparent currentcolor transparent;
+        opacity: 0.8;
+      }
+    }
+
+    .tab-active {
+      @include current-frame;
+      border-color: currentcolor currentcolor transparent currentcolor;
+      &:nth-child(2) {
+        border-left-color: transparent;
+      }
+    }
+
+    .new-tab {
+      order: 1000;
+      padding: 7px 15px 0px 15px;
+      transition: background 0.08s linear;
+      @include other-frame;
+      border-color: transparent transparent currentcolor transparent;
+      &:hover {
+        @include current-frame;
+        border-color: transparent transparent currentcolor transparent;
+        opacity: 0.8;
+      }
+    }
+
+    .tab-close, .tab-indicator {
+      position: absolute;
+      right: 0;
+      top: 0;
+      padding: 0px 5px 2px 5px;
+      margin: 9px;
+      border-radius: 10px;
+      transition: background 0.2s linear, color 0.2s linear;
+    }
+
+    .tab-indicator {
+      height: 8px;
+      right: 3px;
+      margin-top: 13px;
+      background: #57f;
+      display: none;
+    }
+  }
+
+  .buffer {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+
+    .input-wrapper {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      .code-input {
+        font-family: $font-stack;
+        flex: 1;
+        padding: 16px;
+        overflow-y: auto;
+      }
+
+      .docs {
+        margin: 0;
+        border-radius: 0;
+        padding: 16px;
+        width: calc(100% - 32px);
+      }
+
+      .render {
+        height: auto;
+        padding: 0;
+      }
+    }
+
+    .drawer-adjust {
+      display: none;
+      width: 100%;
+      height: 3px;
+      background: currentcolor;
+      opacity: 0.8;
+      cursor: ns-resize;
+    }
+
+    .drawer {
+      transition: height 0.08s linear;
+      position: relative;
+      overflow-y: auto;
+
+      & > .render {
+        position: absolute;
+        max-height: 100%;
+        overflow-y: auto;
+        margin: 0;
+        left:0;
+        right:0;
+        bottom:0;
+      }
+    }
+
+    .buttons {
+      display: flex;
+      flex-direction: row;
+
+      .button {
+        flex: 1;
+        margin: 0;
+        border-radius: 0;
+        padding: 10px 0;
+      }
+    }
+
+    .themes {
+      display: flex;
+      flex-direction: column;
+      width: 200px;
+    }
+  }
+
+}

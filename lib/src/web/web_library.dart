@@ -19,8 +19,9 @@ class WebLibrary extends SchemeLibrary with _$WebLibraryMixin {
   final JsObject jsPlumb;
   final String css;
   final html.Element styleElement;
+  final Function startEditor;
 
-  WebLibrary(this.jsPlumb, this.css, this.styleElement) {
+  WebLibrary(this.jsPlumb, this.css, this.styleElement, this.startEditor) {
     Undefined.jsUndefined = context['undefined'];
     AsyncValue.makePromise = (expr) => JsObject(context['Promise'], [
           (resolve, reject) {
@@ -172,15 +173,26 @@ class WebLibrary extends SchemeLibrary with _$WebLibraryMixin {
   /// Loads and applies a [theme].
   Future<Value> theme(SchemeSymbol theme, Frame env) async {
     ImportedLibrary lib = await import('scm/theme/$theme', [], env);
-    Value myTheme = lib.reference(const SchemeSymbol('imported-theme'));
-    if (myTheme is! Theme) throw SchemeException("No theme exists");
-    applyThemeBuiltin(myTheme);
+    // For old-style themes
+    try {
+      applyThemeBuiltin(
+          lib.reference(const SchemeSymbol('imported-theme')) as Theme);
+    } on SchemeException catch (e) {
+      // Ignore
+    }
     return undefined;
   }
 
   /// Converts [color] to a string of CSS.
   @SchemeSymbol("color->css")
   String colorToCss(Color color) => color.toCSS();
+
+  /// Launch the editor.
+  ///
+  /// Note: This is still a work in progress. Don't use for important work!
+  void editor(Frame env) {
+    startEditor(env.interpreter.clone());
+  }
 }
 
 StreamController<Theme> _controller = StreamController();

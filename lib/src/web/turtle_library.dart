@@ -50,7 +50,7 @@ class TurtleLibrary extends SchemeLibrary with _$TurtleLibraryMixin {
   @turtlestart
   @MinArgs(1)
   @MaxArgs(2)
-  void circle(List<Expression> exprs) {
+  void circle(List<Value> exprs) {
     if (exprs[0] is! Number) {
       throw SchemeException('${exprs[0]} is not a number');
     }
@@ -96,7 +96,7 @@ class TurtleLibrary extends SchemeLibrary with _$TurtleLibraryMixin {
 
   /// Sets the pen color of the turtle.
   @turtlestart
-  void color(Expression color) {
+  void color(Value color) {
     turtle.penColor = Color.fromAnything(color);
   }
 
@@ -123,13 +123,13 @@ class TurtleLibrary extends SchemeLibrary with _$TurtleLibraryMixin {
 
   /// Sets the background color of the turtle canvas.
   @turtlestart
-  void bgcolor(Expression color) {
+  void bgcolor(Value color) {
     turtle.backgroundColor = Color.fromAnything(color);
   }
 
   /// Sets the [size] of the turtle's pen.
   @turtlestart
-  void pensize(num size) {
+  void pensize(int size) {
     turtle.penSize = size;
   }
 
@@ -169,7 +169,7 @@ class TurtleLibrary extends SchemeLibrary with _$TurtleLibraryMixin {
 
   /// Draws a box with [color] in the turtle's current pixel size at ([x], [y])
   @turtlestart
-  void pixel(num x, num y, Expression color) {
+  void pixel(num x, num y, Value color) {
     turtle.drawPixel(x, y, Color.fromAnything(color));
   }
 
@@ -188,7 +188,6 @@ class TurtleLibrary extends SchemeLibrary with _$TurtleLibraryMixin {
   @SchemeSymbol('screen-height')
   num screenHeight() => turtle.gridHeight / turtle.pixelSize;
 
-  /// This turtle procedure is not supported in the web interpreter.
   @SchemeSymbol('unsupported')
   @SchemeSymbol('speed')
   @SchemeSymbol('showturtle')

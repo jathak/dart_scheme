@@ -1,0 +1,17 @@
+@import "theme";
+
+.code-input {
+  display: inline-block;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  //overflow-y:auto;
+
+  &:focus {
+    outline: none;
+  }
+}
+
+.autobox-word {
+  margin: 10px;
+  display: inline-block;
+}

@@ -9,23 +9,23 @@ abstract class _$TurtleLibraryMixin {
   void backward(num distance);
   void left(num angle);
   void right(num angle);
-  void circle(List<Expression> exprs);
+  void circle(List<Value> exprs);
   void setPosition(num x, num y);
   void setHeading(num heading);
   void penUp();
   void penDown();
   void turtleClear();
-  void color(Expression color);
+  void color(Value color);
   void beginFill();
   void endFill();
   void exitonclick(Frame env);
   void exit();
-  void bgcolor(Expression color);
-  void pensize(num size);
+  void bgcolor(Value color);
+  void pensize(int size);
   void turtleHelp(Frame env);
   void setGridSize(int width, int height);
   void setCanvasSize(int width, int height);
-  void pixel(num x, num y, Expression color);
+  void pixel(num x, num y, Value color);
   void pixelsize(int size);
   num screenWidth();
   num screenHeight();
@@ -90,10 +90,8 @@ abstract class _$TurtleLibraryMixin {
         __env.bindings[const SchemeSymbol('right')];
     __env.hidden[const SchemeSymbol('rt')] = true;
     addVariableBuiltin(__env, const SchemeSymbol("circle"), (__exprs, __env) {
-      if (__exprs.any((x) => x is! Expression))
-        throw SchemeException('Argument of invalid type passed to circle.');
       turtle.show();
-      this.circle(__exprs.cast<Expression>());
+      this.circle(__exprs);
       return undefined;
     }, 1,
         maxArgs: 2,
@@ -153,14 +151,12 @@ abstract class _$TurtleLibraryMixin {
       return undefined;
     }, 0, docs: Docs('turtle-clear', "Clears the current turtle state.\n", []));
     addBuiltin(__env, const SchemeSymbol("color"), (__exprs, __env) {
-      if (__exprs[0] is! Expression)
-        throw SchemeException('Argument of invalid type passed to color.');
       turtle.show();
       this.color(__exprs[0]);
       return undefined;
     }, 1,
         docs: Docs("color", "Sets the pen color of the turtle.\n",
-            [Param("expression", "color")]));
+            [Param("value", "color")]));
     addBuiltin(__env, const SchemeSymbol('begin_fill'), (__exprs, __env) {
       turtle.show();
       this.beginFill();
@@ -194,8 +190,6 @@ abstract class _$TurtleLibraryMixin {
         docs: Docs('turtle-exit',
             "Closes the turtle canvas, reseting its state.\n", []));
     addBuiltin(__env, const SchemeSymbol("bgcolor"), (__exprs, __env) {
-      if (__exprs[0] is! Expression)
-        throw SchemeException('Argument of invalid type passed to bgcolor.');
       turtle.show();
       this.bgcolor(__exprs[0]);
       return undefined;
@@ -203,16 +197,16 @@ abstract class _$TurtleLibraryMixin {
         docs: Docs(
             "bgcolor",
             "Sets the background color of the turtle canvas.\n",
-            [Param("expression", "color")]));
+            [Param("value", "color")]));
     addBuiltin(__env, const SchemeSymbol("pensize"), (__exprs, __env) {
-      if (__exprs[0] is! Number)
+      if (__exprs[0] is! Integer)
         throw SchemeException('Argument of invalid type passed to pensize.');
       turtle.show();
-      this.pensize(__exprs[0].toJS());
+      this.pensize(__exprs[0].toJS().toInt());
       return undefined;
     }, 1,
         docs: Docs("pensize", "Sets the [size] of the turtle's pen.\n",
-            [Param("num", "size")]));
+            [Param("int", "size")]));
     addBuiltin(__env, const SchemeSymbol('turtle-help'), (__exprs, __env) {
       this.turtleHelp(__env);
       return undefined;
@@ -244,9 +238,7 @@ abstract class _$TurtleLibraryMixin {
             "Sets the exterior dimensions of the turtle's canvas.\n\nThis does not effect the current state of the turtle.\n",
             [Param("int", "width"), Param("int", "height")]));
     addBuiltin(__env, const SchemeSymbol("pixel"), (__exprs, __env) {
-      if (__exprs[0] is! Number ||
-          __exprs[1] is! Number ||
-          __exprs[2] is! Expression)
+      if (__exprs[0] is! Number || __exprs[1] is! Number)
         throw SchemeException('Argument of invalid type passed to pixel.');
       turtle.show();
       this.pixel(__exprs[0].toJS(), __exprs[1].toJS(), __exprs[2]);
@@ -255,11 +247,7 @@ abstract class _$TurtleLibraryMixin {
         docs: Docs(
             "pixel",
             "Draws a box with [color] in the turtle's current pixel size at ([x], [y])\n",
-            [
-              Param("num", "x"),
-              Param("num", "y"),
-              Param("expression", "color")
-            ]));
+            [Param("num", "x"), Param("num", "y"), Param("value", "color")]));
     addBuiltin(__env, const SchemeSymbol("pixelsize"), (__exprs, __env) {
       if (__exprs[0] is! Integer)
         throw SchemeException('Argument of invalid type passed to pixelsize.');
@@ -297,10 +285,7 @@ abstract class _$TurtleLibraryMixin {
             'Argument of invalid type passed to unsupported.');
       this.unsupported(__exprs.cast<Expression>(), __env);
       return undefined;
-    }, 0,
-        maxArgs: -1,
-        docs: Docs.variable('unsupported',
-            "This turtle procedure is not supported in the web interpreter.\n"));
+    }, 0, maxArgs: -1);
     __env.bindings[const SchemeSymbol('speed')] =
         __env.bindings[const SchemeSymbol('unsupported')];
     __env.hidden[const SchemeSymbol('speed')] = true;

@@ -41,7 +41,7 @@
   (theme-set-color! t 'button-text-hover base3)
   (theme-set-color! t 'async-log yellow)
   (theme-set-css! t 'async-log "font-style: italic;")
-  
+
   (theme-set-color! t 'background base03)
   (theme-set-color! t 'current-frame blue)
   (theme-set-color! t 'other-frame base01)
@@ -56,4 +56,4 @@
   (theme-set-css! t 'async-block border)
   t)
 
-(define imported-theme (make-solarized-theme))
+(apply-theme (make-solarized-theme))

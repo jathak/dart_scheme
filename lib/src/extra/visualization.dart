@@ -11,12 +11,6 @@ class Button extends Widget {
   void Function() click;
   Widget inside;
   Button(this.inside, this.click);
-  Button.forEvent(
-      this.inside, SchemeSymbol id, List<Expression> data, Frame env) {
-    click = () {
-      env.interpreter.triggerEvent(id, data, env);
-    };
-  }
 }
 
 class Visualization extends Widget {
@@ -28,6 +22,8 @@ class Visualization extends Widget {
 
   List<Widget> buttonRow;
   Value result;
+
+  Function(int index, [bool keepAnimating]) goto;
 
   Visualization(this.code, this.env) {
     Interpreter inter = env.interpreter;
@@ -61,7 +57,7 @@ class Visualization extends Widget {
 
   _init() {
     bool animating = false;
-    goto(int index, [bool keepAnimating = false]) {
+    goto = (index, [keepAnimating = false]) {
       if (!keepAnimating) animating = false;
       if (index < 0) index = diagrams.length - 1;
       if (index >= diagrams.length - 1) {
@@ -71,7 +67,7 @@ class Visualization extends Widget {
       current = index;
       buttonRow[2] = TextWidget("${current + 1}/${diagrams.length}");
       update();
-    }
+    };
 
     Button first = Button(TextWidget("<<"), () => goto(0));
     Button prev = Button(TextWidget("<"), () => goto(current - 1));
@@ -83,6 +79,7 @@ class Visualization extends Widget {
         animating = false;
         return;
       }
+      if (current == diagrams.length - 1) goto(0);
       animating = true;
       await Future.delayed(Duration(seconds: 1));
       while (animating && current < diagrams.length - 1) {
@@ -93,7 +90,7 @@ class Visualization extends Widget {
     buttonRow = [first, prev, status, next, last, animate];
   }
 
-  void _addFrames(Frame myEnv, [Expression returnValue]) {
+  void _addFrames(Frame myEnv, [Value returnValue]) {
     if (myEnv.tag == '#imported') return;
     if (frameReturnValues.containsKey(myEnv)) {
       frameReturnValues[myEnv] = returnValue;

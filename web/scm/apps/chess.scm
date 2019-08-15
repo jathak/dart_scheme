@@ -1,3 +1,5 @@
+#lang 61a-scheme/fa18
+
 (define (piece type color file rank) (list type color file rank))
 (define (type piece) (car piece))
 (define (piece-color piece) (car (cdr piece)))
@@ -48,17 +50,17 @@
       ((equal? t "bishop") (draw-bishop x y))
       ((equal? t "pawn") (draw-pawn x y))
       (else nil))))
-    
+
 (define (_draw-pieces pieces)
   (if (not (null? pieces))
       (begin (draw-piece (car pieces))
              (_draw-pieces (cdr pieces)))))
-           
+
 (define (_redraw-square f r)
   (_fill-square f r (equal? current-highlight (cons f r)))
   (define piece-there (piece-at f r))
   (if (null? piece-there) nil (draw-piece piece-there)))
-      
+
 
 (define (_fill-square f r highlight)
   (goto (* (- f 5) 80)
@@ -70,7 +72,7 @@
         (color light-board-color)))
   (begin_fill) (seth 90) (forward 80) (left 90) (forward 80)
   (left 90) (forward 80) (left 90) (end_fill))
-  
+
 (define (_draw-highlighted)
   (_fill-square (car current-highlight)
                (cdr current-highlight) #t))
@@ -89,7 +91,7 @@
     (pensize 0)
     (goto -320 320)
     (board 1))
-  
+
   (make-board)
   (_draw-highlighted)
   (_draw-pieces black-pieces)
@@ -198,7 +200,7 @@
         (helper (cdr lst)))
       (else #t)))
   (helper (if (equal? (piece-color king) "white") black white)))
-    
+
 (define (_find-king pieces)
   (cond ((null? pieces) nil)
         ((equal? (type (car pieces)) "king") (car pieces))
@@ -238,12 +240,12 @@
         (set! white-pieces old-white)
         (set! black-pieces old-black)
         (error-notrace "You may not move yourself into check")))
-  
+
   (set! current (if (equal? current "white") "black" "white"))
   (_redraw-square f1 r1)
   (_redraw-square f2 r2)
   (define king (_find-king (if (equal? current "white") white-pieces black-pieces)))
-  
+
   (define (determine-check)
     (define in-check (_in-check king white-pieces black-pieces))
     (define msg (if in-check (string-append (piece-color king) " king in check\n") nil))

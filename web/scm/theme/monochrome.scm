@@ -30,7 +30,7 @@
   (theme-set-color! t 'button-text-hover background)
   (theme-set-color! t 'async-log foreground)
   (theme-set-css! t 'async-log "font-style: italic;")
-  
+
   (theme-set-color! t 'background background)
   (theme-set-color! t 'current-frame background)
   (theme-set-css! t 'current-frame (string-append "border: 0.125em solid " (color->css foreground) ";"))
@@ -44,9 +44,9 @@
   (theme-set-css! t 'promise (string-append "border: 0.125em solid " (color->css foreground) ";"))
   (theme-set-color! t 'async-block background)
   (theme-set-css! t 'async-block (string-append "border: 0.125em solid " (color->css foreground) ";"))
-  
+
   (theme-set-css! t 'button (string-append "border: 0.125em solid " (color->css foreground) ";"))
   (theme-set-css! t 'button-hover (string-append "border: 0.125em solid " (color->css foreground) ";"))
   t)
 
-(define imported-theme (make-monochrome-theme (hex "#fff") (hex "#000")))
+(apply-theme (make-monochrome-theme (hex "#fff") (hex "#000")))

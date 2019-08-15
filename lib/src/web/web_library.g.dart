@@ -25,6 +25,7 @@ abstract class _$WebLibraryMixin {
   Value libraryReference(ImportedLibrary imported, SchemeSymbol id);
   Future<Value> theme(SchemeSymbol theme, Frame env);
   String colorToCss(Color color);
+  void editor(Frame env);
   void importAll(Frame __env) {
     addVariableBuiltin(__env, const SchemeSymbol("js"), (__exprs, __env) {
       return this.js(__exprs);
@@ -206,5 +207,13 @@ abstract class _$WebLibraryMixin {
         docs: Docs("color->css", "Converts [color] to a string of CSS.\n",
             [Param("color", "color")],
             returnType: "string"));
+    addBuiltin(__env, const SchemeSymbol("editor"), (__exprs, __env) {
+      this.editor(__env);
+      return undefined;
+    }, 0,
+        docs: Docs(
+            "editor",
+            "Launch the editor.\n\nNote: This is still a work in progress. Don't use for important work!\n",
+            []));
   }
 }
