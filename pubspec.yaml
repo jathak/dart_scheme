@@ -12,10 +12,6 @@ dependencies:
   js: ^0.6.1+1
   markdown: ^2.0.3
   quiver: ^2.0.5
-  analyzer: ^0.34.0
-  js: ^0.6.1+1
-  markdown: ^2.0.2
-  quiver: ^2.0.0+1
   tuple: ^1.0.2
 
 dev_dependencies:
