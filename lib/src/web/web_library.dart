@@ -35,7 +35,8 @@ class WebLibrary extends SchemeLibrary with _$WebLibraryMixin {
 
   void importAll(Frame env) {
     super.importAll(env);
-    Procedure.jsProcedure = (procedure) => SchemeFunction(procedure, env);
+    Procedure.jsProcedure =
+        (procedure) => procedureToJsFunction(procedure, env);
   }
 
   /// Evaluates a piece of JavaScript code and returns the result.

@@ -113,8 +113,7 @@ class Promise extends Value {
   /// Evaluates the promise, or returns the result if already evaluated.
   Expression force() {
     if (!_evaluated) {
-      expr = schemeEval(expr, env);
-      env.interpreter.language.validateCdr(expr,
+      expr = env.interpreter.language.validateCdr(schemeEval(expr, env),
           errorMessage: "A promise must contain a pair, stream, or nil");
       _evaluated = true;
     }

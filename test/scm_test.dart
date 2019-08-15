@@ -44,15 +44,15 @@ String runSchemeTests() {
           print("For Input:");
           print(run.join('\n'));
           print("Expected error");
-          print("Actual:   ${formatActual(actual)}");
+          print("Actual:   ${formatTestOutput(actual)}");
           print("");
           failedCount++;
         }
       } else if (!logsEqual(actual, expected)) {
         print("For Input:");
         print(run.join('\n'));
-        print("Expected: ${line.substring(9)}");
-        print("Actual:   ${formatActual(actual)}");
+        print("Expected: ${formatTestOutput(expected)}");
+        print("Actual:   ${formatTestOutput(actual)}");
         print("");
         failedCount++;
       }
@@ -88,9 +88,9 @@ String runSchemeTests() {
   }
 }
 
-formatActual(actual) {
-  if (actual.length == 1) return actual[0];
-  return '\n' + actual.join('\n');
+formatTestOutput(List<String> output) {
+  if (output.length == 1) return output[0];
+  return '\n' + output.join('\n');
 }
 
 logsEqual(actual, expected) {
