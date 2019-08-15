@@ -93,7 +93,7 @@ class Visualization extends Widget {
     buttonRow = [first, prev, status, next, last, animate];
   }
 
-  void _addFrames(Frame myEnv, [Expression returnValue]) {
+  void _addFrames(Frame myEnv, [Value returnValue]) {
     if (myEnv.tag == '#imported') return;
     if (frameReturnValues.containsKey(myEnv)) {
       frameReturnValues[myEnv] = returnValue;
