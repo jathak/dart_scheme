@@ -1,3 +1,7 @@
+; This was written prior to non-list pairs being removed and uses a simple
+; pair for the highlight location, so we need to run it in Fa18 mode.
+#lang 61a-scheme/fa18
+
 (define (piece type color file rank) (list type color file rank))
 (define (type piece) (car piece))
 (define (piece-color piece) (car (cdr piece)))
