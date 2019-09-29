@@ -237,6 +237,7 @@ class BuiltinStub {
     'SchemeSymbol': 'symbol',
     'Procedure': 'procedure',
     'Pair': 'pair',
+    'SchemeList': 'list',
     'SchemeEventListener': 'event listener',
     'JsValue': 'js object',
     'JsProcedure': 'js function',

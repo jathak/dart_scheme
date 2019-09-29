@@ -65,7 +65,7 @@ abstract class _$StandardLibraryMixin {
       return this.apply(__exprs[0], SchemeList(__exprs[1]), __env);
     }, 2,
         docs: Docs("apply", "Applies [procedure] to the given [args]\n",
-            [Param("procedure", "procedure"), Param(null, "args")],
+            [Param("procedure", "procedure"), Param("list", "args")],
             returnType: "value"));
     addBuiltin(__env, const SchemeSymbol("display"), (__exprs, __env) {
       this.display(__exprs[0], __env);
@@ -220,7 +220,8 @@ abstract class _$StandardLibraryMixin {
     }, 0,
         maxArgs: -1,
         docs: Docs.variable(
-            "list", "Constructs a list from zero or more arguments.\n"));
+            "list", "Constructs a list from zero or more arguments.\n",
+            returnType: "list"));
     addBuiltin(__env, const SchemeSymbol("map"), (__exprs, __env) {
       if (__exprs[0] is! Procedure || __exprs[1] is! PairOrEmpty)
         throw SchemeException('Argument of invalid type passed to map.');
@@ -229,7 +230,8 @@ abstract class _$StandardLibraryMixin {
         docs: Docs(
             "map",
             "Constructs a new list from calling [fn] on each item in [lst].\n",
-            [Param("procedure", "fn"), Param(null, "lst")]));
+            [Param("procedure", "fn"), Param("list", "lst")],
+            returnType: "list"));
     addBuiltin(__env, const SchemeSymbol("filter"), (__exprs, __env) {
       if (__exprs[0] is! Procedure || __exprs[1] is! PairOrEmpty)
         throw SchemeException('Argument of invalid type passed to filter.');
@@ -238,7 +240,8 @@ abstract class _$StandardLibraryMixin {
         docs: Docs(
             "filter",
             "Constructs a new list of all items in [lst] that return true when passed\nto [pred].\n",
-            [Param("procedure", "pred"), Param(null, "lst")]));
+            [Param("procedure", "pred"), Param("list", "lst")],
+            returnType: "list"));
     addBuiltin(__env, const SchemeSymbol("reduce"), (__exprs, __env) {
       if (__exprs[0] is! Procedure || __exprs[1] is! PairOrEmpty)
         throw SchemeException('Argument of invalid type passed to reduce.');
@@ -247,7 +250,7 @@ abstract class _$StandardLibraryMixin {
         docs: Docs(
             "reduce",
             "Reduces [lst] into a single expression by combining items with [combiner].\n",
-            [Param("procedure", "combiner"), Param(null, "lst")],
+            [Param("procedure", "combiner"), Param("list", "lst")],
             returnType: "value"));
     addVariableBuiltin(__env, const SchemeSymbol("+"), (__exprs, __env) {
       if (__exprs.any((x) => x is! Number))
